@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+dist/
+build/
+*.log
+
+# Claude Code local state (spec-kit skills under .claude/skills/ are intentionally tracked)
+.claude/settings.local.json
