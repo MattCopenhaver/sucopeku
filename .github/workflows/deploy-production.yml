@@ -17,7 +17,47 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # main is held to the same standard as anything proposed for it (FR-014).
+  # Whether anything the site serves actually changed. Unlike the pull request
+  # workflows, nothing here is a required status check, so a skipped job cannot
+  # deadlock anything — this exists purely to avoid republishing identical bytes.
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Did anything executable change?
+        id: filter
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          # A zeroed `before` means a new or force-pushed branch with no usable
+          # comparison point. Publish rather than guess.
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "No comparable previous commit; publishing."
+            exit 0
+          fi
+          changed=$(git diff --name-only "$BEFORE" "$AFTER")
+          echo "Changed files:"; printf '%s\n' "$changed" | sed 's/^/  /'
+          # See checks.yml for why this captures a list instead of using -qv.
+          code_files=$(printf '%s\n' "$changed" | grep -vE '^(specs/|\.specify/)|\.md$' || true)
+          if [ -n "$code_files" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "Executable changes:"; printf '%s\n' "$code_files" | sed 's/^/  /'
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "Specification and documentation only; nothing to republish (FR-013)"
+          fi
+
+  # main is held to the same standard as anything proposed for it (FR-015),
+  # unconditionally — that requirement says "after every merge" and makes no
+  # exception for documentation. Only the publish below is skippable.
   # With FR-006 requiring branches be current and merges squashed, this is
   # usually a repeat of a result already obtained on the pull request — its value
   # is as a backstop against process bypass, and as the gate that stops a bad
@@ -36,7 +76,8 @@ jobs:
       - run: npm run test:e2e
 
   publish:
-    needs: checks
+    needs: [scope, checks]
+    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

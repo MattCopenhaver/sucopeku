@@ -142,36 +142,45 @@ gone.
 
 ### Edge Cases
 
-- What happens when a deployment fails partway, leaving some resources created
-  and others not? The pull request must be blocked, and the partial resources
-  must not survive the pull request.
-- What happens when removal of a deployment fails? The failure must be visible
+Each carries an identifier and states an obligation, per constitution 2.1.0.
+They are traced and covered by tasks exactly as functional requirements are. An
+edge case whose satisfaction *changes the design* rather than exercising it is
+promoted to a requirement instead — EC-004 was promoted to FR-014 for that
+reason.
+
+- **EC-001**: When a deployment fails partway, leaving some resources created and
+  others not, the pull request MUST be blocked and the partial resources MUST NOT
+  survive the pull request.
+- **EC-002**: When removal of a deployment fails, the failure MUST be visible
   rather than silent, since a silent failure accrues cost indefinitely.
-- What happens when a pull request changes both a specification and code? Every
-  check runs. The exemption applies only when nothing executable changed.
-- What happens when a specification-only change is merged to `main`? Nothing is
-  republished, because nothing the site serves has changed.
-- What happens when a deployment address is entered without a trailing slash?
-  It must load a working page. Serving the right document at the wrong address
-  is a failure that looks like a success: the page renders unstyled, because the
+- **EC-003**: When a pull request changes both a specification and code, every
+  check MUST run. The exemption in FR-013 applies only when nothing executable
+  changed.
+- **EC-004**: *Promoted to FR-014.* A specification-only merge to `main` must not
+  republish the site. Satisfying it required a job that did not exist, which the
+  promotion test makes a requirement rather than an edge case.
+- **EC-005**: When a deployment address is entered without a trailing slash, it
+  MUST load a working page. Serving the right document at the wrong address is a
+  failure that looks like a success: the page renders unstyled, because the
   browser resolves relative references against the parent directory.
-- What happens when a closed pull request is reopened? It must return to having a
+- **EC-006**: When a closed pull request is reopened, it MUST return to having a
   working deployment.
-- What happens when several commits are pushed in quick succession? The
-  deployment must end up matching the most recent commit, not an earlier one.
-- What happens when two pull requests are open simultaneously? Neither may
-  observe or overwrite the other's deployment.
-- What happens when a pull request is opened from a fork rather than a branch?
-  (Out of scope for a single-contributor project; see Assumptions.)
-- What happens when a merge succeeds but publishing to the permanent address
-  fails? The previously published version keeps serving — a working old site is
-  the correct fallback — but `main` and the published site now disagree, so the
-  failure must be reported rather than passing silently.
-- What happens when a visitor holds a cached copy and a new version is
-  published? The next visit with a network must show the new version. A cache
-  that survives forever is a site that can never be updated.
-- What happens when two merges land in quick succession? The permanent address
-  must end up matching the later merge, not the earlier one.
+- **EC-007**: When several commits are pushed in quick succession, the deployment
+  MUST end up matching the most recent commit, not an earlier one.
+- **EC-008**: When two pull requests are open simultaneously, neither may observe
+  or overwrite the other's deployment.
+- **EC-009**: A pull request opened from a fork is out of scope for a
+  single-contributor project; see Assumptions. It MUST fail safely rather than
+  gain credentials.
+- **EC-010**: When a merge succeeds but publishing to the permanent address
+  fails, the previously published version MUST keep serving — a working old site
+  is the correct fallback — and the failure MUST be reported, since `main` and
+  the published site now disagree.
+- **EC-011**: When a visitor holds a cached copy and a new version is published,
+  the next visit with a network MUST show the new version. A cache that survives
+  forever is a site that can never be updated.
+- **EC-012**: When two merges land in quick succession, the permanent address
+  MUST end up matching the later merge, not the earlier one.
 
 ## Requirements *(mandatory)*
 
@@ -213,95 +222,100 @@ gone.
   suite, and deployment. Such a pull request MUST nonetheless remain mergeable.
   A required check that never reports blocks a pull request permanently, so
   "does not run" cannot be implemented by preventing the check from existing.
+- **FR-014**: When a merge to `main` changes only Spec Kit artifacts and
+  documentation, the site MUST NOT be republished — nothing it serves has
+  changed. Linting and the browser suite still run, per FR-017, which requires
+  them after every merge and makes no exception for documentation. Promoted from
+  EC-004: satisfying it required a job that did not previously exist.
 
 **Publishing from main**
 
-- **FR-014**: Merging to `main` MUST publish the site at a permanent address
+- **FR-015**: Merging to `main` MUST publish the site at a permanent address
   reachable by anyone, and MUST update it on every subsequent merge.
-- **FR-015**: The same checks required of a pull request — linting and the
+- **FR-016**: The same checks required of a pull request — linting and the
   browser suite — MUST also run on `main` after every merge. Publishing MUST NOT
   proceed unless they pass. `main` is not exempt from the standard applied to
   everything proposed for it.
-- **FR-016**: The permanent deployment MUST be produced by the same procedure as
+- **FR-017**: The permanent deployment MUST be produced by the same procedure as
   a pull request deployment — the same ordered steps, run the same way. Only two
   differences are permitted: it targets production's own infrastructure, and it
   is never removed.
-- **FR-017**: Production MUST NOT share deployment infrastructure or credentials
+- **FR-018**: Production MUST NOT share deployment infrastructure or credentials
   with pull request previews. A change to preview infrastructure, or a workflow
   running from an unmerged branch, MUST NOT be able to modify the published site.
-- **FR-018**: Pull request previews MAY share infrastructure with one another,
+- **FR-019**: Pull request previews MAY share infrastructure with one another,
   provided each remains independently reachable and unaffected by the others.
-- **FR-019**: Publishing MUST be atomic from a visitor's point of view. At no
+- **FR-020**: Publishing MUST be atomic from a visitor's point of view. At no
   point during a publish may the site be unavailable, and at no point may a
   visitor receive a combination of files belonging to different versions.
-- **FR-020**: A publish MUST NOT delete or overwrite files belonging to a
+- **FR-021**: A publish MUST NOT delete or overwrite files belonging to a
   previous version. Every file the site has ever served remains retrievable, so a
   page already open in a browser cannot break partway through a visit. This is
   checkable by listing the stored objects after a publish and confirming the
   previous version's files are still present.
-- **FR-021**: A failed publish to the permanent address MUST be surfaced rather
-  than passing silently, per FR-024. A failed publish MUST leave the previously
+- **FR-022**: A failed publish to the permanent address MUST be surfaced rather
+  than passing silently, per FR-025. A failed publish MUST leave the previously
   published version serving, not a partially updated site.
 
 **Cleanup**
 
-- **FR-022**: When a pull request is merged or closed, its deployment and every
+- **FR-023**: When a pull request is merged or closed, its deployment and every
   resource created for it MUST be removed. This MUST NOT affect the permanent
   deployment.
-- **FR-023**: A failure to remove a pull request's deployment MUST be surfaced
-  rather than passing silently, per FR-024. Because removal runs after a pull
+- **FR-024**: A failure to remove a pull request's deployment MUST be surfaced
+  rather than passing silently, per FR-025. Because removal runs after a pull
   request closes, reporting it on that pull request alone is not sufficient.
 
 **Failure reporting**
 
-- **FR-024**: Every pipeline failure MUST be reported on the pull request that
+- **FR-025**: Every pipeline failure MUST be reported on the pull request that
   caused it, including failures that occur after the pull request has closed.
-- **FR-025**: The project owner MUST receive a notification of every reported
+- **FR-026**: The project owner MUST receive a notification of every reported
   failure without having to check for it, including failures reported against a
   closed pull request.
-- **FR-026**: A failure that prevents the pipeline from reporting at all — the
+- **FR-027**: A failure that prevents the pipeline from reporting at all — the
   automation itself failing to run or crashing before it can report — MUST still
   reach the project owner.
 
 **The site itself**
 
-- **FR-027**: The deployed site MUST serve a placeholder page containing no
+- **FR-028**: The deployed site MUST serve a placeholder page containing no
   gameplay.
-- **FR-028**: The placeholder page MUST be readable on a phone-width screen
+- **FR-029**: The placeholder page MUST be readable on a phone-width screen
   without horizontal scrolling.
 
 **Offline**
 
-- **FR-029**: After one visit with a network connection, the site MUST load with
+- **FR-030**: After one visit with a network connection, the site MUST load with
   no network connection at all.
-- **FR-030**: When a network is available, a visit MUST obtain the most recently
+- **FR-031**: When a network is available, a visit MUST obtain the most recently
   published version. A cached copy MUST NOT pin a visitor to an old version.
-- **FR-031**: Offline capability MUST work at whatever path the site is served
+- **FR-032**: Offline capability MUST work at whatever path the site is served
   from, so a preview behaves the same way production does.
 
 **Test and lint foundations**
 
-- **FR-032**: An automated test suite MUST exist, MUST drive a real browser, and
+- **FR-033**: An automated test suite MUST exist, MUST drive a real browser, and
   MUST run against a locally served build of the site. It MUST NOT require a
   deployment to have succeeded, so that a failing test and a failing deployment
   remain distinguishable.
-- **FR-033**: At least one smoke test MUST run against the pull request's
+- **FR-034**: At least one smoke test MUST run against the pull request's
   deployed preview and confirm the page renders there. This is what makes the
   deployment verified rather than merely reported as successful.
-- **FR-034**: Linting MUST run across the repository's own source.
+- **FR-035**: Linting MUST run across the repository's own source.
 
 **Process record**
 
-- **FR-035**: A pull request MUST prompt its author for the `## SDD Notes`
+- **FR-036**: A pull request MUST prompt its author for the `## SDD Notes`
   section required by the project's definition of done.
 
 **Cost control**
 
-- **FR-036**: Hosting MUST be built from services billed by usage. Any component
+- **FR-037**: Hosting MUST be built from services billed by usage. Any component
   carrying a fixed recurring charge, or billed for time rather than for use, MUST
   be justified in the plan before it is adopted. An idle deployment — including
   one orphaned by a failed removal — MUST cost approximately nothing.
-- **FR-037**: A spending threshold MUST be configured, and crossing it MUST
+- **FR-038**: A spending threshold MUST be configured, and crossing it MUST
   notify the project owner. This is the backstop for cost that accrues without
   any job failing, which no other requirement here would detect.
 
@@ -382,7 +396,7 @@ gone.
   Nothing about puzzles, saved games, or rulesets is in scope, because none of
   them exist.
 - **Spending protection is in scope; application monitoring is not.** A budget
-  threshold and its notification are required (FR-037). Uptime monitoring,
+  threshold and its notification are required (FR-038). Uptime monitoring,
   metrics, dashboards, and alerting on the site's behaviour are not.
 - **Out of scope**: custom domain names, application monitoring and alerting,
   rollback
@@ -418,17 +432,17 @@ gone.
   Previews must be independent to anyone loading them but may share
   infrastructure with each other. Production must have its own infrastructure and
   credentials, so unmerged code cannot reach it. Constitution amended to 2.0.0;
-  recorded as FR-015 through FR-018.
+  recorded as FR-016 through FR-019.
 - Q: `/speckit-analyze` found that deferring offline support conflicts with
   Principle IV, which the bootstrap clause does not relax. Build it or amend the
   principle? → A: Build a minimal service worker in this feature. Recorded as
-  FR-029 through FR-031 and SC-011, SC-012.
+  FR-030 through FR-032 and SC-011, SC-012.
 
 **2026-08-07** — Both open questions resolved:
 
 - **Public deployment is in scope.** `main` publishes to a permanent address,
   produced by the same process as a pull request deployment and differing only in
-  that it is never torn down. Recorded as User Story 3 and FR-013 through FR-017.
+  that it is never torn down. Recorded as User Story 3 and FR-013 through FR-018.
 - **Offline support is deferred but must not be designed out.** It arrives with
   gameplay. The plan must show it remains reachable — chiefly by not addressing
   deployments in a way that confines offline caching to a sub-path. Recorded in
