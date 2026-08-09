@@ -1,8 +1,35 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0 → 2.2.0
+Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0 → 2.2.0 → 3.0.0
 Ratified: 2026-08-07 | Last amended: 2026-08-09
+
+AMENDMENT (3.0.0) — Principle V, formats are provisional before 1.0
+  Adds: until Sucopeku 1.0 is declared, stored progress and shared links MAY
+  break. A release may change either format and discard what it cannot read,
+  provided the failure is graceful. From 1.0 onward the principle binds in full.
+  1.0 is declared by amendment, so the guarantee's start cannot drift.
+
+  Why: the principle made every stored format permanent from the first byte
+  written. Planning feature 002 surfaced the consequence — persistence could not
+  be added without committing forever to a shape chosen before variants,
+  generation, or sharing exist. The options were to defer persistence (violating
+  Principle VI, which binds the moment a puzzle is in progress) or to lock in a
+  guess. Neither was acceptable; bounding the guarantee to 1.0 is the standard
+  practice for exactly this situation and removes the dilemma.
+
+  Not suspended: version identifiers. A format with no version cannot be
+  recognised later even to discard it safely.
+
+  MAJOR because a MUST is downgraded — "never break" becomes conditional before
+  1.0 — which this constitution's own versioning policy classifies as backward
+  incompatible, even though the guarantee is unchanged after 1.0.
+
+  Requirement that forced the loosening: feature 002 must honour Principle VI by
+  saving a puzzle in progress, and could not do so without Principle V making
+  that first storage format permanent.
+
+  Invalidates: nothing built. No format has been shipped.
 
 AMENDMENT (2.2.0) — Development Workflow, bootstrap period closed
   The bootstrap period ended on 2026-08-09. Its own terms required that the
@@ -354,6 +381,27 @@ progress is lost, not that the stored bytes stay frozen. A link is unreachable:
 it lives in someone else's chat history, and no migration can ever touch it, so
 its old formats MUST be decoded as-is forever.
 
+**Before 1.0, formats are provisional.** Until Sucopeku 1.0 is declared, stored
+progress and shared links MAY break. A release may change either format and
+discard what it can no longer read. The failure MUST be graceful — a player meets
+a fresh puzzle, never an error or a refusal to start — but nothing is promised to
+survive.
+
+From 1.0 onward this principle binds in full and no format may break again. 1.0
+is declared by an amendment to this constitution, so the moment the guarantee
+begins is explicit and cannot drift by accident.
+
+The requirements above are not suspended in the meantime, only their permanence:
+formats still carry version identifiers from their first release, because a
+format with no version cannot be recognised later even to discard it.
+
+*Rationale: this principle makes every stored format permanent, which is right
+for a site people rely on and paralysing for one that has not yet learned what it
+must store. Committing to a shape before variants, generation, and sharing exist
+would lock in a guess and then require supporting it forever. Bounding the
+guarantee to 1.0 buys the freedom to learn without pretending the eventual
+promise is optional.*
+
 **How this is checked:** a change that alters the meaning of an existing encoded
 field, drops a reader for a released format, or changes an existing ruleset's
 behavior violates this principle, regardless of how much cleaner it makes the
@@ -639,4 +687,4 @@ covered under Development Workflow. Beyond that, this project has one
 contributor and needs no further ceremony. The check that matters is whether the
 artifacts tell the truth about the code.
 
-**Version**: 2.2.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-09
+**Version**: 3.0.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-09
