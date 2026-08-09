@@ -1,8 +1,30 @@
 .DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+
+# Dependencies and build output
 node_modules/
 dist/
 build/
-*.log
+site/dist/
+
+# Infrastructure
+infra/cdk.out/
+.env
+.env.*
+!.env.example
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Editors
+.vscode/
+.idea/
 
 # Claude Code local state (spec-kit skills under .claude/skills/ are intentionally tracked)
 .claude/settings.local.json

@@ -1,0 +1,40 @@
+name: Report failure
+description: >
+  Reports a pipeline failure on the pull request that caused it, including one
+  that has already closed. GitHub notifies subscribers of comments on closed
+  pull requests, and the author is subscribed automatically, so this reaches the
+  owner without any additional service (FR-023, FR-024, contract C5).
+
+inputs:
+  workflow:
+    description: Which workflow failed
+    required: true
+  reason:
+    description: One-line description of what went wrong
+    required: true
+  pull-request:
+    description: Pull request number to report against
+    required: true
+  token:
+    description: Token with permission to comment
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Comment the failure
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        WORKFLOW: ${{ inputs.workflow }}
+        REASON: ${{ inputs.reason }}
+        PR: ${{ inputs.pull-request }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -euo pipefail
+        gh pr comment "$PR" --body "$(cat <<EOF
+        **$WORKFLOW failed** — $REASON
+
+        Run: $RUN_URL
+        EOF
+        )"

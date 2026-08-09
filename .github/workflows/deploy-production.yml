@@ -1,0 +1,80 @@
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+# Merges queue rather than cancel. An interrupted publish is harmless by design,
+# but cancelling mid-publish is still a worse idea than waiting: the point is
+# that the last merge is what ends up live, and queueing guarantees that without
+# interrupting anything.
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  # main is held to the same standard as anything proposed for it (FR-014).
+  # With FR-006 requiring branches be current and merges squashed, this is
+  # usually a repeat of a result already obtained on the pull request — its value
+  # is as a backstop against process bypass, and as the gate that stops a bad
+  # main from reaching the public site.
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:e2e
+
+  publish:
+    needs: checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Assume the production deploy role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN_PRODUCTION }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # Identical ordered steps to a preview deploy — only the bucket, prefix,
+      # and role differ (FR-015). A failed publish leaves index.html untouched,
+      # so the previously published version keeps serving (FR-022).
+      - name: Publish to the distribution root
+        env:
+          DEPLOY_BUCKET: ${{ vars.PRODUCTION_BUCKET }}
+          DEPLOY_DISTRIBUTION_ID: ${{ vars.PRODUCTION_DISTRIBUTION_ID }}
+          DEPLOY_PREFIX: ''
+        run: npm run deploy
+
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke test the published site
+        env:
+          SMOKE_URL: https://${{ vars.PRODUCTION_DOMAIN }}/
+        run: npx playwright test --project=chromium
+
+  # A push to main has no pull request to comment on, so failures surface
+  # through GitHub's own workflow-failure notifications — the account setting
+  # covering FR-025.

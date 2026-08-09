@@ -1,0 +1,58 @@
+name: Teardown preview
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  teardown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Assume the preview deploy role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN_PREVIEW }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # Cannot affect production: this role has no access to production's
+      # bucket, so a prefix bug fails with an access error rather than deleting
+      # the wrong thing (FR-016).
+      - name: Remove the preview
+        id: remove
+        env:
+          DEPLOY_BUCKET: ${{ vars.PREVIEW_BUCKET }}
+          DEPLOY_PREFIX: pr-${{ github.event.pull_request.number }}
+        run: npm run teardown
+
+      # This runs after the pull request has closed, which is exactly why it must
+      # not report only into the run log — nobody reopens a closed pull request
+      # to check on it. A comment here notifies the subscribed author by email
+      # (FR-023, FR-024).
+      - name: Report failure
+        if: failure()
+        uses: ./.github/actions/report
+        with:
+          workflow: Teardown preview
+          reason: >-
+            removing the preview failed; its resources may still exist and are
+            still costing money
+          pull-request: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}

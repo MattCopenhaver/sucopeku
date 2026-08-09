@@ -1,0 +1,52 @@
+name: Comment preview URL
+description: >
+  Posts the preview address on the pull request, editing the existing comment
+  rather than adding another so a long-lived pull request does not accumulate
+  noise (FR-002, contract C5).
+
+inputs:
+  url:
+    description: Preview address
+    required: true
+  commit:
+    description: Commit the preview was built from
+    required: true
+  pull-request:
+    description: Pull request number
+    required: true
+  token:
+    description: Token with permission to comment
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Upsert the preview comment
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        URL: ${{ inputs.url }}
+        COMMIT: ${{ inputs.commit }}
+        PR: ${{ inputs.pull-request }}
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+
+        # A hidden marker identifies our comment so it can be found and edited.
+        MARKER="<!-- sucopeku-preview -->"
+        BODY="$MARKER
+        **Preview deployed** → $URL
+        Commit: \`${COMMIT:0:7}\`"
+
+        existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+          --jq "map(select(.body | startswith(\"$MARKER\"))) | .[0].id // empty")
+
+        if [ -n "$existing" ]; then
+          gh api --method PATCH "repos/$REPO/issues/comments/$existing" \
+            -f body="$BODY" >/dev/null
+          echo "Updated existing preview comment."
+        else
+          gh api --method POST "repos/$REPO/issues/$PR/comments" \
+            -f body="$BODY" >/dev/null
+          echo "Posted preview comment."
+        fi
