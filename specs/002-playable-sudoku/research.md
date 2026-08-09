@@ -253,3 +253,48 @@ until one overwrites the other) is worse.
 resolve to one. EC-008 requires only that the result stay loadable, which
 last-write-wins satisfies. Closing that window properly would need locking or a
 change log, which is far more machinery than a single-player puzzle site warrants.
+
+## D11. Constraints belong to the ruleset, for now
+
+**Decision**: Ship constraints on the `Ruleset` only. A `Puzzle` names a ruleset
+and its givens, nothing more. Record here what that will not stretch to, before
+there is stored data making it expensive to change.
+
+**Rationale**: Classic Sudoku's constraints are identical for every puzzle —
+rows, columns, boxes, always the same 27. Putting them on the ruleset is
+correct for the ruleset we have and is the smallest thing that works.
+
+**What was checked**: Three plausible future variants were traced through the
+types actually built, not the types imagined:
+
+- *Cages or lines with no repeated value* (killer cages, diagonals, disjoint
+  groups) work with no change whatsoever. `all-different` takes an arbitrary
+  cell list and assumes nothing about contiguity, shape, or size.
+- *Increasing or decreasing lines* (thermometers) work structurally, because
+  `Constraint.cells` is ordered and primitives receive it in order. They need a
+  new primitive, which is code — but a rare, budgeted kind, and `evaluate` does
+  not change.
+- *Cages summing to a number* do **not** fit. `Constraint` is `{primitive,
+  cells}` with nowhere to hold the target. Encoding it in the primitive name
+  (`sum-20`) puts data in an identifier and needs a registry entry per total, so
+  it is not a workaround. A parameter field is required.
+
+**The structural limit**: all three of those place their cages and lines
+*per puzzle*, not per ruleset. Under this design, two Killer puzzles with
+different cages would be two rulesets — and ruleset identifiers are permanent
+because they appear in stored progress, so that would mint a permanent
+identifier per puzzle. That is the constraint model's real boundary, and it is
+worth naming precisely: this design supports rulesets whose constraints are
+fixed by geometry, and no others.
+
+**The shape of the fix, when a variant needs it**: let a puzzle carry its own
+constraints and have the evaluator union them with the ruleset's. The ruleset
+keeps what is true of every puzzle of its type; the puzzle carries what varies.
+`evaluate` needs no change — composition happens before it is called.
+
+**Alternatives considered**: Adding the parameter field and per-puzzle
+constraints now, unused. Rejected: it would be structure built for requirements
+that do not exist yet, and the migration cost is low precisely because no
+variant ruleset has shipped. This entry exists so the cost stays low —
+the trap is not the missing field, it is minting permanent ruleset
+identifiers per puzzle before noticing.

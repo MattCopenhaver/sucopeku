@@ -12,6 +12,11 @@
  *     only when the network fails is what satisfies FR-028 (offline) without
  *     violating FR-029 (never pinned to a stale version).
  *
+ *     Navigations are cached under their path alone, with the query discarded.
+ *     Every ?puzzle= address serves the same document, so keeping the query
+ *     would fill the cache with identical copies and — worse — make an offline
+ *     visit to a puzzle address miss a document we are already holding.
+ *
  *   Everything else      → cache first, network as fallback.
  *     Asset filenames contain a hash of their contents, so a cached asset can
  *     never be a stale version of a different file. Cache-first is therefore
@@ -61,14 +66,22 @@ self.addEventListener('fetch', (event) => {
 
 async function networkFirst(request) {
   const cache = await caches.open(CACHE_NAME);
+
+  // The document is the same whichever puzzle the address names, so the query
+  // is not part of the key. Which puzzle to show is decided in the page, from
+  // the address the browser still has.
+  const url = new URL(request.url);
+  url.search = '';
+  const key = url.toString();
+
   try {
     const response = await fetch(request);
     if (response && response.ok) {
-      await cache.put(request, response.clone());
+      await cache.put(key, response.clone());
     }
     return response;
   } catch {
-    const cached = await cache.match(request);
+    const cached = await cache.match(key);
     if (cached) return cached;
 
     // A navigation to a path we have never seen, with no network. Fall back to

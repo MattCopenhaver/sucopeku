@@ -279,10 +279,12 @@ reason.
 
 **The site itself**
 
-- **FR-028**: The deployed site MUST serve a placeholder page containing no
-  gameplay.
-- **FR-029**: The placeholder page MUST be readable on a phone-width screen
-  without horizontal scrolling.
+- **FR-028**: *(withdrawn 2026-08-09 — see Revisions.)* Formerly: the deployed
+  site MUST serve a placeholder page containing no gameplay.
+- **FR-029**: The deployed site MUST be readable on a phone-width screen
+  without horizontal scrolling. *(Amended 2026-08-09: was scoped to the
+  placeholder page, which no longer exists. The obligation was never about
+  the placeholder — see Revisions.)*
 
 **Offline**
 
@@ -523,3 +525,17 @@ requirement was first written as FR-037, colliding with the existing requirement
 for prompting `## SDD Notes`. Two requirements shared an identifier, making any
 citation to it ambiguous. Corrected to the next free number, which is what
 constitution 3.2.0's append rule requires.
+
+**2026-08-09 — the placeholder was superseded by feature 002.** FR-028 withdrawn
+in place; FR-029 amended. This spec required the deployed site to serve a
+placeholder page containing no gameplay, and its own Assumptions anticipated the
+end of it: "the placeholder page is temporary... expected to be replaced entirely
+by the first gameplay feature."
+
+That feature has arrived, so the requirement is now false rather than merely
+finished. It is withdrawn rather than deleted, per constitution 3.2.0, so its
+identifier stays permanently taken and this entry explains why the pipeline once
+demanded an empty page.
+
+FR-029 survives with its scope widened: being readable at phone width was never
+a property of the placeholder, only stated through it.

@@ -30,7 +30,25 @@ test.describe('offline', () => {
     await page.reload();
 
     await expect(page.getByRole('heading', { name: 'Sucopeku' })).toBeVisible();
-    await expect(page.getByTestId('tagline')).toBeVisible();
+    await expect(page.getByTestId('grid')).toBeVisible();
+  });
+
+  test('a puzzle address loads offline even if only the bare site was visited', async ({
+    page,
+    context,
+  }) => {
+    await page.goto('./');
+    await waitForServiceWorker(page);
+    await page.reload();
+
+    // The query is not part of the cache key, so this address was never fetched
+    // and still resolves. Without that, offline works at / and fails at the only
+    // kind of address a shared link ever has.
+    await context.setOffline(true);
+    await page.goto('./?puzzle=p07');
+
+    await expect(page.getByTestId('grid')).toBeVisible();
+    await expect(page.locator('.cell.given').first()).toBeVisible();
   });
 
   test('with a network available the page comes from the network, not the cache (SC-012)', async ({

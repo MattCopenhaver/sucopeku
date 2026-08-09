@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Ready
+**Status**: Implementing
 
 **Input**: User description: "A playable Sudoku game. When a player starts, they are given one of 20 curated puzzles chosen at random. They can enter and clear values in cells, and the game shows conflicts under the classic Sudoku ruleset. Progress on a puzzle is saved in the browser and restored when the player returns to it. Playable by keyboard, mouse, and touch. Puzzle generation is out of scope for this feature — the 20 puzzles are curated data shipped with the site."
 
@@ -444,3 +444,45 @@ requirements that meant something else, a consequence of five renumbering passes
 during clarification. No requirement changed; the record is here because the
 correction is why identifiers are now permanent (constitution 3.2.0) and why the
 citation check exists.
+
+**2026-08-09 — three defects found by browser tests, all invisible to Chromium.**
+Recorded here because Principle VIII asks that the experiment's results be
+reported, and these are results.
+
+*Backspace navigated the browser back.* Safari treats Backspace outside a text
+field as "go back", so pressing erase on a keyboard left the site mid-puzzle.
+Fixed by preventing the default in `site/src/main.ts`. No unit test of the
+keyboard handler would have found this: the handler was correct, and the
+browser did something else afterwards.
+
+*A keyboard player could not enter the grid.* Safari leaves buttons out of the
+tab order unless the player has turned on full keyboard access, and the game
+started with no cell selected. Fixed by selecting the first writable cell on
+load (`site/src/game/state.ts`), so there is always somewhere to be. FR-016 is
+now satisfied from the first frame rather than after the first click.
+
+*Focus and selection could diverge.* Reaching a cell by Tab moved focus without
+selecting it, so a keyboard player typed into nothing; and rebuilding the grid
+after every change dropped focus entirely. Both fixed in `site/src/ui/grid.ts`.
+The focus handler deliberately does not re-render — browsers focus on
+mousedown, so rebuilding there would destroy the button before its own click
+event fired, fixing keyboard input by breaking pointer input.
+
+**2026-08-09 — the service worker's cache key now ignores the query string.**
+T053 as planned. Worth recording why it was not cosmetic: every `?puzzle=`
+address serves the same document, so keeping the query cached one identical copy
+per puzzle *and* made an offline visit to a puzzle address miss a document
+already held. Offline worked at `/` and failed at every address a shared link
+actually has.
+
+**2026-08-09 — T044 cannot use two browser contexts.** Separate contexts do not
+share `localStorage`, so they cannot exercise cross-tab synchronisation at all.
+The test uses two tabs in one context, which is also what a player has.
+
+**2026-08-09 — feature 001's placeholder requirement was superseded.** FR-028
+of `001-delivery-pipeline` required the deployed site to serve a page with no
+gameplay. This feature makes that false, so it was withdrawn in place there and
+FR-029 was amended; `tests/e2e/placeholder.spec.ts` became
+`tests/e2e/site.spec.ts`. This is the first requirement retired under the
+3.2.0 rules, and the mechanism held: the identifier stays taken, the reason is
+on the record, and the citation check still passes.
