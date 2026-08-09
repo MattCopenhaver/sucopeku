@@ -168,3 +168,5 @@ Beyond the scenarios above, per the constitution:
 - A human-written `## SDD Notes` section in the pull request body
 - A follow-up pull request amending the constitution to close the bootstrap
   period — **alone in its own pull request**, as Governance requires
+
+<!-- trigger isolation test, do not merge -->
