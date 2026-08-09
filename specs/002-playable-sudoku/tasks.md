@@ -139,7 +139,7 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 - [ ] T048 [US4] Give the player a working puzzle when the address names an unknown or malformed identifier (FR-029, EC-010)
 - [ ] T049 [US4] Add the new-puzzle control in `site/src/ui/controls.ts`, choosing a different puzzle at random and moving to its address (FR-038)
 - [ ] T050 [US4] Prefer puzzles the player has not completed when choosing a new one, while unplayed puzzles remain (User Story 4, scenario 4)
-- [ ] T051 [P] [US4] Write `tests/e2e/puzzles.spec.ts`: arriving at `/` yields an address, reloading keeps the same puzzle, the new-puzzle control changes it, the back button returns to the previous puzzle with its progress (SC-007)
+- [ ] T051 [P] [US4] Write `tests/e2e/puzzles.spec.ts`: arriving at `/` yields an address, reloading keeps the same puzzle, the new-puzzle control changes it, the back button returns to the previous puzzle with its progress (SC-007, FR-039)
 - [ ] T052 [US4] Extend `tests/e2e/puzzles.spec.ts`: after leaving an unsolved puzzle, arriving at `/` resumes it; after solving every puzzle with progress, arriving at `/` gives a random one (User Story 1, scenarios 2 and 3)
 
 **Checkpoint**: All four stories complete. The game is playable, forgiving, persistent, and navigable.

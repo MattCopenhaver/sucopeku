@@ -294,10 +294,7 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - **FR-038**: The site MUST present a single control that starts a different
   puzzle, chosen at random from the curated set, and moves the player to that
   puzzle's address.
-- **FR-039**: Because each puzzle has its own address, returning to a previous
-  puzzle MUST require no navigation surface of its own. Browser history is
-  sufficient, and no list of puzzles is built in this feature.
-- **FR-040**: Starting a different puzzle MUST NOT discard progress on the one
+- **FR-039**: Starting a different puzzle MUST NOT discard progress on the one
   being left.
 
 ### Key Entities
@@ -361,6 +358,12 @@ cases are traced and covered by tasks exactly as functional requirements are.
   nothing labels, sorts, or filters by it.
 - **No solving assistance.** No hints, no auto-fill, no undo history. Each is
   defensible and each is a separate feature.
+- **No navigation surface is built.** Because each puzzle has its own address,
+  returning to a previous puzzle needs nothing beyond browser history — no list
+  of puzzles, no menu. This was chosen over a puzzle list during clarification
+  and is recorded here rather than as a requirement, since it describes work
+  deliberately not done. A future feature adding a list is reversing this
+  decision, not filling a gap.
 - **Pencil marks are out of scope, but not designed out.** Marking candidate
   values in a cell belongs to a later feature. The digit-first input model was
   chosen partly because it accommodates them: with a digit already selected, a
