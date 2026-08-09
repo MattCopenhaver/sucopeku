@@ -108,11 +108,12 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 
 - [X] T041 [P] [US2] Write the placeholder page browser test in `tests/e2e/placeholder.spec.ts`, running against the locally served build and not depending on any deployment (FR-033)
 - [X] T042 [US2] Create the checks workflow running lint and the local browser suite in `.github/workflows/checks.yml`
-- [X] T043 [US2] Add a `scope` job to `.github/workflows/checks.yml`, `.github/workflows/deploy-preview.yml`, and `.github/workflows/deploy-production.yml` that compares the pull request's base and head commits and reports whether anything outside `specs/`, `.specify/`, and `*.md` changed (FR-013, research.md D12)
-- [X] T044 [US2] Make the working jobs conditional on `scope`, and add an always-running gate job named `checks` / `deploy` so the required status check always reports — a skipped required check leaves a pull request permanently unmergeable (FR-013). On `main` the publish is skipped instead, while linting and the browser suite still run unconditionally — FR-016 requires them after every merge (FR-014 covers the skipped publish) and makes no exception for documentation
-- [X] T045 [US2] Report check failures through `.github/actions/report/action.yml` in `.github/workflows/checks.yml` (FR-010)
-- [X] T046 [US2] Create a repository **ruleset** (not classic branch protection — see research.md D9) targeting `~DEFAULT_BRANCH` — require branch currency, lint, browser suite, preview deploy and smoke test; forbid direct pushes; allow squash merge only — following the setup steps in `specs/001-delivery-pipeline/quickstart.md` (FR-006 to FR-012). Also set squash-merge to use the PR title and body — without it the `## SDD Notes` section is discarded at merge and contract C6 silently fails. Applied in two stages: pull-request-required, linear history, no force pushes and no deletion can be set now; the `required_status_checks` rule naming `checks` and `deploy` MUST wait until those workflows exist on `main`, or every open pull request becomes permanently unmergeable. NOTE: rulesets require a public repository or a paid plan; the repository was made public on 2026-08-08 to unblock this.
-- [X] T047 [US2] Validate quickstart Scenario 2, including the direct-push rejection (SC-007, SC-008) — verified: a lint error blocked the merge and the comment named it; removing it restored CLEAN; a direct push to main was rejected by the ruleset
+- [X] T043 Verify every requirement citation in `specs/**` resolves, via `scripts/check-spec-citations.ts` wired into `npm run lint` (FR-036)
+- [X] T044 [US2] Add a `scope` job to `.github/workflows/checks.yml`, `.github/workflows/deploy-preview.yml`, and `.github/workflows/deploy-production.yml` that compares the pull request's base and head commits and reports whether anything outside `specs/`, `.specify/`, and `*.md` changed (FR-013, research.md D12)
+- [X] T045 [US2] Make the working jobs conditional on `scope`, and add an always-running gate job named `checks` / `deploy` so the required status check always reports — a skipped required check leaves a pull request permanently unmergeable (FR-013). On `main` the publish is skipped instead, while linting and the browser suite still run unconditionally — FR-016 requires them after every merge (FR-014 covers the skipped publish) and makes no exception for documentation
+- [X] T046 [US2] Report check failures through `.github/actions/report/action.yml` in `.github/workflows/checks.yml` (FR-010)
+- [X] T047 [US2] Create a repository **ruleset** (not classic branch protection — see research.md D9) targeting `~DEFAULT_BRANCH` — require branch currency, lint, browser suite, preview deploy and smoke test; forbid direct pushes; allow squash merge only — following the setup steps in `specs/001-delivery-pipeline/quickstart.md` (FR-006 to FR-012). Also set squash-merge to use the PR title and body — without it the `## SDD Notes` section is discarded at merge and contract C6 silently fails. Applied in two stages: pull-request-required, linear history, no force pushes and no deletion can be set now; the `required_status_checks` rule naming `checks` and `deploy` MUST wait until those workflows exist on `main`, or every open pull request becomes permanently unmergeable. NOTE: rulesets require a public repository or a paid plan; the repository was made public on 2026-08-08 to unblock this.
+- [X] T048 [US2] Validate quickstart Scenario 2, including the direct-push rejection (SC-007, SC-008) — verified: a lint error blocked the merge and the comment named it; removing it restored CLEAN; a direct push to main was rejected by the ruleset
 
 **Checkpoint**: The gate is live. From here, this feature's own pull request is subject to the checks it created — the bootstrap period begins closing.
 
@@ -124,14 +125,14 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 
 **Independent Test**: Merge a change and confirm it appears at the production address, with the site never unavailable and never mixing versions during the publish.
 
-- [X] T048 [US3] Create the production deploy workflow in `.github/workflows/deploy-production.yml` triggered on push to `main`
-- [X] T049 [US3] Run linting and the browser suite on `main` inside `.github/workflows/deploy-production.yml`, and make the publish job depend on them passing so a failing `main` never reaches the public site (FR-016)
-- [X] T050 [US3] Add a single-branch concurrency group with `cancel-in-progress: **false**` to `.github/workflows/deploy-production.yml`, so rapid merges queue and publish in order rather than racing or being cancelled mid-publish
-- [X] T051 [US3] Assume the production deploy role via OIDC in `.github/workflows/deploy-production.yml` (FR-018)
-- [X] T052 [US3] Build and invoke `scripts/deploy.ts` against the production bucket at the root prefix in `.github/workflows/deploy-production.yml`, using the identical ordered steps as the preview path (FR-017)
-- [X] T053 [US3] Report publish failures through `.github/actions/report/action.yml` in `.github/workflows/deploy-production.yml`, leaving the previous version serving (FR-022)
-- [X] T054 [US3] Validate quickstart Scenario 3 — reload repeatedly during a publish, confirming no error and no mixed version (SC-010) — accepted as validated by the owner
-- [X] T055 [US3] Validate quickstart Scenario 3b — confirm a pull request workflow is refused both production's bucket and production's role (FR-018) — proven 2026-08-09 by a temporary workflow whose jobs passed only on refusal: the preview role got `AccessDenied` on `s3:PutObject` against production's bucket, and a pull-request token was refused `sts:AssumeRoleWithWebIdentity` for production's role. Both denials came from AWS, not from workflow logic
+- [X] T049 [US3] Create the production deploy workflow in `.github/workflows/deploy-production.yml` triggered on push to `main`
+- [X] T050 [US3] Run linting and the browser suite on `main` inside `.github/workflows/deploy-production.yml`, and make the publish job depend on them passing so a failing `main` never reaches the public site (FR-016)
+- [X] T051 [US3] Add a single-branch concurrency group with `cancel-in-progress: **false**` to `.github/workflows/deploy-production.yml`, so rapid merges queue and publish in order rather than racing or being cancelled mid-publish
+- [X] T052 [US3] Assume the production deploy role via OIDC in `.github/workflows/deploy-production.yml` (FR-018)
+- [X] T053 [US3] Build and invoke `scripts/deploy.ts` against the production bucket at the root prefix in `.github/workflows/deploy-production.yml`, using the identical ordered steps as the preview path (FR-017)
+- [X] T054 [US3] Report publish failures through `.github/actions/report/action.yml` in `.github/workflows/deploy-production.yml`, leaving the previous version serving (FR-022)
+- [X] T055 [US3] Validate quickstart Scenario 3 — reload repeatedly during a publish, confirming no error and no mixed version (SC-010) — accepted as validated by the owner
+- [X] T056 [US3] Validate quickstart Scenario 3b — confirm a pull request workflow is refused both production's bucket and production's role (FR-018) — proven 2026-08-09 by a temporary workflow whose jobs passed only on refusal: the preview role got `AccessDenied` on `s3:PutObject` against production's bucket, and a pull-request token was refused `sts:AssumeRoleWithWebIdentity` for production's role. Both denials came from AWS, not from workflow logic
 
 **Checkpoint**: Sucopeku is publicly reachable, and unmerged code provably cannot touch it.
 
@@ -143,10 +144,10 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 
 **Independent Test**: Note a preview URL, close the pull request, confirm the URL stops serving and no objects remain under its prefix — while production is unaffected.
 
-- [X] T056 [US4] Create the teardown workflow in `.github/workflows/teardown-preview.yml` triggered on pull request close, whether merged or not
-- [X] T057 [US4] Invoke `scripts/teardown.ts` for the pull request's prefix in `.github/workflows/teardown-preview.yml` (FR-023)
-- [X] T058 [US4] Report teardown failures to the now-closed pull request through `.github/actions/report/action.yml` in `.github/workflows/teardown-preview.yml` (FR-024, FR-026)
-- [X] T059 [US4] Validate quickstart Scenario 4, including reopening a pull request and confirming its preview returns at the same address (SC-003, SC-004) — verified: closing removed all 4 objects and left pr-6 untouched; reopening restored the preview at the same address
+- [X] T057 [US4] Create the teardown workflow in `.github/workflows/teardown-preview.yml` triggered on pull request close, whether merged or not
+- [X] T058 [US4] Invoke `scripts/teardown.ts` for the pull request's prefix in `.github/workflows/teardown-preview.yml` (FR-023)
+- [X] T059 [US4] Report teardown failures to the now-closed pull request through `.github/actions/report/action.yml` in `.github/workflows/teardown-preview.yml` (FR-024, FR-026)
+- [X] T060 [US4] Validate quickstart Scenario 4, including reopening a pull request and confirming its preview returns at the same address (SC-003, SC-004) — verified: closing removed all 4 objects and left pr-6 untouched; reopening restored the preview at the same address
 
 **Checkpoint**: All four stories complete. The pipeline creates, gates, publishes, and cleans up.
 
@@ -154,12 +155,12 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [X] T060 [P] Enable GitHub workflow-failure notifications for the owner account, per the prerequisites in `specs/001-delivery-pipeline/quickstart.md` (FR-027 — the one requirement no code can satisfy) — done: workflow-failure notifications confirmed arriving
-- [X] T061 Validate quickstart Scenario 5 — break teardown deliberately, confirm a comment on the closed pull request and an email arrive — accepted as validated by the owner
-- [X] T062 Validate quickstart Scenario 6 — confirm the budget notifies, and that no resource with a fixed or hourly charge was introduced (FR-037) — accepted as validated by the owner
-- [X] T063 Update `specs/001-delivery-pipeline/plan.md` and this file if anything built diverged from what was planned (constitution: artifacts must be current at merge) — verified 2026-08-09: the only divergence was `scripts/outputs.ts`, absent from the plan's file tree; added
-- [X] T064 Write the human-authored `## SDD Notes` section in this feature's pull request body, answering both definition-of-done questions — done: notes written per pull request as the work proceeded, rather than once at the end
-- [X] T065 Amend `.specify/memory/constitution.md` to close the bootstrap period — **in a separate pull request containing nothing else**, as Governance requires — done: constitution amended to v2.2.0 in its own pull request, recording that every required check is enforced and that the exemption was closed deliberately rather than allowed to lapse
+- [X] T061 [P] Enable GitHub workflow-failure notifications for the owner account, per the prerequisites in `specs/001-delivery-pipeline/quickstart.md` (FR-027 — the one requirement no code can satisfy) — done: workflow-failure notifications confirmed arriving
+- [X] T062 Validate quickstart Scenario 5 — break teardown deliberately, confirm a comment on the closed pull request and an email arrive — accepted as validated by the owner
+- [X] T063 Validate quickstart Scenario 6 — confirm the budget notifies, and that no resource with a fixed or hourly charge was introduced (FR-037) — accepted as validated by the owner
+- [X] T064 Update `specs/001-delivery-pipeline/plan.md` and this file if anything built diverged from what was planned (constitution: artifacts must be current at merge) — verified 2026-08-09: the only divergence was `scripts/outputs.ts`, absent from the plan's file tree; added
+- [X] T065 Write the human-authored `## SDD Notes` section in this feature's pull request body, answering both definition-of-done questions — done: notes written per pull request as the work proceeded, rather than once at the end
+- [X] T066 Amend `.specify/memory/constitution.md` to close the bootstrap period — **in a separate pull request containing nothing else**, as Governance requires — done: constitution amended to v2.2.0 in its own pull request, recording that every required check is enforced and that the exemption was closed deliberately rather than allowed to lapse
 
 ---
 

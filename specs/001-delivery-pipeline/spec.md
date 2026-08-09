@@ -303,27 +303,37 @@ reason.
   deployed preview and confirm the page renders there. This is what makes the
   deployment verified rather than merely reported as successful.
 - **FR-035**: Linting MUST run across the repository's own source.
+- **FR-036**: Every reference to a requirement, edge case, or success criterion
+  inside a feature's documents MUST resolve to something that feature's spec
+  defines. A reference that does not resolve MUST fail the checks.
+
+  This exists because inserting a requirement renumbers everything below it,
+  silently invalidating references in the plan, the tasks, and the contracts. It
+  happened in this feature and again in feature 002, where eight tasks cited
+  unrelated requirements. It cannot verify that a citation names the *right*
+  requirement — only that it names a real one, which is the difference between
+  catching rot and catching error.
 
 **Process record**
 
-- **FR-036**: A pull request MUST prompt its author for the `## SDD Notes`
+- **FR-037**: A pull request MUST prompt its author for the `## SDD Notes`
   section required by the project's definition of done.
 
 **Cost control**
 
-- **FR-037**: Hosting MUST be built from services billed by usage. Any component
+- **FR-038**: Hosting MUST be built from services billed by usage. Any component
   carrying a fixed recurring charge, or billed for time rather than for use, MUST
   be justified in the plan before it is adopted. An idle deployment — including
   one orphaned by a failed removal — MUST cost approximately nothing.
-- **FR-038**: A spending threshold MUST be configured, and crossing it MUST
+- **FR-039**: A spending threshold MUST be configured, and crossing it MUST
   notify the project owner. This is the backstop for cost that accrues without
   any job failing, which no other requirement here would detect.
-- **FR-039**: The spending threshold MUST be scoped to the resources this project
+- **FR-040**: The spending threshold MUST be scoped to the resources this project
   creates, not to the whole account. An account-wide threshold answers a
   different question: it alarms on unrelated spending and, more damagingly, it
   cannot distinguish this project's cost from anything else, so a genuine leak
   here could sit under the threshold indefinitely while looking fine.
-- **FR-040**: Every resource this project creates MUST be identifiable as
+- **FR-041**: Every resource this project creates MUST be identifiable as
   belonging to it, so that its cost can be attributed. Cost cannot be attributed
   by who created a resource, only by the resource itself — which is why this is a
   requirement about resources rather than about credentials.
@@ -405,7 +415,7 @@ reason.
   Nothing about puzzles, saved games, or rulesets is in scope, because none of
   them exist.
 - **Spending protection is in scope; application monitoring is not.** A budget
-  threshold and its notification are required (FR-038). Uptime monitoring,
+  threshold and its notification are required (FR-039). Uptime monitoring,
   metrics, dashboards, and alerting on the site's behaviour are not.
 - **Out of scope**: custom domain names, application monitoring and alerting,
   rollback
