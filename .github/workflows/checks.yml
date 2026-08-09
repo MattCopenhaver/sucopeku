@@ -55,6 +55,29 @@ jobs:
             echo "Specification and documentation only; skipping checks (FR-013)"
           fi
 
+  # Runs unconditionally. A constitution-only pull request changes nothing
+  # executable, so putting this inside the conditional job would skip it on
+  # exactly the pull requests it guards — which is how #14 got through.
+  isolation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Amendment isolation
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: npx tsx scripts/check-amendment-isolation.ts
+
   verify:
     needs: scope
     if: needs.scope.outputs.code == 'true'
@@ -104,12 +127,16 @@ jobs:
   # reports a `skipped` conclusion whose treatment by branch protection is
   # ambiguous; this removes the ambiguity.
   checks:
-    needs: [scope, verify]
+    needs: [scope, verify, isolation]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Conclude
         run: |
+          if [ "${{ needs.isolation.result }}" != "success" ]; then
+            echo "Amendment isolation failed: the constitution changed alongside other files."
+            exit 1
+          fi
           if [ "${{ needs.verify.result }}" = "failure" ] || [ "${{ needs.verify.result }}" = "cancelled" ]; then
             echo "Checks failed."
             exit 1

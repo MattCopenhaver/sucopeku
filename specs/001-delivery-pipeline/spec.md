@@ -314,6 +314,15 @@ reason.
   requirement — only that it names a real one, which is the difference between
   catching rot and catching error.
 
+- **FR-037**: A pull request that changes the constitution alongside any other
+  file MUST fail the checks. Governance requires an amendment be alone in its
+  pull request, and constitution 3.1.0 makes that a property of the diff rather
+  than of intent.
+
+  The check MUST run regardless of what else changed. A constitution-only pull
+  request alters nothing executable, so a check that only runs when code changes
+  would skip exactly the pull requests it guards.
+
 **Process record**
 
 - **FR-037**: A pull request MUST prompt its author for the `## SDD Notes`
