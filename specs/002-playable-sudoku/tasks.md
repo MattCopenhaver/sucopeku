@@ -67,13 +67,13 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 **Independent Test**: Open the site, fill every empty cell correctly, and confirm the game recognises the puzzle as solved.
 
 - [X] T011 [US1] Build the board in `site/src/game/state.ts` by overlaying player entries onto the puzzle's givens, and expose which cells are given and therefore not writable (FR-004)
-- [X] T012 [US1] Hold interaction state in `site/src/game/state.ts` as a selected digit and a selected cell, with every input reducing to *select a digit* and *apply to a cell* (research.md D7)
+- [X] T012 [US1] Hold interaction state in `site/src/game/state.ts` as a selected cell, with every input reducing to *move the selection* and *place into it* (research.md D7, revised 2026-08-09 from digit-first)
 - [X] T013 [US1] Render the 9×9 grid from the board in `site/src/ui/grid.ts`, distinguishing given cells from the player's entries
 - [X] T014 [P] [US1] Render the number pad in `site/src/ui/pad.ts` with digits 1–9 and an erase key, always visible while a puzzle is shown (FR-009, FR-014)
-- [X] T015 [US1] Indicate the selected digit and the selected cell in `site/src/ui/pad.ts` and `site/src/ui/grid.ts` (FR-011, FR-016)
-- [X] T016 [US1] Apply a selected digit to a chosen cell in `site/src/game/state.ts`, leaving the digit selected so it can be placed repeatedly (FR-008, FR-010)
-- [X] T017 [US1] Implement erase in `site/src/game/state.ts`: while erase is selected, choosing a cell clears the player's value; choosing an empty cell does nothing and reports no error (FR-013, FR-014, FR-015)
-- [X] T018 [US1] Add keyboard handling in `site/src/ui/grid.ts` — arrows move the selected cell, typing a digit selects and places it, Backspace and Delete clear, per the table in research.md D7 (FR-012, FR-017)
+- [X] T015 [US1] Indicate the selected cell in `site/src/ui/grid.ts` (FR-016). There is no selected digit to indicate under cell-first entry — FR-011 is withdrawn
+- [X] T016 [US1] Place a chosen digit into the selected cell in `site/src/game/state.ts`, leaving the cell selected so its value can be corrected without reselecting it (FR-008, FR-010)
+- [X] T017 [US1] Implement erase in `site/src/game/state.ts`: choosing erase clears the selected cell's player value; doing so on an empty cell does nothing and reports no error (FR-013, FR-014, FR-015)
+- [X] T018 [US1] Add keyboard handling in `site/src/main.ts` — arrows move the selected cell, typing a digit places it there, Backspace and Delete clear it, per the table in research.md D7 (FR-012, FR-017)
 - [X] T019 [US1] Make the grid and pad usable by touch and pointer with the same handlers, so no action is reachable by only one input method (FR-017)
 - [X] T020 [US1] Show the puzzle as solved when `evaluate` reports complete with no conflicts, visibly enough that a person need not inspect cells (FR-022, SC-005)
 - [X] T021 [US1] Lock the grid while solved, and add the unlock control in `site/src/ui/controls.ts` that returns it to editing (FR-023, FR-024)

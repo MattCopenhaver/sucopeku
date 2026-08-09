@@ -35,9 +35,10 @@ export function renderGrid(root: HTMLElement, game: Game, onChange: () => void):
     if (game.isGiven(cell)) button.setAttribute('aria-readonly', 'true');
     button.disabled = false;
 
+    // Choosing a cell selects it and nothing more. What goes in it is the next
+    // action, from the pad or the keyboard (FR-010).
     button.addEventListener('click', () => {
       game.selectCell(cell);
-      game.apply(cell);
       onChange();
     });
 

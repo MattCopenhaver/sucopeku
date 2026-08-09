@@ -28,18 +28,37 @@ test('the grid and pad appear, with some cells already filled', async ({ page })
   expect(await page.locator('.cell.given').count()).toBeGreaterThan(0);
 });
 
-test('choosing a digit then a cell places it, and the digit stays selected', async ({ page }) => {
+test('choosing a cell then a digit places it, and the cell stays selected', async ({ page }) => {
   await page.goto('./');
   const target = await firstEmptyCell(page);
 
-  await key(page, '5').click();
-  await expect(key(page, '5')).toHaveAttribute('aria-pressed', 'true');
-
   await cell(page, target).click();
+  await expect(cell(page, target)).toHaveClass(/selected/);
+
+  await key(page, '5').click();
   await expect(cell(page, target)).toHaveText('5');
 
-  // still selected, so it can be placed again without reselecting (FR-010)
-  await expect(key(page, '5')).toHaveAttribute('aria-pressed', 'true');
+  // Still selected, so a wrong digit can be corrected without choosing the cell
+  // again — which is the whole reason this order is the right way round (FR-010).
+  await expect(cell(page, target)).toHaveClass(/selected/);
+  await key(page, '6').click();
+  await expect(cell(page, target)).toHaveText('6');
+});
+
+test('the pad does nothing until a cell is chosen', async ({ page }) => {
+  await page.goto('./');
+
+  // There is no mode to enter, so a pad key with no selection is inert rather
+  // than arming something invisible (FR-011, withdrawn).
+  const before = await page.locator('.cell').allTextContents();
+  await page.evaluate(() => {
+    document
+      .querySelectorAll('.cell.selected')
+      .forEach((node) => node.classList.remove('selected'));
+  });
+  await key(page, '9').click();
+  await expect(page.getByTestId('grid')).toBeVisible();
+  expect((await page.locator('.cell').allTextContents()).length).toBe(before.length);
 });
 
 test('a cell that came with the puzzle cannot be changed', async ({ page }) => {
@@ -47,8 +66,8 @@ test('a cell that came with the puzzle cannot be changed', async ({ page }) => {
   const given = page.locator('.cell.given').first();
   const before = await given.textContent();
 
-  await key(page, '7').click();
   await given.click();
+  await key(page, '7').click();
 
   await expect(given).toHaveText(before ?? '');
 });
@@ -57,30 +76,27 @@ test('erase clears a value, and does nothing to an empty cell', async ({ page })
   await page.goto('./');
   const target = await firstEmptyCell(page);
 
-  await key(page, '4').click();
   await cell(page, target).click();
+  await key(page, '4').click();
   await expect(cell(page, target)).toHaveText('4');
 
   await key(page, 'erase').click();
-  await cell(page, target).click();
   await expect(cell(page, target)).toHaveText('');
 
-  // erasing an empty cell is a no-op, not an error (FR-015)
-  await cell(page, target).click();
+  // Erasing an already-empty cell is a no-op, not an error (FR-015).
+  await key(page, 'erase').click();
   await expect(cell(page, target)).toHaveText('');
   await expect(page.getByTestId('grid')).toBeVisible();
 });
 
-test('typing a digit selects it and places it in the selected cell', async ({ page }) => {
+test('typing a digit places it in the selected cell', async ({ page }) => {
   await page.goto('./');
   const target = await firstEmptyCell(page);
 
-  await key(page, 'erase').click();
   await cell(page, target).click();
 
   await page.keyboard.press('6');
   await expect(cell(page, target)).toHaveText('6');
-  await expect(key(page, '6')).toHaveAttribute('aria-pressed', 'true');
 
   await page.keyboard.press('Backspace');
   await expect(cell(page, target)).toHaveText('');
@@ -109,8 +125,8 @@ test('solving the puzzle locks it, and unlocking resumes editing', async ({ page
   // Locked: placing into a cell changes nothing (FR-023).
   const target = 0;
   const before = await cell(page, target).textContent();
-  await key(page, '1').click();
   await cell(page, target).click();
+  await key(page, '1').click();
   await expect(cell(page, target)).toHaveText(before ?? '');
 
   await page.getByTestId('unlock').click();
@@ -119,8 +135,8 @@ test('solving the puzzle locks it, and unlocking resumes editing', async ({ page
   // Editing resumes, and a board that stops being complete stops being solved
   // (FR-024, EC-007).
   const editable = await page.locator('.cell:not(.given)').first().getAttribute('data-cell');
-  await key(page, 'erase').click();
   await cell(page, Number(editable)).click();
+  await key(page, 'erase').click();
   await expect(cell(page, Number(editable))).toHaveText('');
   await expect(page.getByTestId('status')).toHaveText('');
 });

@@ -60,8 +60,8 @@ async function conflictSetup(
 }
 
 async function place(page: Page, digit: number, cell: number): Promise<void> {
-  await page.locator(`[data-key="${digit}"]`).click();
   await page.locator(`[data-cell="${cell}"]`).click();
+  await page.locator(`[data-key="${digit}"]`).click();
 }
 
 for (const [name, group] of [
@@ -90,8 +90,8 @@ test('the marking clears when the conflict is resolved (FR-020)', async ({ page 
   await place(page, digit, b);
   await expect(page.locator(`[data-cell="${a}"]`)).toHaveClass(/conflict/);
 
-  await page.locator('[data-key="erase"]').click();
   await page.locator(`[data-cell="${b}"]`).click();
+  await page.locator('[data-key="erase"]').click();
 
   await expect(page.locator(`[data-cell="${a}"]`)).not.toHaveClass(/conflict/);
   await expect(page.locator(`[data-cell="${b}"]`)).not.toHaveClass(/conflict/);
@@ -111,8 +111,8 @@ test('a conflict is visible without colour (SC-009)', async ({ page }) => {
   await expect(page.locator(`[data-cell="${a}"]`)).toHaveClass(/conflict/);
   const conflicting = await page.locator(`[data-cell="${a}"]`).screenshot();
 
-  await page.locator('[data-key="erase"]').click();
   await page.locator(`[data-cell="${b}"]`).click();
+  await page.locator('[data-key="erase"]').click();
   await expect(page.locator(`[data-cell="${a}"]`)).not.toHaveClass(/conflict/);
   const settled = await page.locator(`[data-cell="${a}"]`).screenshot();
 

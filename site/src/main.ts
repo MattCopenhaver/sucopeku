@@ -1,7 +1,7 @@
 import './style.css';
 import { puzzleFor, puzzles, rulesetFor, type Puzzle } from './game/data.js';
 import { mostRecentUnsolved, onExternalChange, solvedIds } from './game/progress.js';
-import { Game, type Selection } from './game/state.js';
+import { Game } from './game/state.js';
 import { renderControls } from './ui/controls.js';
 import { renderGrid } from './ui/grid.js';
 import { renderPad } from './ui/pad.js';
@@ -97,7 +97,7 @@ function start(): void {
     const cell = game.selectedCell;
 
     if (event.key >= '1' && event.key <= '9') {
-      game.type(Number(event.key) as Selection, cell);
+      game.place(Number(event.key));
       draw();
       return;
     }
@@ -106,7 +106,7 @@ function start(): void {
       // would drop the player off the site mid-puzzle. Caught on WebKit; no
       // other browser we test does it.
       event.preventDefault();
-      game.type('erase', cell);
+      game.place('erase');
       draw();
       return;
     }

@@ -6,13 +6,14 @@ import { load, save, type PuzzleProgress } from './progress.js';
 /**
  * The playing state.
  *
- * Interaction is digit-first: every input reduces to *select a digit* and
- * *apply to a cell* (research.md D7). Typing a digit is a shortcut over that
- * same model, not a second one — which is what keeps input parity checkable
- * rather than aspirational.
+ * Interaction is cell-first: every input reduces to *move the selection* and
+ * *place into it* (research.md D7). The pad and the keyboard call `place` with
+ * the same argument, so there is no second path that could drift from the
+ * first — which is what keeps input parity checkable rather than aspirational.
  */
 
-export type Selection = number | 'erase';
+/** What the pad and the keyboard can place. */
+export type Entry = number | 'erase';
 
 export class Game {
   readonly puzzle: Puzzle;
@@ -24,7 +25,6 @@ export class Game {
   private solvedFlag: boolean;
   private unlocked: boolean;
 
-  selectedDigit: Selection = 1;
   selectedCell: number | null = null;
 
   constructor(puzzle: Puzzle, ruleset: Ruleset) {
@@ -77,34 +77,33 @@ export class Game {
     return this.givens.has(cell);
   }
 
-  select(digit: Selection): void {
-    this.selectedDigit = digit;
-  }
-
   selectCell(cell: number): void {
     if (cell >= 0 && cell < this.cellCount) this.selectedCell = cell;
   }
 
-  /** Applies the selected digit to a cell. The digit stays selected (FR-010). */
-  apply(cell: number): void {
+  /**
+   * Places an entry into the selected cell, which stays selected so a value can
+   * be corrected without reselecting it (FR-010).
+   *
+   * This is the only way a value ever changes. The pad, a typed digit, and
+   * Backspace all arrive here, which is what makes FR-012 true in the code
+   * rather than only in the wording.
+   */
+  place(entry: Entry): void {
+    const cell = this.selectedCell;
+    if (cell === null) return;
     if (this.locked) return;
     if (this.isGiven(cell)) return;
 
-    if (this.selectedDigit === 'erase') {
+    if (entry === 'erase') {
       // Erasing an empty cell does nothing and reports no error (FR-015).
       delete this.entries[String(cell)];
     } else {
-      this.entries[String(cell)] = this.selectedDigit;
+      this.entries[String(cell)] = entry;
     }
 
     this.refreshSolved();
     this.persist();
-  }
-
-  /** Typing a digit selects it and places it — one model, not two (FR-012). */
-  type(digit: Selection, cell: number | null): void {
-    this.select(digit);
-    if (cell !== null) this.apply(cell);
   }
 
   unlock(): void {

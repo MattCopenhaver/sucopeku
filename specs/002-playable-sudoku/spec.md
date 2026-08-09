@@ -214,19 +214,22 @@ cases are traced and covered by tasks exactly as functional requirements are.
   they are permitted to change.
 - **FR-009**: The site MUST present a number pad of the digits 1 to 9 that is
   visible whenever a puzzle is shown.
-- **FR-010**: Entry MUST be digit-first: the player selects a digit, and then
-  places it by choosing a cell. The selected digit MUST remain selected after
-  placement, so several cells can be filled with the same digit in succession.
-- **FR-011**: The site MUST indicate which digit is currently selected.
-- **FR-012**: Typing a digit while a cell is selected MUST both select that digit
-  and place it in that cell. This is a shortcut over the same model, not a second
-  one: every action it performs is also reachable from the number pad.
+- **FR-010**: Entry MUST be cell-first: the player chooses a cell, and then
+  chooses a digit to place in it. The chosen cell MUST remain selected after
+  placement, so its value can be corrected without selecting it again.
+- **FR-011**: *(withdrawn 2026-08-09 — see Revisions.)* Formerly: the site MUST
+  indicate which digit is currently selected. Cell-first entry has no persistent
+  digit selection to indicate; the pad performs an action rather than entering a
+  mode.
+- **FR-012**: Typing a digit MUST place it in the selected cell. This is a
+  shortcut over the same model, not a second one: every action it performs is
+  also reachable from the number pad, and both act on the selected cell.
 - **FR-013**: A player MUST be able to clear a value they entered.
-- **FR-014**: The number pad MUST include an erase key, selectable like a digit.
-  While erase is selected, choosing a cell clears the player's value in it.
-  Pressing Backspace or Delete with a cell selected MUST clear that cell.
-- **FR-015**: Choosing a cell that holds no player value while erase is selected
-  MUST do nothing, and MUST NOT report an error.
+- **FR-014**: The number pad MUST include an erase key. Choosing it clears the
+  player's value in the selected cell. Pressing Backspace or Delete MUST do the
+  same.
+- **FR-015**: Choosing erase while the selected cell holds no player value MUST
+  do nothing, and MUST NOT report an error.
 - **FR-016**: The site MUST indicate which cell the player is currently acting
   on.
 - **FR-017**: Every action a player can take MUST be possible by keyboard, by
@@ -486,3 +489,22 @@ FR-029 was amended; `tests/e2e/placeholder.spec.ts` became
 `tests/e2e/site.spec.ts`. This is the first requirement retired under the
 3.2.0 rules, and the mechanism held: the identifier stays taken, the reason is
 on the record, and the citation check still passes.
+
+**2026-08-09 — entry reversed from digit-first to cell-first.** FR-010, FR-012,
+FR-014, and FR-015 amended; FR-011 withdrawn in place.
+
+Digit-first was chosen before there was anything to use. In use it reads wrong:
+a pointer player picks a digit and enters a *mode*, while a keyboard player
+selects a cell and types into it. Two models, and the pad was the odd one out.
+
+Cell-first removes a concept rather than adding one. There is no selected digit,
+so there is no mode, no indicator for one, and no state to keep in sync — which
+is why FR-011 has nothing left to require. Every input now does one of two
+things: move the selection, or place into it. Pointer, touch, and keyboard
+become the same model in fact rather than only in wording, which is what FR-012
+always claimed and what FR-017 has to be checkable against.
+
+The cost is that filling several cells with the same digit now takes two actions
+per cell instead of one. That is the trade, and it is the right way round:
+correcting a single cell is the common act; repeating one digit across a region
+is not.

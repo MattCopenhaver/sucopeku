@@ -103,10 +103,8 @@ async function fill(
         .filter((index) => index >= 0),
     );
 
-  for (let digit = 1; digit <= 9; digit += 1) {
-    const cells = empty.filter((cell) => solution[cell] === digit);
-    if (cells.length === 0) continue;
-    await act(`[data-key="${digit}"]`);
-    for (const cell of cells) await act(`[data-cell="${cell}"]`);
+  for (const cell of empty) {
+    await act(`[data-cell="${cell}"]`);
+    await act(`[data-key="${solution[cell]}"]`);
   }
 }

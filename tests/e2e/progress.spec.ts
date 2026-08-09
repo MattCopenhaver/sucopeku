@@ -21,8 +21,8 @@ async function firstEmpty(page: Page): Promise<number> {
 }
 
 async function place(page: Page, digit: number, cell: number): Promise<void> {
-  await page.locator(`[data-key="${digit}"]`).click();
   await page.locator(`[data-cell="${cell}"]`).click();
+  await page.locator(`[data-key="${digit}"]`).click();
 }
 
 test('entries survive a reload (SC-006)', async ({ page }) => {

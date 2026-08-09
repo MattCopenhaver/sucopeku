@@ -67,8 +67,8 @@ test('going back returns to the previous puzzle with its progress (FR-039)', asy
   await page.goto('./');
   const first = named(page);
   const target = await firstEmpty(page);
-  await page.locator('[data-key="8"]').click();
   await page.locator(`[data-cell="${target}"]`).click();
+  await page.locator('[data-key="8"]').click();
 
   await page.getByTestId('new-puzzle').click();
   await expect(page.getByTestId('grid')).toBeVisible();
@@ -82,8 +82,8 @@ test('going back returns to the previous puzzle with its progress (FR-039)', asy
 test('arriving at the site resumes the puzzle left unsolved (FR-003)', async ({ page }) => {
   await page.goto('./?puzzle=p11');
   const target = await firstEmpty(page);
-  await page.locator('[data-key="9"]').click();
   await page.locator(`[data-cell="${target}"]`).click();
+  await page.locator('[data-key="9"]').click();
 
   await page.goto('./');
   expect(named(page)).toBe('p11');

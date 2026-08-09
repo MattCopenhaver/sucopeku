@@ -149,10 +149,9 @@ p {
   cursor: pointer;
 }
 
-.key.selected {
+.key:active {
   border-color: var(--ink);
   background: color-mix(in srgb, var(--ink) 12%, var(--paper));
-  font-weight: 700;
 }
 
 .key.erase {

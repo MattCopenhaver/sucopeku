@@ -170,24 +170,32 @@ Recorded so that revisiting it is a decision rather than a rescue.
 
 ## D7. Input as a small state machine
 
-**Decision**: Interaction state is `{ selectedDigit: 1..9 | 'erase', selectedCell:
-index | null }`. Every input path reduces to the same two operations: *select a
-digit* and *apply to a cell*.
+**Decision**: Interaction state is `{ selectedCell: index | null }` — one field.
+Every input path reduces to the same two operations: *move the selection* and
+*place into it*.
 
 | Input | Path |
 |---|---|
-| Tap or click a pad key | select digit |
-| Tap or click a cell | apply to that cell |
-| Arrow keys | move selected cell |
-| Type 1–9 | select that digit, then apply to the selected cell |
-| Backspace or Delete | select erase, then apply to the selected cell |
-| Enter or Space | apply the selected digit to the selected cell |
+| Tap or click a cell | move the selection there |
+| Tap or click a pad key | place that digit into the selected cell |
+| Arrow keys | move the selection |
+| Type 1–9 | place that digit into the selected cell |
+| Backspace or Delete | erase the selected cell |
 
-**Rationale**: FR-010 makes entry digit-first and FR-012 makes typing a shortcut
-over the same model rather than a second one. Expressing every input as the same
-two operations is what makes that true in the code rather than only in the
-specification, and it is why Principle IX's parity requirement can be checked by
-reading this table.
+**Rationale**: FR-010 makes entry cell-first and FR-012 makes typing a shortcut
+over the same model rather than a second one. With one piece of state, that is
+not a claim to be maintained — the pad and the keyboard call the same function
+with the same argument, and there is no second path that could drift from the
+first. It is why Principle IX's parity requirement can be checked by reading
+this table.
+
+**Superseded 2026-08-09.** This originally specified digit-first entry, with
+state `{ selectedDigit, selectedCell }` and the pad selecting a mode. It was
+decided before there was anything to use, and using it showed the flaw: the
+keyboard was already cell-first, so the two input paths were different models
+wearing the same words. Reversing it deleted a field, a mode, and an indicator
+(FR-011, withdrawn). Recorded rather than quietly rewritten, because "the design
+that survived contact" is the part worth keeping.
 
 ---
 
