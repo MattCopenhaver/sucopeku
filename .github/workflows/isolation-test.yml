@@ -29,10 +29,13 @@ jobs:
       - name: Write to production's bucket — must be denied
         run: |
           set +e
+          # A real file: the CLI rejects /dev/null client-side, which would make
+          # the request never reach AWS and the test prove nothing.
+          echo "isolation probe" > probe.txt
           out=$(aws s3api put-object \
                   --bucket "${{ vars.PRODUCTION_BUCKET }}" \
                   --key "_isolation-test-DELETE-ME.txt" \
-                  --body /dev/null 2>&1)
+                  --body probe.txt 2>&1)
           code=$?
           echo "$out"
           if [ $code -eq 0 ]; then
