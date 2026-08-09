@@ -1,0 +1,15 @@
+node_modules/
+site/dist/
+infra/cdk.out/
+playwright-report/
+test-results/
+package-lock.json
+
+# Spec Kit tooling and its templates are not ours to reformat
+.claude/
+.specify/
+
+# Markdown is hand-wrapped prose throughout this project — specs, plans, and
+# contracts are written to be read as text, and reflowing them destroys
+# deliberate line breaks without improving anything.
+**/*.md

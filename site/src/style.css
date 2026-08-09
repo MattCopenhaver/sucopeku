@@ -1,0 +1,66 @@
+/* Readable at 320px without horizontal scrolling (FR-027). Nothing here uses a
+   fixed width, so the page reflows rather than overflowing. */
+
+:root {
+  --ink: #1a1a1a;
+  --paper: #fdfdfb;
+  --muted: #5a5a5a;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #ececec;
+    --paper: #16171a;
+    --muted: #a3a3a3;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+main {
+  max-width: 34rem;
+  width: 100%;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+h1 {
+  font-size: clamp(2rem, 9vw, 3.25rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+p {
+  margin: 0.5rem 0;
+  overflow-wrap: anywhere;
+}
+
+[data-testid='status'] {
+  color: var(--muted);
+  font-size: 0.95rem;
+}

@@ -1,0 +1,133 @@
+name: Deploy preview
+
+# `reopened` is named explicitly. Omitting it would leave a reopened pull request
+# with no preview — its old one was torn down on close and nothing would rebuild
+# it. See spec Edge Cases.
+#
+# The trigger is unfiltered for the reason given in checks.yml: a workflow that
+# never starts leaves a required check that never reports. The `scope` job
+# decides what to run instead (FR-013, research.md D12).
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write # OIDC; no stored AWS keys
+
+# Rapid pushes must not land out of order: a slower earlier run finishing last
+# would publish stale content with every check green and nothing reporting a
+# failure. Cancelling is safe here because the deploy performs only object writes
+# and one invalidation — see contracts/deployment.md C3 and research.md D3.
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Did anything executable change?
+        id: filter
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+          echo "Changed files:"; printf '%s\n' "$changed" | sed 's/^/  /'
+          # See checks.yml for why this captures a list instead of using -qv.
+          code_files=$(printf '%s\n' "$changed" | grep -vE '^(specs/|\.specify/)|\.md$' || true)
+          if [ -n "$code_files" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "Executable changes:"; printf '%s\n' "$code_files" | sed 's/^/  /'
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "Specification and documentation only; the existing preview still matches (FR-013)"
+          fi
+
+  preview:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Assume the preview deploy role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN_PREVIEW }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Publish to pr-${{ github.event.pull_request.number }}/
+        id: publish
+        env:
+          DEPLOY_BUCKET: ${{ vars.PREVIEW_BUCKET }}
+          DEPLOY_DISTRIBUTION_ID: ${{ vars.PREVIEW_DISTRIBUTION_ID }}
+          DEPLOY_PREFIX: pr-${{ github.event.pull_request.number }}
+        run: npm run deploy
+
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke test the deployed preview
+        id: smoke
+        env:
+          SMOKE_URL: https://${{ vars.PREVIEW_DOMAIN }}/pr-${{ github.event.pull_request.number }}/
+        run: npx playwright test --project=chromium
+
+      - name: Comment the preview URL
+        uses: ./.github/actions/comment
+        with:
+          url: https://${{ vars.PREVIEW_DOMAIN }}/pr-${{ github.event.pull_request.number }}/
+          commit: ${{ github.event.pull_request.head.sha }}
+          pull-request: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report failure
+        if: failure()
+        uses: ./.github/actions/report
+        with:
+          workflow: Deploy preview
+          reason: >-
+            ${{ steps.publish.outcome == 'failure' && 'publishing the preview failed'
+            || steps.smoke.outcome == 'failure' && 'the deployed preview failed its smoke test'
+            || 'a deploy step failed' }}
+          pull-request: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  # The required status check — always runs, so it always reports. See the same
+  # job in checks.yml for why a skipped job is not good enough.
+  deploy:
+    needs: [scope, preview]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conclude
+        run: |
+          if [ "${{ needs.preview.result }}" = "failure" ] || [ "${{ needs.preview.result }}" = "cancelled" ]; then
+            echo "Preview deployment failed."
+            exit 1
+          fi
+          if [ "${{ needs.scope.outputs.code }}" != "true" ]; then
+            echo "No executable changes — the existing preview already matches this pull request."
+          else
+            echo "Preview deployed."
+          fi
