@@ -458,3 +458,52 @@ smoke test — minutes of runtime and a real deployment, avoided when nothing th
 site serves has changed.
 
 ---
+
+---
+
+## D13. Scoping the budget with cost allocation tags
+
+**Decision**: The CDK app applies `Project: sucopeku` to every resource it
+creates, and the budget filters on `TagKeyValue: user:Project$sucopeku`. The
+threshold is **$1/month**.
+
+**Rationale**: FR-039 requires the threshold to watch this project rather than
+the account. AWS Budgets can filter by cost allocation tag, which is the only
+mechanism that tracks *these* resources rather than a category they happen to
+fall into.
+
+$1 is deliberately far below any plausible real cost. Storage and CloudFront
+requests for a few hundred kilobytes of static assets should be fractions of a
+cent, so the threshold is a tripwire rather than a budget — it fires when
+something is wrong, not when the project gets busy.
+
+**The manual step this creates**: user-defined tags must be *activated* as cost
+allocation tags before any budget can filter on them:
+
+```bash
+aws ce update-cost-allocation-tags-status \
+  --cost-allocation-tags-status TagKey=Project,Status=Active
+```
+
+Activation takes up to roughly 24 hours to take effect and is **not
+retroactive** — spend recorded before activation carries no tag and will not
+match the filter. Until it propagates, the filtered budget matches little or
+nothing, which fails safe in the sense that it under-reports rather than
+misfires, and unsafe in the sense that it is not yet protecting anything. This
+joins GitHub's workflow-failure notification setting as a requirement no code can
+satisfy.
+
+**Alternatives considered**:
+
+| Alternative | Rejected because |
+|---|---|
+| Filter by service (S3, CloudFront) | Needs no activation and works immediately, but captures every bucket and distribution in the account, not this project's. Equivalent only while the account hosts nothing else — an assumption that decays silently |
+| Filter by linked account | Correct and total isolation, but requires a separate AWS account and Organizations |
+| Filter by the IAM role that created the resource | Not possible. AWS attributes cost to resources, not to principals. This is why FR-040 is phrased about resources |
+| `aws:cloudformation:stack-name`, an AWS-generated tag | Already applied without any CDK change, but still requires activation, and it spreads the project across four stack names instead of one value |
+
+**What the tag does not cover**: costs that are not attributable to a taggable
+resource — tax, support charges, and anything created outside this CDK app. Those
+are exactly the costs FR-039 wants excluded, so the gap is the point.
+
+---

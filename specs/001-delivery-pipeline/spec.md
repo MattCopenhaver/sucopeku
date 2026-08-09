@@ -318,6 +318,15 @@ reason.
 - **FR-038**: A spending threshold MUST be configured, and crossing it MUST
   notify the project owner. This is the backstop for cost that accrues without
   any job failing, which no other requirement here would detect.
+- **FR-039**: The spending threshold MUST be scoped to the resources this project
+  creates, not to the whole account. An account-wide threshold answers a
+  different question: it alarms on unrelated spending and, more damagingly, it
+  cannot distinguish this project's cost from anything else, so a genuine leak
+  here could sit under the threshold indefinitely while looking fine.
+- **FR-040**: Every resource this project creates MUST be identifiable as
+  belonging to it, so that its cost can be attributed. Cost cannot be attributed
+  by who created a resource, only by the resource itself — which is why this is a
+  requirement about resources rather than about credentials.
 
 ### Key Entities
 

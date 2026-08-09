@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { App } from 'aws-cdk-lib';
+import { App, Tags } from 'aws-cdk-lib';
 import { BudgetStack } from '../lib/budget.js';
 import { GithubOidcStack } from '../lib/github-oidc.js';
 import { SiteStack } from '../lib/site-stack.js';
@@ -15,6 +15,14 @@ function required(name: string): string {
 }
 
 const app = new App();
+
+// Every resource carries this, so the budget can watch this project rather than
+// the whole account (FR-039, FR-040). Cost is attributable to resources, never
+// to the credential that created them — which is why the tag goes here and not
+// on the deploy roles. See research.md D13, including the manual activation the
+// tag requires before any budget can filter on it.
+export const PROJECT_TAG = { key: 'Project', value: 'sucopeku' };
+Tags.of(app).add(PROJECT_TAG.key, PROJECT_TAG.value);
 
 const repository = required('SUCOPEKU_REPOSITORY'); // e.g. "owner/repo"
 const budgetEmail = required('SUCOPEKU_BUDGET_EMAIL');
@@ -62,5 +70,8 @@ new SiteStack(app, 'SucopekuPreviews', {
 new BudgetStack(app, 'SucopekuBudget', {
   env,
   notifyEmail: budgetEmail,
-  monthlyLimitUsd: Number(process.env.SUCOPEKU_BUDGET_USD ?? 5),
+  // A tripwire, not a budget. Real cost for a few hundred kilobytes of static
+  // assets is fractions of a cent, so $1 means something is wrong.
+  monthlyLimitUsd: Number(process.env.SUCOPEKU_BUDGET_USD ?? 1),
+  projectTag: PROJECT_TAG,
 });
