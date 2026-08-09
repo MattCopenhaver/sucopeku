@@ -12,10 +12,15 @@
  * A wrong citation is worse than a missing one: it reads as authoritative and
  * sends whoever follows it to the wrong requirement.
  *
- * This checks that references RESOLVE. It cannot check that they are the RIGHT
- * requirement — a citation can point at a real requirement that means something
- * else entirely, which is exactly what happened in feature 002. Only reading
- * catches that.
+ * It also rejects duplicate definitions. Appending a requirement without checking
+ * the number is free gives two requirements the same identifier, making every
+ * citation to it ambiguous — which happened while implementing the amendment that
+ * made identifiers permanent.
+ *
+ * This checks that references RESOLVE and that definitions are UNIQUE. It cannot
+ * check that a citation names the RIGHT requirement — a reference can point at a
+ * real requirement that means something else entirely, which is exactly what
+ * happened in feature 002. Only reading catches that.
  */
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -24,6 +29,7 @@ const SPECS_DIR = 'specs';
 const KINDS = ['FR', 'EC', 'SC'] as const;
 
 type Problem = { file: string; ref: string; defined: number };
+type Duplicate = { file: string; id: string; count: number };
 
 async function filesUnder(dir: string): Promise<string[]> {
   const found: string[] = [];
@@ -33,6 +39,11 @@ async function filesUnder(dir: string): Promise<string[]> {
     else if (entry.name.endsWith('.md')) found.push(full);
   }
   return found;
+}
+
+/** Every definition occurrence, so repeats can be spotted. */
+function definitions(spec: string, kind: string): string[] {
+  return [...spec.matchAll(new RegExp(`\\*\\*${kind}-(\\d{3})\\*\\*`, 'g'))].map((m) => m[1]!);
 }
 
 /** Definitions look like `**FR-001**:`; references look like `FR-001` anywhere. */
@@ -49,6 +60,7 @@ function referenced(text: string, kind: string): string[] {
 async function main(): Promise<void> {
   let features = 0;
   const problems: Problem[] = [];
+  const duplicates: Duplicate[] = [];
 
   for (const entry of await readdir(SPECS_DIR, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
@@ -64,6 +76,14 @@ async function main(): Promise<void> {
     const spec = await readFile(specPath, 'utf8');
     const known = Object.fromEntries(KINDS.map((k) => [k, defined(spec, k)]));
 
+    for (const kind of KINDS) {
+      const counts = new Map<string, number>();
+      for (const id of definitions(spec, kind)) counts.set(id, (counts.get(id) ?? 0) + 1);
+      for (const [id, count] of counts) {
+        if (count > 1) duplicates.push({ file: specPath, id: `${kind}-${id}`, count });
+      }
+    }
+
     for (const file of await filesUnder(dir)) {
       const text = await readFile(file, 'utf8');
       for (const kind of KINDS) {
@@ -76,8 +96,25 @@ async function main(): Promise<void> {
     }
   }
 
+  if (duplicates.length > 0) {
+    console.error(`Spec citations: ${duplicates.length} identifier(s) defined more than once.\n`);
+    for (const { file, id, count } of duplicates) {
+      console.error(`  ${file}: ${id} is defined ${count} times`);
+    }
+    console.error(
+      '\nTwo requirements sharing an identifier make every citation to it\n' +
+        'ambiguous. Identifiers are permanent, so give the newer one the next\n' +
+        'free number rather than renumbering the older.\n',
+    );
+    process.exitCode = 1;
+  }
+
   if (problems.length === 0) {
-    console.log(`Spec citations: every reference resolves, across ${features} feature(s).`);
+    if (duplicates.length === 0) {
+      console.log(
+        `Spec citations: every reference resolves and every identifier is unique, across ${features} feature(s).`,
+      );
+    }
     return;
   }
 

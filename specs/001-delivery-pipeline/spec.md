@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-07
 
-**Status**: Draft
+**Status**: Complete
 
 **Input**: User description: "Establish the delivery pipeline for Sucopeku. A contributor opening a pull request gets an isolated, working deployment of the site from that branch, reachable by URL, which disappears when the pull request closes. Pull requests cannot merge unless linting and automated tests pass. The site itself is a placeholder page with no gameplay."
 
@@ -314,7 +314,7 @@ reason.
   requirement — only that it names a real one, which is the difference between
   catching rot and catching error.
 
-- **FR-037**: A pull request that changes the constitution alongside any other
+- **FR-042**: A pull request that changes the constitution alongside any other
   file MUST fail the checks. Governance requires an amendment be alone in its
   pull request, and constitution 3.1.0 makes that a property of the diff rather
   than of intent.
@@ -475,3 +475,51 @@ reason.
   gameplay. The plan must show it remains reachable — chiefly by not addressing
   deployments in a way that confines offline caching to a sub-path. Recorded in
   Assumptions.
+
+## Revisions
+
+Changes made after this specification settled, per constitution 3.2.0. Identifiers
+are permanent; nothing here was renumbered.
+
+**2026-08-08 — offline built rather than deferred.** FR-030 to FR-032 added.
+`/speckit-analyze` found that deferring offline conflicted with Principle IV,
+which the bootstrap clause did not relax. The choice was to build a minimal
+service worker or ship in violation.
+
+**2026-08-08 — production isolated from previews.** FR-017 rewritten; FR-018 and
+FR-019 added. Planning surfaced that "each pull request deploys its own isolated
+environment" married two concerns: what a visitor observes, and what a mistake
+can reach. Constitution amended to 2.0.0 in the same session.
+
+**2026-08-08 — "long enough" replaced.** FR-021 had required previous-version
+files remain retrievable "for long enough", which no test could check. Restated
+as: a publish never deletes them.
+
+**2026-08-08 — the publish time bound removed.** SC-005 had bounded production
+freshness at ten minutes, unmeasured and off anyone's critical path. The bound on
+previews (SC-001) was kept, because a contributor waits on it.
+
+**2026-08-08 — the URL must work as typed.** FR-002 extended and an edge case
+added, after `/pr-2` served the right document at the wrong address and rendered
+unstyled. Serving correct content at an incorrect address is a failure that looks
+like a success.
+
+**2026-08-09 — specification-only changes skip the code checks.** FR-013 and
+FR-014 added. The mergeability clause is part of the requirement: a required
+check that never reports blocks a pull request permanently.
+
+**2026-08-09 — the spending threshold scoped to this project.** FR-040 and FR-041
+added. An account-wide budget could not distinguish this project's cost from
+anything else, so a leak here could sit under the threshold indefinitely.
+
+**2026-08-09 — citations must resolve.** FR-036 added, after renumbering left
+eight of feature 002's tasks citing unrelated requirements.
+
+**2026-08-09 — amendment isolation enforced.** FR-042 added. Constitution 3.1.0
+required the check and named it as work it did not do; this is that work.
+
+**2026-08-09 — FR-042 renumbered before merge.** The amendment-isolation
+requirement was first written as FR-037, colliding with the existing requirement
+for prompting `## SDD Notes`. Two requirements shared an identifier, making any
+citation to it ambiguous. Corrected to the next free number, which is what
+constitution 3.2.0's append rule requires.
