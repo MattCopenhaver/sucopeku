@@ -1,5 +1,3 @@
-const deliberatelyUnused = 'this exists to fail linting';
-
 import './style.css';
 
 // Registering with a URL resolved against the document's base is what makes
