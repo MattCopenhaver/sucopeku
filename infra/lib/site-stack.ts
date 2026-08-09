@@ -69,6 +69,28 @@ export class SiteStack extends Stack {
     // credentials (FR-005). On AWS the default is the opposite — buckets are
     // private and stay private — so anonymous read is configured here
     // deliberately rather than inherited.
+    // CloudFront's defaultRootObject only resolves the distribution root, so a
+    // request for `/pr-42/` becomes the S3 key `pr-42/`, which does not exist.
+    // Previews are served from prefixes, so directory-style URLs must be
+    // rewritten to their index document or every preview 403s at the address a
+    // person would actually type.
+    const directoryIndex = new cloudfront.Function(this, 'DirectoryIndex', {
+      runtime: cloudfront.FunctionRuntime.JS_2_0,
+      comment: 'Rewrites directory-style URIs to their index document',
+      code: cloudfront.FunctionCode.fromInline(`
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+  if (uri.endsWith('/')) {
+    request.uri = uri + 'index.html';
+  } else if (uri.lastIndexOf('.') < uri.lastIndexOf('/')) {
+    // Final segment carries no file extension, so treat it as a directory.
+    request.uri = uri + '/index.html';
+  }
+  return request;
+}`),
+    });
+
     this.distribution = new cloudfront.Distribution(this, 'SiteDistribution', {
       defaultRootObject: 'index.html',
       defaultBehavior: {
@@ -79,13 +101,18 @@ export class SiteStack extends Stack {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         compress: true,
+        functionAssociations: [
+          {
+            function: directoryIndex,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          },
+        ],
       },
-      // A preview lives under `pr-<n>/`, where a bare directory request must
-      // resolve to that prefix's own index.html rather than production's.
-      errorResponses: [
-        { httpStatus: 403, responseHttpStatus: 200, responsePagePath: '/index.html' },
-        { httpStatus: 404, responseHttpStatus: 200, responsePagePath: '/index.html' },
-      ],
+      // Deliberately no error-response mapping. An earlier version rewrote 403
+      // and 404 to `/index.html`, which is wrong for a distribution serving many
+      // prefixes: it would answer a missing preview with production's entry
+      // document, and mask genuine failures behind a 200. A missing path should
+      // say so. Revisit only if client-side routing ever needs a catch-all.
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
     });
 
