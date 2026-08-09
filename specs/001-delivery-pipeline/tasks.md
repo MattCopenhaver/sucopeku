@@ -66,8 +66,8 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 - [X] T020 Set object cache headers in `scripts/deploy.ts` — `no-cache` for `index.html` and `sw.js`, one-year immutable for hashed assets (contract C2). Planned for `infra/lib/site-stack.ts`, but Cache-Control is a property of each uploaded object, not of the bucket or distribution
 - [X] T021 Instantiate the production stack and the preview stack in `infra/bin/infra.ts` with no shared resources (FR-018, FR-019)
 - [X] T022 [P] Implement the account spending threshold in `infra/lib/budget.ts` with owner notification (FR-038)
-- [ ] T023 Apply a `Project: sucopeku` tag to every resource in `infra/bin/infra.ts` so this project's cost is attributable (FR-040, research.md D13)
-- [ ] T024 Filter the budget in `infra/lib/budget.ts` to `TagKeyValue: user:Project$sucopeku` and lower the threshold to $1 (FR-039, research.md D13)
+- [X] T023 Apply a `Project: sucopeku` tag to every resource in `infra/bin/infra.ts` so this project's cost is attributable (FR-040, research.md D13)
+- [X] T024 Filter the budget in `infra/lib/budget.ts` to `TagKeyValue: user:Project$sucopeku` and lower the threshold to $1 (FR-039, research.md D13)
 - [ ] T025 Activate `Project` as a cost allocation tag, **after T024 is merged and the tagged stacks are deployed**. AWS only offers tag keys it has already observed on resources, so activating before deployment fails with `Tag keys not found: Project`. Discovery is asynchronous and can take up to ~24 hours after the first tagged resource exists; activation then takes up to ~24 hours more and is not retroactive. Run `aws ce update-cost-allocation-tags-status --cost-allocation-tags-status TagKey=Project,Status=Active`, or check availability first with `aws ce list-cost-allocation-tags --status Inactive`. No code can do this (FR-039)
 - [X] T026 Implement the ordered deploy in `scripts/deploy.ts` — upload hashed assets, verify, then write `index.html`, then invalidate that one path (contract C3, FR-020)
 - [X] T027 Implement prefix deletion in `scripts/teardown.ts`, idempotent and scoped to the preview bucket (contract C4)
@@ -157,7 +157,7 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 - [ ] T060 [P] Enable GitHub workflow-failure notifications for the owner account, per the prerequisites in `specs/001-delivery-pipeline/quickstart.md` (FR-027 — the one requirement no code can satisfy)
 - [ ] T061 Validate quickstart Scenario 5 — break teardown deliberately, confirm a comment on the closed pull request and an email arrive
 - [ ] T062 Validate quickstart Scenario 6 — confirm the budget notifies, and that no resource with a fixed or hourly charge was introduced (FR-037)
-- [ ] T063 Update `specs/001-delivery-pipeline/plan.md` and this file if anything built diverged from what was planned (constitution: artifacts must be current at merge)
+- [X] T063 Update `specs/001-delivery-pipeline/plan.md` and this file if anything built diverged from what was planned (constitution: artifacts must be current at merge) — verified 2026-08-09: the only divergence was `scripts/outputs.ts`, absent from the plan's file tree; added
 - [ ] T064 Write the human-authored `## SDD Notes` section in this feature's pull request body, answering both definition-of-done questions
 - [ ] T065 Amend `.specify/memory/constitution.md` to close the bootstrap period — **in a separate pull request containing nothing else**, as Governance requires
 
