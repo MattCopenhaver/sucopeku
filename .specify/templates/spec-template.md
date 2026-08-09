@@ -71,12 +71,28 @@
 ### Edge Cases
 
 <!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right edge cases.
+  ACTION REQUIRED: Replace the placeholders below with the real edge cases.
+
+  Per the constitution, edge cases ARE requirements:
+
+  - Every edge case carries an identifier, EC-###.
+  - Every edge case states an obligation in MUST/SHOULD language, exactly as a
+    functional requirement does. Not "the page renders oddly" but "the page MUST
+    load".
+  - Edge cases are traced and covered by tasks like requirements are.
+
+  PROMOTE an edge case to a functional requirement when satisfying it CHANGES
+  THE DESIGN rather than merely exercising it. The test: if it needs tasks of
+  its own, or determines how something is built, it is a requirement. If it is a
+  specific input or state the design must survive, it stays an edge case.
+
+  An unnumbered edge case is a requirement in disguise — nothing maps it to a
+  task, so it can contradict the requirement above it and no review will notice.
 -->
 
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- **EC-001**: When [boundary condition], the system MUST [required behaviour].
+- **EC-002**: When [error scenario], [what MUST happen instead of failing
+  silently].
 
 ## Requirements *(mandatory)*
 
