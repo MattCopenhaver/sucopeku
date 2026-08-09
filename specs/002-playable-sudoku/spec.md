@@ -82,6 +82,10 @@ their entries intact.
 Losing a half-finished grid to a reload is the kind of failure that ends a
 player's relationship with a site.
 
+Each puzzle has its own address, so returning is a matter of opening that link
+again — from a bookmark, from history, or by being given the same puzzle another
+day.
+
 **Independent Test**: Fill several cells, reload the page, and confirm those
 cells still hold their values.
 
@@ -93,7 +97,9 @@ cells still hold their values.
    browser entirely, **Then** their progress is still there.
 3. **Given** a solved puzzle, **When** the player returns, **Then** it is still
    shown as solved.
-4. **Given** progress on a puzzle, **When** the player starts a different puzzle
+4. **Given** progress on a puzzle, **When** the player opens that puzzle's
+   address directly, **Then** the puzzle loads with their entries intact.
+5. **Given** progress on a puzzle, **When** the player starts a different puzzle
    and later returns to the first, **Then** the first puzzle's progress is
    intact.
 
@@ -114,9 +120,9 @@ one, and that the previous one's progress is unaffected.
 **Acceptance Scenarios**:
 
 1. **Given** a player on any puzzle, **When** they ask for a new one, **Then** a
-   different puzzle from the curated set is shown.
-2. **Given** a new puzzle has been started, **When** the player returns to the
-   previous one, **Then** its progress is intact.
+   different puzzle from the curated set is shown, at its own address.
+2. **Given** a new puzzle has been started, **When** the player opens the
+   previous puzzle's address, **Then** its progress is intact.
 3. **Given** the player has played several puzzles, **When** they ask for another,
    **Then** they are not repeatedly given one they have already completed while
    unplayed puzzles remain.
@@ -135,6 +141,8 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - **EC-003**: When stored progress refers to a puzzle that no longer exists in
   the curated set, the player MUST be given a working puzzle rather than an
   error or an empty grid.
+- **EC-010**: When an address names a puzzle identifier that is malformed or
+  unknown, the player MUST be given a working puzzle rather than an error.
 - **EC-004**: When stored progress is unreadable or corrupt, the player MUST be
   given a working puzzle. Losing progress is acceptable; failing to start is not.
 - **EC-005**: When a stored entry conflicts with the puzzle's fixed values —
@@ -198,23 +206,40 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - **FR-016**: When the board is complete and violates no constraint, the player
   MUST be told the puzzle is solved.
 
+**Each puzzle has an address**
+
+- **FR-017**: Every curated puzzle MUST have its own address, derived from a
+  puzzle identifier that is stable across releases.
+- **FR-018**: Opening a puzzle's address MUST load that puzzle. If the player has
+  progress on it, that progress MUST be restored.
+- **FR-019**: Arriving without naming a puzzle MUST select one at random and
+  place the player at that puzzle's address, so that reloading keeps them on the
+  same puzzle rather than reshuffling.
+- **FR-020**: An address naming a puzzle that does not exist MUST NOT produce an
+  error. The player MUST be given a working puzzle.
+- **FR-021**: The address MUST carry only a puzzle identifier, not an encoded
+  board. The puzzles ship with the site.
+
 **Progress**
 
-- **FR-017**: A puzzle in progress MUST be saved in the browser and restored when
+- **FR-022**: A puzzle in progress MUST be saved in the browser and restored when
   the player returns to it, per constitution Principle VI.
-- **FR-018**: Saving MUST NOT require the player to take any action.
-- **FR-019**: Progress MUST be stored per puzzle, so that returning to an earlier
-  puzzle restores that puzzle's own entries.
-- **FR-020**: The site MUST retain progress for at most 10 puzzles, discarding
+- **FR-023**: Saving MUST NOT require the player to take any action.
+- **FR-024**: Progress MUST be stored against the puzzle's identifier, so that
+  reaching a puzzle by any route — its address, or being given it at random —
+  restores that puzzle's own entries.
+- **FR-025**: The site MUST retain progress for at most 10 puzzles, discarding
   the least recently played beyond that, per constitution Principle VI.
-- **FR-021**: Stored progress MUST carry a version identifier, and every version
-  ever released MUST remain loadable, per constitution Principle V.
+- **FR-026**: Stored progress and puzzle addresses MUST each carry a version
+  identifier. Before Sucopeku 1.0 they MAY break: state that can no longer be
+  read MUST be discarded gracefully rather than causing an error, per
+  constitution Principle V as amended in 3.0.0.
 
 **Starting another puzzle**
 
-- **FR-022**: A player MUST be able to start a different puzzle from the curated
+- **FR-027**: A player MUST be able to start a different puzzle from the curated
   set.
-- **FR-023**: Starting a different puzzle MUST NOT discard progress on the one
+- **FR-028**: Starting a different puzzle MUST NOT discard progress on the one
   being left.
 
 ### Key Entities
@@ -253,11 +278,20 @@ cases are traced and covered by tasks exactly as functional requirements are.
 ## Assumptions
 
 - **Generation is out of scope.** The 20 puzzles are curated data. Generating
-  puzzles, rating difficulty, and verifying uniqueness at runtime belong to a
-  later feature.
-- **Sharing is out of scope.** No links, no encoded puzzle state in the URL.
-  Constitution Principle V still binds what this feature does store, which is why
-  stored progress carries a version identifier.
+  puzzles and rating difficulty belong to a later feature.
+- **Uniqueness is verified once, outside the repository.** Each curated puzzle is
+  confirmed to have exactly one solution before it ships, and how that was done is
+  recorded alongside the data. No solver is built here — that satisfies Principle
+  II for fixed data without dragging the generation feature's hardest piece
+  forward.
+- **Addresses name a puzzle; they do not encode one.** A link carries a puzzle
+  identifier, and the board itself ships with the site. Sharing an arbitrary or
+  generated puzzle — which requires encoding a board into a link — belongs to the
+  generation feature.
+- **Formats may break before 1.0.** Constitution 3.0.0 makes stored progress and
+  addresses provisional until 1.0 is declared, provided failures are graceful.
+  This is what allows persistence to be built now without committing forever to a
+  shape chosen before variants and generation exist.
 - **Classic Sudoku only.** One ruleset. The point of expressing it as data is
   that adding variants later requires no engine change — not that variants exist
   now.
@@ -271,20 +305,18 @@ cases are traced and covered by tasks exactly as functional requirements are.
   required by FR-015 because it is free at design time; screen reader support is
   supported where free but does not constrain other decisions, per Principle IX.
 
-## Clarifications Needed
+## Clarifications
 
-- **[NEEDS CLARIFICATION: How is a curated puzzle's single solution verified, and
-  by whom?]** Principle II requires every puzzle presented to have exactly one
-  solution, and requires mechanical verification for generated puzzles. These are
-  curated rather than generated, and Principle VIII forbids tests that a player
-  could not perform — so a solver-based uniqueness test does not obviously fit.
-  The options differ substantially in work: verify once by hand outside the
-  repository and trust the data; build a solver in this feature purely to check
-  the curated set; or defer verification to the generation feature that will need
-  a solver anyway.
-- **[NEEDS CLARIFICATION: When a player asks for a new puzzle, what happens to
-  the one they were on?]** FR-023 says progress is not discarded, but not how the
-  player gets back. Options range from no way back at all (progress is retained
-  but unreachable, which makes FR-019 untestable), to a list of puzzles in
-  progress, to simply cycling through the set in order. This determines whether
-  this feature needs any navigation surface at all.
+### Session 2026-08-09
+
+- Q: How is each curated puzzle's single solution verified, and by whom? → A:
+  Verified once outside the repository, before the data ships. No solver is built
+  in this feature; the puzzles are fixed, so one-time verification is real
+  evidence rather than a standing promise.
+- Q: When a player starts a different puzzle, how do they get back to the one they
+  left? → A: Each puzzle has its own address. Returning means opening that link
+  again — from a bookmark, from history, or by being given the same puzzle at
+  random. No list or navigation surface is needed.
+- Q: Does reloading reshuffle the puzzle? → A: No. Arriving without naming a
+  puzzle selects one at random and places the player at that puzzle's address, so
+  a reload keeps them where they were.
