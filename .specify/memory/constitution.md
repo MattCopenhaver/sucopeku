@@ -1,8 +1,28 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 → 2.0.0 → 2.0.1
+Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0
 Ratified: 2026-08-07 | Last amended: 2026-08-07
+
+AMENDMENT (2.1.0) — Development Workflow, edge cases are requirements
+  Adds: every edge case in a spec MUST carry an EC-### identifier and state its
+  obligation in MUST/SHOULD language; edge cases are traced and covered by tasks
+  exactly as requirements are; an edge case MUST be promoted to a functional
+  requirement when satisfying it changes the design rather than exercising it.
+
+  Why: implementing feature 001 produced a spec whose edge case ("a
+  documentation-only merge republishes nothing") contradicted the scope of the
+  requirement above it ("when a pull request changes only..."). The code
+  implemented the requirement; the edge case went unbuilt. It survived
+  /speckit-analyze because coverage mapping works on identifiers, and edge cases
+  had none — prose cannot be traced.
+
+  MINOR: adds guidance, removes nothing, downgrades no MUST.
+
+  Follow-up required, not done here: `.specify/templates/spec-template.md` must
+  carry the convention so future specs inherit it, and spec 001's existing edge
+  cases must be numbered. Both are ordinary changes and land separately —
+  Governance forbids bundling them with this amendment.
 
 AMENDMENT (2.0.1) — Development Workflow, bootstrap clause wording
   The 2.0.0 amendment renamed the "Ephemeral environments" section to "Preview
@@ -505,6 +525,24 @@ An artifact that contradicts the merged code is a defect, and the artifact is
 what gets corrected. Work that produced no artifact change still requires the
 artifacts to be accurate — silence is not currency.
 
+**Edge cases are requirements.** Every edge case in a spec MUST carry an
+identifier of the form `EC-###` and MUST state its obligation in the same
+MUST/SHOULD language as a functional requirement. Edge cases are traced, covered
+by tasks, and checked for contradictions exactly as requirements are.
+
+An edge case MUST be promoted to a functional requirement when satisfying it
+changes the design rather than merely exercising it. The test: if it needs tasks
+of its own, or determines how something is built, it is a requirement. If it is a
+specific input or state the design must survive, it stays an edge case.
+
+*Rationale: an unnumbered edge case is a requirement in disguise. Nothing maps it
+to a task, so it can contradict the requirement printed above it and no review
+will notice. This was not hypothetical — spec 001 stated in an edge case that a
+documentation-only merge republishes nothing, while the requirement it sat under
+covered pull requests only. The code implemented the requirement, the edge case
+went unbuilt, and the disagreement survived a full analysis pass because prose
+without an identifier is invisible to coverage mapping.*
+
 Anything that exists only as a report, and leaves no committed artifact behind,
 is RECOMMENDED where useful but never required. Cross-checking spec, plan, and
 tasks against one another before implementing is the clearest example: valuable,
@@ -578,4 +616,4 @@ covered under Development Workflow. Beyond that, this project has one
 contributor and needs no further ceremony. The check that matters is whether the
 artifacts tell the truth about the code.
 
-**Version**: 2.0.1 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-07
+**Version**: 2.1.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-07
