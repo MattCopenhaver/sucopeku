@@ -94,7 +94,7 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 - [X] T037 [P] [US1] Write the deployed smoke test in `tests/e2e/smoke.spec.ts`, taking its target URL from an environment variable (FR-034)
 - [X] T038 [US1] Run the smoke test against the freshly deployed preview in `.github/workflows/deploy-preview.yml`
 - [X] T039 [US1] Report preview deploy failures through `.github/actions/report/action.yml` in `.github/workflows/deploy-preview.yml`
-- [ ] T040 [US1] Validate quickstart Scenario 1, including two simultaneous pull requests showing only their own content (SC-001, SC-002, SC-009)
+- [X] T040 [US1] Validate quickstart Scenario 1, including two simultaneous pull requests showing only their own content (SC-001, SC-002, SC-009) — verified: pr-6 and pr-7 served distinct markers, neither contained the other's, production carried neither
 
 **Checkpoint**: Previews work end to end. This is the MVP — every later story gates on, publishes from, or cleans up what exists now.
 
@@ -112,7 +112,7 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 - [X] T044 [US2] Make the working jobs conditional on `scope`, and add an always-running gate job named `checks` / `deploy` so the required status check always reports — a skipped required check leaves a pull request permanently unmergeable (FR-013). On `main` the publish is skipped instead, while linting and the browser suite still run unconditionally — FR-016 requires them after every merge (FR-014 covers the skipped publish) and makes no exception for documentation
 - [X] T045 [US2] Report check failures through `.github/actions/report/action.yml` in `.github/workflows/checks.yml` (FR-010)
 - [X] T046 [US2] Create a repository **ruleset** (not classic branch protection — see research.md D9) targeting `~DEFAULT_BRANCH` — require branch currency, lint, browser suite, preview deploy and smoke test; forbid direct pushes; allow squash merge only — following the setup steps in `specs/001-delivery-pipeline/quickstart.md` (FR-006 to FR-012). Also set squash-merge to use the PR title and body — without it the `## SDD Notes` section is discarded at merge and contract C6 silently fails. Applied in two stages: pull-request-required, linear history, no force pushes and no deletion can be set now; the `required_status_checks` rule naming `checks` and `deploy` MUST wait until those workflows exist on `main`, or every open pull request becomes permanently unmergeable. NOTE: rulesets require a public repository or a paid plan; the repository was made public on 2026-08-08 to unblock this.
-- [ ] T047 [US2] Validate quickstart Scenario 2, including the direct-push rejection (SC-007, SC-008)
+- [X] T047 [US2] Validate quickstart Scenario 2, including the direct-push rejection (SC-007, SC-008) — verified: a lint error blocked the merge and the comment named it; removing it restored CLEAN; a direct push to main was rejected by the ruleset
 
 **Checkpoint**: The gate is live. From here, this feature's own pull request is subject to the checks it created — the bootstrap period begins closing.
 
@@ -146,7 +146,7 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 - [X] T056 [US4] Create the teardown workflow in `.github/workflows/teardown-preview.yml` triggered on pull request close, whether merged or not
 - [X] T057 [US4] Invoke `scripts/teardown.ts` for the pull request's prefix in `.github/workflows/teardown-preview.yml` (FR-023)
 - [X] T058 [US4] Report teardown failures to the now-closed pull request through `.github/actions/report/action.yml` in `.github/workflows/teardown-preview.yml` (FR-024, FR-026)
-- [ ] T059 [US4] Validate quickstart Scenario 4, including reopening a pull request and confirming its preview returns at the same address (SC-003, SC-004)
+- [X] T059 [US4] Validate quickstart Scenario 4, including reopening a pull request and confirming its preview returns at the same address (SC-003, SC-004) — verified: closing removed all 4 objects and left pr-6 untouched; reopening restored the preview at the same address
 
 **Checkpoint**: All four stories complete. The pipeline creates, gates, publishes, and cleans up.
 
