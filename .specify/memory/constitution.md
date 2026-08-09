@@ -1,8 +1,28 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0 → 2.2.0 → 3.0.0
+Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0 → 2.2.0 → 3.0.0 → 3.1.0
 Ratified: 2026-08-07 | Last amended: 2026-08-09
+
+AMENDMENT (3.1.0) — Governance, amendment isolation is checked, not trusted
+  Adds: "alone in its pull request" is a property of the diff and MUST be
+  confirmed against the changed files before opening. And it MUST be enforced by
+  the required checks — a pull request changing this file and any other file
+  fails.
+
+  Why: pull request #14 (the 3.0.0 amendment) carried feature 002's spec.md and
+  its checklist into main. The branch was created from a working tree that
+  already held them, and staging everything at once committed them. Nobody
+  disputed the rule; nobody chose to break it. The existing wording stated the
+  outcome and left compliance to attention, which is the failure mode it just
+  demonstrated.
+
+  MINOR: adds an obligation, downgrades nothing.
+
+  Creates work not done here: the check itself belongs to the delivery pipeline
+  and needs its own requirement and task in feature 001. Until it exists, this
+  rule is still enforced only by attention — the gap is now named rather than
+  assumed closed.
 
 AMENDMENT (3.0.0) — Principle V, formats are provisional before 1.0
   Adds: until Sucopeku 1.0 is declared, stored progress and shared links MAY
@@ -667,6 +687,22 @@ amendment MUST be alone in its pull request. Nothing but this file changes. A
 change to the rules is therefore always reviewable on its own terms, never
 bundled with — or justified by — the feature that prompted it.
 
+**"Alone" is a property of the diff, not of the intent.** Before opening an
+amendment, its author MUST confirm against the pull request's actual changed
+files that nothing else is present. A branch created from a working tree that
+already holds unrelated work will carry that work along, and staging everything
+at once will commit it — without anyone deciding to.
+
+This MUST be enforced rather than remembered: a pull request that changes this
+file and any other file MUST fail the required checks.
+
+*Rationale: on 2026-08-09 an amendment carried an unrelated feature's
+specification into `main` by exactly this route. Nobody disputed the rule and
+nobody chose to break it; the branch was cut from a dirty tree and everything was
+staged together. A rule that depends on remembering to look is a rule that fails
+on the day you are thinking about something else — which is every day an
+amendment is interesting enough to write.*
+
 Amendments require no spec. Principle I governs code; this section governs this
 document.
 
@@ -687,4 +723,4 @@ covered under Development Workflow. Beyond that, this project has one
 contributor and needs no further ceremony. The check that matters is whether the
 artifacts tell the truth about the code.
 
-**Version**: 3.0.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-09
+**Version**: 3.1.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-09
