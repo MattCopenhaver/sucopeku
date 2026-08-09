@@ -293,8 +293,28 @@ keeps what is true of every puzzle of its type; the puzzle carries what varies.
 `evaluate` needs no change — composition happens before it is called.
 
 **Alternatives considered**: Adding the parameter field and per-puzzle
-constraints now, unused. Rejected: it would be structure built for requirements
-that do not exist yet, and the migration cost is low precisely because no
-variant ruleset has shipped. This entry exists so the cost stays low —
-the trap is not the missing field, it is minting permanent ruleset
-identifiers per puzzle before noticing.
+constraints now, unused. Rejected on Principle VIII grounds rather than
+general caution: with no ruleset using them, there is nothing a player could do
+to exercise either, so they would be the only untestable code in the repo and
+would stay untestable until a variant shipped. The migration cost is low
+anyway, because no variant ruleset has shipped and formats are provisional
+before 1.0 (constitution 3.0.0). The trap is not the missing field — it is
+minting permanent ruleset identifiers per puzzle before noticing.
+
+**Decided 2026-08-09, to be implemented with the first variant ruleset**: the
+division is *fixed by geometry* against *varying per puzzle*, not *universal*
+against *specific*.
+
+A ruleset carries what its geometry determines — rows, columns, boxes — and
+declares which primitives its puzzles may use. Classic 9x9 is not special here,
+only the first instance: `scripts/build-classic-ruleset.ts` already computes
+those 27 constraints from the grid shape rather than listing them, so 4x4 and
+16x16 need a box-size parameter and no new concept.
+
+A puzzle carries what nothing about its type determines — where this puzzle's
+cages are, what they sum to, which cells this thermometer runs through. A
+Killer ruleset would therefore hold the same geometric constraints as classic
+plus permission to use `sum`, while each Killer puzzle holds its own cages.
+
+The test for which side a constraint belongs on: could it be derived from the
+geometry alone? Rows and boxes can. A cage never can.
