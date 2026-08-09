@@ -5,6 +5,13 @@
 **Created**: [DATE]
 
 **Status**: Draft
+<!-- Exactly one of: Draft | Ready | Implementing | Complete
+       Draft         still being iterated; downstream work should not begin
+       Ready         clarified and planned; implementation may begin
+       Implementing  tasks are being worked
+       Complete      every task done, and merged
+     Update it as part of the change that makes it true. An unmaintained status
+     is worse than none. -->
 
 **Input**: User description: "$ARGUMENTS"
 
@@ -145,3 +152,20 @@
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+
+## Revisions
+
+<!-- Required once implementation begins. One dated entry per requirement added,
+     rewritten, or withdrawn after the spec settled, and why.
+
+     Clarifications covers decisions made while writing the spec. This covers
+     decisions made once the spec was being built against.
+
+     Identifiers are permanent: never reuse or reassign one. New requirements
+     append. A requirement that no longer applies is withdrawn in place:
+
+       - **FR-012**: *(withdrawn 2026-08-20 — see Revisions.)* Formerly: the
+         site MUST prompt before discarding progress.
+-->
+
+_Nothing yet._
