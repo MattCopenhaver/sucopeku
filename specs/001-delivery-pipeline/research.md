@@ -235,34 +235,67 @@ Principle VIII.
 
 ---
 
-## D11. Directory-style URLs redirect rather than rewrite
+## D7. CI platform and AWS authentication
 
-**Decision**: A CloudFront viewer-request function resolves directory-style
-URLs. A URI ending in `/` is rewritten internally to its `index.html`. A URI
-whose final segment has no file extension gets a **301 redirect** to the same
-path with a trailing slash.
+**Decision**: GitHub Actions, authenticating to AWS by OIDC federation. Two
+roles, one per stack. No long-lived AWS access keys are stored.
 
-**Rationale**: CloudFront's `defaultRootObject` only resolves the distribution
-root, so `/pr-42/` maps to the S3 key `pr-42/`, which does not exist. Previews
-live at prefixes, so without this every preview returns 403 at the address a
-person would actually type.
+| Role | Trust condition | May write to |
+|---|---|---|
+| Preview deploy | `repo:<owner>/<repo>:pull_request` | Preview bucket only |
+| Production deploy | `repo:<owner>/<repo>:ref:refs/heads/main` | Production bucket only |
 
-The redirect is the part that matters. Rewriting `/pr-42` internally serves the
-correct document at the wrong address: the browser still believes it is at
-`/pr-42`, whose directory is `/`, so every `./asset` reference resolves to the
-distribution root and 404s, and the service worker registers at `/sw.js` with
-the wrong scope. The page renders — unstyled and without offline support — which
-is worse than an error, because it looks like it worked.
+**Rationale**: OIDC removes stored credentials entirely and costs nothing. The
+split roles are what make FR-015 enforceable rather than aspirational: a pull
+request can edit its own workflow file, so the guarantee cannot rest on what the
+workflow chooses to do. It has to rest on AWS refusing the role. Because the
+production role's trust policy names the `main` ref as its only subject, a
+workflow triggered by a pull request is issued a token AWS will not accept.
 
-**Alternatives considered**: emitting absolute asset paths (would break
-position-independence, D5, and with it the guarantee that previews and
-production deploy an identical artifact); an S3 website endpoint, which resolves
-index documents per prefix natively (HTTP only, so it forecloses service
-workers entirely).
+**Failure reporting** (FR-020 to FR-022): each workflow posts its outcome as a
+pull request comment, including the teardown workflow, which comments on the
+already-closed pull request. GitHub notifies subscribers of comments on closed
+pull requests, and the author is subscribed automatically, so the owner is
+notified without any additional service. Workflow runs that crash before they can
+comment are covered by GitHub's own workflow-failure notifications, which must be
+enabled — this is the one part of FR-022 that depends on an account setting
+rather than on code.
 
-**Also removed here**: the distribution's 403/404 → `/index.html` error mapping.
-On a distribution serving many prefixes it answered a missing preview with
-production's entry document and masked genuine failures behind a 200.
+---
+
+## D8. Offline capability
+
+**Decision**: A hand-written service worker at `site/public/sw.js`, registered
+from `main.ts` with a relative path. Runtime caching, no build-time manifest, no
+dependency. Navigation requests are network-first with a cache fallback; hashed
+assets are cache-first; anything fetched successfully is cached.
+
+**Rationale**: Added after `/speckit-analyze` found that deferring offline
+conflicted with constitution Principle IV, which the bootstrap clause does not
+relax.
+
+Network-first for the entry document is what satisfies FR-028: because
+`index.html` is the only mutable object and is served `no-cache`, a visitor with
+a network always gets the current version, and the cache is only consulted when
+the network fails. Cache-first for hashed assets is safe precisely because their
+names encode their content — a cached asset can never be a stale version of a
+different file, which is the same property that makes publishing atomic (D2).
+
+Registering with a relative path is what satisfies FR-029: the worker's scope
+defaults to the directory it is served from, so it covers `/pr-42/` in a preview
+and `/` in production without configuration.
+
+**Why no build-time precache manifest**: precaching would require a Vite plugin
+and a generated asset list. Runtime caching gives offline-after-first-visit with
+about thirty lines and no dependency, which is what Principle II asks for. The
+tradeoff is that a visitor who leaves before assets finish loading has an
+incomplete cache — acceptable for a placeholder page, and worth revisiting when
+there is a real application to cache.
+
+**Alternatives considered**: Workbox (a dependency and a build step for
+behaviour we can write directly); no service worker plus an amendment to
+Principle IV (rejected by the owner — shipping in violation of a MUST in week
+one sets the wrong precedent on a project about following the process).
 
 ---
 
@@ -304,64 +337,82 @@ reason; see the spec's Assumptions for what that changed.
 
 ---
 
-## D8. Offline capability
+## D10. The OIDC trust policy pins immutable repository IDs
 
-**Decision**: A hand-written service worker at `site/public/sw.js`, registered
-from `main.ts` with a relative path. Runtime caching, no build-time manifest, no
-dependency. Navigation requests are network-first with a cache fallback; hashed
-assets are cache-first; anything fetched successfully is cached.
+**Decision**: The deploy roles' trust conditions list **both** subject formats as
+exact strings:
 
-**Rationale**: Added after `/speckit-analyze` found that deferring offline
-conflicted with constitution Principle IV, which the bootstrap clause does not
-relax.
+```
+repo:<owner>/<repo>:<event>
+repo:<owner>@<ownerId>/<repo>@<repoId>:<event>
+```
 
-Network-first for the entry document is what satisfies FR-028: because
-`index.html` is the only mutable object and is served `no-cache`, a visitor with
-a network always gets the current version, and the cache is only consulted when
-the network fails. Cache-first for hashed assets is safe precisely because their
-names encode their content — a cached asset can never be a stale version of a
-different file, which is the same property that makes publishing atomic (D2).
+`SUCOPEKU_OWNER_ID` and `SUCOPEKU_REPO_ID` supply the numeric IDs at deploy time.
 
-Registering with a relative path is what satisfies FR-029: the worker's scope
-defaults to the directory it is served from, so it covers `/pr-42/` in a preview
-and `/` in production without configuration.
+**Rationale**: This was found by running the pipeline, not by reasoning about it.
+The first preview deploy failed with `Not authorized to perform
+sts:AssumeRoleWithWebIdentity` while the trust policy, the identity provider, and
+the audience all looked correct. Decoding the token GitHub actually issued showed
+the subject was:
 
-**Why no build-time precache manifest**: precaching would require a Vite plugin
-and a generated asset list. Runtime caching gives offline-after-first-visit with
-about thirty lines and no dependency, which is what Principle II asks for. The
-tradeoff is that a visitor who leaves before assets finish loading has an
-incomplete cache — acceptable for a placeholder page, and worth revisiting when
-there is a real application to cache.
+```
+repo:MattCopenhaver@12800786/sucopeku@1326129239:pull_request
+```
 
-**Alternatives considered**: Workbox (a dependency and a build step for
-behaviour we can write directly); no service worker plus an amendment to
-Principle IV (rejected by the owner — shipping in violation of a MUST in week
-one sets the wrong precedent on a project about following the process).
+GitHub now embeds immutable numeric IDs in the subject claim, so that renaming an
+account or repository cannot transfer trust to whoever subsequently claims the
+released name. The plan had assumed the older name-only form documented in most
+examples.
+
+Both forms are listed because older repositories still emit the name-only
+subject, and a trust policy that accepts only one is a policy that breaks on a
+platform change in either direction.
+
+**Why exact strings rather than a wildcard**: `repo:<owner>@*/<repo>@*:<event>`
+would match regardless of the IDs and is tempting for its brevity. It also
+reopens precisely the hole the immutable format exists to close — an attacker who
+registered a released account name would match again. The wildcard trades away
+the guarantee in exchange for not having to look up two numbers.
+
+**Operational cost**: two more values are required at deploy time. They are
+fetched once with:
+
+```bash
+gh api repos/<owner>/<repo> --jq '{repo_id: .id, owner_id: .owner.id}'
+```
+
+**Diagnostic worth keeping**: when role assumption fails and everything looks
+correct, decode the token's claims rather than re-reading the policy. The
+mismatch was invisible from the AWS side, because AWS reports only that the
+condition did not match, never what the presented claim was.
 
 ---
 
-## D7. CI platform and AWS authentication
+## D11. Directory-style URLs redirect rather than rewrite
 
-**Decision**: GitHub Actions, authenticating to AWS by OIDC federation. Two
-roles, one per stack. No long-lived AWS access keys are stored.
+**Decision**: A CloudFront viewer-request function resolves directory-style
+URLs. A URI ending in `/` is rewritten internally to its `index.html`. A URI
+whose final segment has no file extension gets a **301 redirect** to the same
+path with a trailing slash.
 
-| Role | Trust condition | May write to |
-|---|---|---|
-| Preview deploy | `repo:<owner>/<repo>:pull_request` | Preview bucket only |
-| Production deploy | `repo:<owner>/<repo>:ref:refs/heads/main` | Production bucket only |
+**Rationale**: CloudFront's `defaultRootObject` only resolves the distribution
+root, so `/pr-42/` maps to the S3 key `pr-42/`, which does not exist. Previews
+live at prefixes, so without this every preview returns 403 at the address a
+person would actually type.
 
-**Rationale**: OIDC removes stored credentials entirely and costs nothing. The
-split roles are what make FR-015 enforceable rather than aspirational: a pull
-request can edit its own workflow file, so the guarantee cannot rest on what the
-workflow chooses to do. It has to rest on AWS refusing the role. Because the
-production role's trust policy names the `main` ref as its only subject, a
-workflow triggered by a pull request is issued a token AWS will not accept.
+The redirect is the part that matters. Rewriting `/pr-42` internally serves the
+correct document at the wrong address: the browser still believes it is at
+`/pr-42`, whose directory is `/`, so every `./asset` reference resolves to the
+distribution root and 404s, and the service worker registers at `/sw.js` with
+the wrong scope. The page renders — unstyled and without offline support — which
+is worse than an error, because it looks like it worked.
 
-**Failure reporting** (FR-020 to FR-022): each workflow posts its outcome as a
-pull request comment, including the teardown workflow, which comments on the
-already-closed pull request. GitHub notifies subscribers of comments on closed
-pull requests, and the author is subscribed automatically, so the owner is
-notified without any additional service. Workflow runs that crash before they can
-comment are covered by GitHub's own workflow-failure notifications, which must be
-enabled — this is the one part of FR-022 that depends on an account setting
-rather than on code.
+**Alternatives considered**: emitting absolute asset paths (would break
+position-independence, D5, and with it the guarantee that previews and
+production deploy an identical artifact); an S3 website endpoint, which resolves
+index documents per prefix natively (HTTP only, so it forecloses service
+workers entirely).
+
+**Also removed here**: the distribution's 403/404 → `/index.html` error mapping.
+On a distribution serving many prefixes it answered a missing preview with
+production's entry document and masked genuine failures behind a 200.
