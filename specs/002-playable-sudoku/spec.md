@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Draft
+**Status**: Ready
 
 **Input**: User description: "A playable Sudoku game. When a player starts, they are given one of 20 curated puzzles chosen at random. They can enter and clear values in cells, and the game shows conflicts under the classic Sudoku ruleset. Progress on a puzzle is saved in the browser and restored when the player returns to it. Playable by keyboard, mouse, and touch. Puzzle generation is out of scope for this feature — the 20 puzzles are curated data shipped with the site."
 
@@ -413,3 +413,34 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - Q: Does reloading reshuffle the puzzle? → A: No. Arriving without naming a
   puzzle selects one at random and places the player at that puzzle's address, so
   a reload keeps them where they were.
+
+## Revisions
+
+Changes made after this specification settled, per constitution 3.2.0.
+Identifiers are permanent from this point. Those assigned earlier are the product
+of renumbering during clarification and are frozen at their current values.
+
+**2026-08-09 — cross-tab reflection promoted out of an edge case.** FR-036 and
+FR-037 added; EC-008 narrowed to the residual. EC-008 had required only that
+concurrent writes leave a loadable document, which last-write-wins already
+satisfies. Reflecting one tab's work in another changes the design — a storage
+listener and a merge strategy — so by the promotion test in constitution 2.1.0 it
+is a requirement rather than an edge case.
+
+**2026-08-09 — returning players resume their puzzle.** FR-003 rewritten and
+FR-028 narrowed. FR-003 predated the addressing decision, and its trigger — "has
+no puzzle in progress" — was no longer a condition the site evaluates. It now
+selects the most recently played unsolved puzzle, falling back to random; FR-028
+governs only the address. This needed no new data, since `playedAt` already
+existed for the ten-puzzle eviction cap.
+
+**2026-08-09 — the no-navigation decision moved to Assumptions.** A requirement
+stating that no puzzle list is built described work deliberately not done. It
+could never carry a task, so the coverage map permanently showed one uncovered
+item — which trains a reader to ignore uncovered items.
+
+**2026-08-09 — eleven citations corrected in `tasks.md`.** Eight tasks cited
+requirements that meant something else, a consequence of five renumbering passes
+during clarification. No requirement changed; the record is here because the
+correction is why identifiers are now permanent (constitution 3.2.0) and why the
+citation check exists.
