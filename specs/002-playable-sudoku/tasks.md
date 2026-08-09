@@ -38,9 +38,9 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 
 - [ ] T001 [P] Define `Geometry`, `Constraint`, `Ruleset`, and `Board` types in `site/src/engine/types.ts` per data-model.md, addressing cells by flat index rather than row and column
 - [ ] T002 Write the development-only generator in `scripts/build-classic-ruleset.ts` that emits the 27 all-different constraints for a 9×9 grid — nine rows, nine columns, nine boxes (research.md D2)
-- [ ] T003 Run the generator and commit its output as `site/src/rulesets/classic-9x9.json`, matching contracts/ruleset.md. Nothing at runtime may import the generator
+- [ ] T003 Run the generator and commit its output as `site/src/rulesets/classic-9x9.json`, matching contracts/ruleset.md. Nothing at runtime may import the generator (FR-005)
 - [ ] T004 Add the 20 curated puzzles to `site/src/puzzles/curated.json` in the shape given by contracts/puzzle.md, with sparse `givens` keyed by flat index (FR-001)
-- [ ] T005 Verify each of the 20 puzzles has exactly one solution using a tool outside this repository, and record the method and date in `curated.json`'s `verifiedUnique` field (FR-002, research.md D3)
+- [ ] T005 Verify each of the 20 puzzles has exactly one solution using a tool outside this repository, and record the method and date in `curated.json`'s `verifiedUnique` field (FR-002, SC-002, research.md D3)
 
 ---
 
@@ -71,17 +71,17 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 - [ ] T013 [US1] Render the 9×9 grid from the board in `site/src/ui/grid.ts`, distinguishing given cells from the player's entries
 - [ ] T014 [P] [US1] Render the number pad in `site/src/ui/pad.ts` with digits 1–9 and an erase key, always visible while a puzzle is shown (FR-009, FR-014)
 - [ ] T015 [US1] Indicate the selected digit and the selected cell in `site/src/ui/pad.ts` and `site/src/ui/grid.ts` (FR-011, FR-016)
-- [ ] T016 [US1] Apply a selected digit to a chosen cell in `site/src/game/state.ts`, leaving the digit selected so it can be placed repeatedly (FR-010)
-- [ ] T017 [US1] Implement erase in `site/src/game/state.ts`: while erase is selected, choosing a cell clears the player's value; choosing an empty cell does nothing and reports no error (FR-014, FR-015)
+- [ ] T016 [US1] Apply a selected digit to a chosen cell in `site/src/game/state.ts`, leaving the digit selected so it can be placed repeatedly (FR-008, FR-010)
+- [ ] T017 [US1] Implement erase in `site/src/game/state.ts`: while erase is selected, choosing a cell clears the player's value; choosing an empty cell does nothing and reports no error (FR-013, FR-014, FR-015)
 - [ ] T018 [US1] Add keyboard handling in `site/src/ui/grid.ts` — arrows move the selected cell, typing a digit selects and places it, Backspace and Delete clear, per the table in research.md D7 (FR-012, FR-017)
 - [ ] T019 [US1] Make the grid and pad usable by touch and pointer with the same handlers, so no action is reachable by only one input method (FR-017)
-- [ ] T020 [US1] Show the puzzle as solved when `evaluate` reports complete with no conflicts, visibly enough that a person need not inspect cells (FR-022)
+- [ ] T020 [US1] Show the puzzle as solved when `evaluate` reports complete with no conflicts, visibly enough that a person need not inspect cells (FR-022, SC-005)
 - [ ] T021 [US1] Lock the grid while solved, and add the unlock control in `site/src/ui/controls.ts` that returns it to editing (FR-023, FR-024)
 - [ ] T022 [US1] Clear the solved state when an unlocked puzzle stops being complete, and set it again if completed again (EC-007)
 - [ ] T023 [US1] Ignore input that is not a digit 1–9, an erase, or a movement, without changing the grid or reporting an error (EC-001)
 - [ ] T024 [US1] Replace a cell's existing value when a new digit is placed into it (EC-002)
-- [ ] T025 [P] [US1] Style the grid and pad in `site/src/style.css` so both are usable at 320px width without horizontal scrolling (FR-018, EC-009)
-- [ ] T026 [P] [US1] Write `tests/e2e/play.spec.ts`: place a digit, place it again elsewhere, erase, confirm givens are not writable, solve the puzzle, confirm it locks, unlock and confirm editing resumes
+- [ ] T025 [P] [US1] Style the grid and pad in `site/src/style.css` so both are usable at 320px width without horizontal scrolling (FR-018, EC-009, SC-008)
+- [ ] T026 [P] [US1] Write `tests/e2e/play.spec.ts`: place a digit, place it again elsewhere, erase, confirm givens are not writable, solve the puzzle, confirm it locks, unlock and confirm editing resumes (SC-001)
 - [ ] T027 [US1] Extend `tests/e2e/play.spec.ts` to perform the same sequence by keyboard alone and by touch alone, proving input parity (SC-003, quickstart Scenario 2)
 
 **Checkpoint**: The game is playable end to end. This is the MVP — everything after it protects, marks, or persists this.
@@ -94,11 +94,11 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 
 **Independent Test**: Enter two identical numbers in the same row; confirm both are marked, and that changing one clears the marking.
 
-- [ ] T028 [US2] Mark the cells `evaluate` reports as conflicting in `site/src/ui/grid.ts`, re-evaluating after every change (FR-019)
+- [ ] T028 [US2] Mark the cells `evaluate` reports as conflicting in `site/src/ui/grid.ts`, re-evaluating after every change (FR-019, SC-004)
 - [ ] T029 [US2] Clear the marking when a conflict is resolved (FR-020)
 - [ ] T030 [P] [US2] Mark conflicts with both a colour change and a heavy underline in `site/src/style.css`, so they survive greyscale (FR-021, research.md D8)
 - [ ] T031 [P] [US2] Write `tests/e2e/conflicts.spec.ts` covering a row conflict, a column conflict, a box conflict, and the marking clearing when resolved
-- [ ] T032 [US2] Add a greyscale screenshot assertion to `tests/e2e/conflicts.spec.ts` proving a conflict is identifiable without colour (SC-008)
+- [ ] T032 [US2] Add a greyscale screenshot assertion to `tests/e2e/conflicts.spec.ts` proving a conflict is identifiable without colour (SC-009)
 
 **Checkpoint**: The ruleset machinery is exercised through the interface, which is the only way Principle VIII permits verifying it.
 
@@ -111,14 +111,14 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 **Independent Test**: Fill several cells, reload, and confirm the entries are still present.
 
 - [ ] T033 [US3] Implement load and save in `site/src/game/progress.ts` against one `localStorage` key holding a versioned document, per contracts/storage.md C2
-- [ ] T034 [US3] Save after every change without any player action, recording entries, solved, unlocked, and `playedAt` (FR-031, FR-032)
+- [ ] T034 [US3] Save after every change without any player action, recording entries, solved, unlocked, and `playedAt` (FR-025, FR-031, FR-032)
 - [ ] T035 [US3] Restore progress for a puzzle when it loads, keyed by puzzle identifier so any route to a puzzle finds its own entries (FR-033)
 - [ ] T036 [US3] Evict the least recently played puzzle beyond ten in `site/src/game/progress.ts` (FR-034)
 - [ ] T037 [US3] Discard the whole stored document when its version is unrecognised, and start the player fresh rather than erroring (FR-035, EC-004)
 - [ ] T038 [US3] Keep the puzzle fully playable when storage is denied or full, treating persistence as an enhancement rather than a prerequisite (EC-006)
 - [ ] T039 [US3] Load a puzzle normally when stored entries conflict with its givens, showing the conflict rather than refusing to open (EC-005)
 - [ ] T040 [US3] Give the player a working puzzle when stored progress names a puzzle that no longer exists (EC-003)
-- [ ] T041 [P] [US3] Write `tests/e2e/progress.spec.ts`: fill cells, reload, confirm entries persist; solve, reload, confirm still solved and locked
+- [ ] T041 [P] [US3] Write `tests/e2e/progress.spec.ts`: fill cells, reload, confirm entries persist; solve, reload, confirm still solved and locked (SC-006)
 
 **Checkpoint**: Progress survives. Principle VI is honoured rather than deferred.
 
@@ -130,12 +130,12 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 
 **Independent Test**: Start a new puzzle, confirm it differs, then go back and confirm the previous puzzle's progress is intact.
 
-- [ ] T042 [US4] Read the puzzle identifier from the query string in `site/src/main.ts` and load that puzzle (FR-027, contracts/storage.md C1)
+- [ ] T042 [US4] Read the puzzle identifier from the query string in `site/src/main.ts` and load that puzzle (FR-026, FR-027, FR-030, contracts/storage.md C1)
 - [ ] T043 [US4] Choose a puzzle at random when none is named, and replace the address with that puzzle's so a reload does not reshuffle (FR-028)
 - [ ] T044 [US4] Give the player a working puzzle when the address names an unknown or malformed identifier (FR-029, EC-010)
 - [ ] T045 [US4] Add the new-puzzle control in `site/src/ui/controls.ts`, choosing a different puzzle at random and moving to its address (FR-036)
 - [ ] T046 [US4] Prefer puzzles the player has not completed when choosing a new one, while unplayed puzzles remain (User Story 4, scenario 4)
-- [ ] T047 [P] [US4] Write `tests/e2e/puzzles.spec.ts`: arriving at `/` yields an address, reloading keeps the same puzzle, the new-puzzle control changes it, the back button returns to the previous puzzle with its progress
+- [ ] T047 [P] [US4] Write `tests/e2e/puzzles.spec.ts`: arriving at `/` yields an address, reloading keeps the same puzzle, the new-puzzle control changes it, the back button returns to the previous puzzle with its progress (SC-007)
 
 **Checkpoint**: All four stories complete. The game is playable, forgiving, persistent, and navigable.
 
