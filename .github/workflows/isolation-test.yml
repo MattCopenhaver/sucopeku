@@ -1,0 +1,66 @@
+name: Production isolation test
+
+# TEMPORARY — validates FR-017 (T055) and is not merged.
+#
+# Both jobs PASS only when AWS REFUSES them. A green run means a pull request
+# cannot reach production; a red run means the isolation guarantee is broken.
+#
+# The write attempt targets a throwaway key, never index.html, so that a broken
+# guarantee leaves a stray zero-byte object rather than a damaged live site.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  preview-role-cannot-write-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assume the preview role (this should succeed)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN_PREVIEW }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Write to production's bucket — must be denied
+        run: |
+          set +e
+          out=$(aws s3api put-object \
+                  --bucket "${{ vars.PRODUCTION_BUCKET }}" \
+                  --key "_isolation-test-DELETE-ME.txt" \
+                  --body /dev/null 2>&1)
+          code=$?
+          echo "$out"
+          if [ $code -eq 0 ]; then
+            echo "::error::FR-017 VIOLATED — the preview role wrote to production's bucket"
+            exit 1
+          fi
+          if ! echo "$out" | grep -qiE 'accessdenied|not authorized|forbidden'; then
+            echo "::error::Refused, but not by an access denial. Inconclusive."
+            exit 1
+          fi
+          echo "Denied as required — the preview role cannot write to production."
+
+  pull_request_cannot_assume_production_role:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Attempt to assume the production role — must be refused
+        id: attempt
+        continue-on-error: true
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN_PRODUCTION }}
+          aws-region: ${{ vars.AWS_REGION }}
+          retry-max-attempts: 1
+
+      - name: Require the refusal
+        run: |
+          if [ "${{ steps.attempt.outcome }}" = "success" ]; then
+            echo "::error::FR-017 VIOLATED — a pull request assumed the production role"
+            exit 1
+          fi
+          echo "Refused as required — a pull request token carries a subject production does not admit."
