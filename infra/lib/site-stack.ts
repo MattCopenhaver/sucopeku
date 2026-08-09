@@ -81,12 +81,29 @@ export class SiteStack extends Stack {
 function handler(event) {
   var request = event.request;
   var uri = request.uri;
+
+  // A trailing slash means the browser already treats this as a directory, so
+  // relative references resolve correctly. Rewriting internally is safe.
   if (uri.endsWith('/')) {
     request.uri = uri + 'index.html';
-  } else if (uri.lastIndexOf('.') < uri.lastIndexOf('/')) {
-    // Final segment carries no file extension, so treat it as a directory.
-    request.uri = uri + '/index.html';
+    return request;
   }
+
+  var lastSegment = uri.substring(uri.lastIndexOf('/') + 1);
+  if (lastSegment.indexOf('.') === -1) {
+    // No trailing slash. Rewriting internally would serve the right document at
+    // the wrong address: the browser would still think it is at /pr-2, whose
+    // directory is /, so every './asset' reference would resolve to the
+    // distribution root and 404 — and the service worker would register with
+    // the wrong scope. Redirect so the address itself becomes correct.
+    // (Query strings are not preserved; this site uses none.)
+    return {
+      statusCode: 301,
+      statusDescription: 'Moved Permanently',
+      headers: { location: { value: uri + '/' } },
+    };
+  }
+
   return request;
 }`),
     });

@@ -147,6 +147,10 @@ gone.
   must not survive the pull request.
 - What happens when removal of a deployment fails? The failure must be visible
   rather than silent, since a silent failure accrues cost indefinitely.
+- What happens when a deployment address is entered without a trailing slash?
+  It must load a working page. Serving the right document at the wrong address
+  is a failure that looks like a success: the page renders unstyled, because the
+  browser resolves relative references against the parent directory.
 - What happens when a closed pull request is reopened? It must return to having a
   working deployment.
 - What happens when several commits are pushed in quick succession? The
@@ -175,7 +179,8 @@ gone.
   built from that pull request's branch and isolated from all others.
 - **FR-002**: The address of a pull request's deployment MUST be discoverable
   from the pull request itself, without a contributor having to look it up
-  elsewhere.
+  elsewhere, and MUST load a working page whether or not it is entered with a
+  trailing slash.
 - **FR-003**: When new commits are pushed to a pull request, its deployment MUST
   be updated to match the most recent commit.
 - **FR-004**: A pull request's deployment MUST be reachable from both a desktop

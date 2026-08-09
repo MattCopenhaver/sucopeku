@@ -235,6 +235,37 @@ Principle VIII.
 
 ---
 
+## D11. Directory-style URLs redirect rather than rewrite
+
+**Decision**: A CloudFront viewer-request function resolves directory-style
+URLs. A URI ending in `/` is rewritten internally to its `index.html`. A URI
+whose final segment has no file extension gets a **301 redirect** to the same
+path with a trailing slash.
+
+**Rationale**: CloudFront's `defaultRootObject` only resolves the distribution
+root, so `/pr-42/` maps to the S3 key `pr-42/`, which does not exist. Previews
+live at prefixes, so without this every preview returns 403 at the address a
+person would actually type.
+
+The redirect is the part that matters. Rewriting `/pr-42` internally serves the
+correct document at the wrong address: the browser still believes it is at
+`/pr-42`, whose directory is `/`, so every `./asset` reference resolves to the
+distribution root and 404s, and the service worker registers at `/sw.js` with
+the wrong scope. The page renders — unstyled and without offline support — which
+is worse than an error, because it looks like it worked.
+
+**Alternatives considered**: emitting absolute asset paths (would break
+position-independence, D5, and with it the guarantee that previews and
+production deploy an identical artifact); an S3 website endpoint, which resolves
+index documents per prefix natively (HTTP only, so it forecloses service
+workers entirely).
+
+**Also removed here**: the distribution's 403/404 → `/index.html` error mapping.
+On a distribution serving many prefixes it answered a missing preview with
+production's entry document and masked genuine failures behind a 200.
+
+---
+
 ## D9. How merge requirements are enforced: rulesets, not branch protection
 
 **Decision**: Enforce FR-006 through FR-012 with a **repository ruleset**
