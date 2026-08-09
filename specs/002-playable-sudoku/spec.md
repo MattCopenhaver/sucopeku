@@ -106,6 +106,10 @@ cells still hold their values.
 5. **Given** progress on a puzzle, **When** the player starts a different puzzle
    and later returns to the first, **Then** the first puzzle's progress is
    intact.
+6. **Given** the same puzzle open in two tabs, **When** the player enters a value
+   in one, **Then** the other shows it without being reloaded.
+7. **Given** two tabs showing different puzzles, **When** one saves, **Then** the
+   other puzzle's progress is unaffected.
 
 ---
 
@@ -160,8 +164,11 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - **EC-007**: When a player unlocks a solved puzzle and then clears a value, the
   puzzle MUST stop being shown as solved rather than holding a stale solved
   state. Completing it again MUST show it as solved again.
-- **EC-008**: When the same puzzle is open in two browser tabs, neither MUST
-  corrupt the other's stored progress into an unloadable state.
+- **EC-008**: When two tabs write at the same instant, one write wins and the
+  stored document MUST remain loadable. Losing the later of two simultaneous
+  entries is acceptable; an unreadable document is not. *Promoted in part to
+  FR-036 and FR-037 — reflecting one tab's work in another changes the design
+  rather than exercising it.*
 - **EC-009**: When the grid is displayed at 320px width, every cell MUST remain
   legible and reachable without horizontal scrolling.
 
@@ -264,15 +271,21 @@ cases are traced and covered by tasks exactly as functional requirements are.
   read MUST be discarded gracefully rather than causing an error, per
   constitution Principle V as amended in 3.0.0.
 
+- **FR-036**: A change made in one browser tab MUST be reflected in any other tab
+  showing the same puzzle, without the player reloading.
+- **FR-037**: Saving MUST NOT discard another puzzle's progress. A tab writes by
+  merging its change into the stored document as it currently stands, rather than
+  replacing the document with what it last read.
+
 **Starting another puzzle**
 
-- **FR-036**: The site MUST present a single control that starts a different
+- **FR-038**: The site MUST present a single control that starts a different
   puzzle, chosen at random from the curated set, and moves the player to that
   puzzle's address.
-- **FR-037**: Because each puzzle has its own address, returning to a previous
+- **FR-039**: Because each puzzle has its own address, returning to a previous
   puzzle MUST require no navigation surface of its own. Browser history is
   sufficient, and no list of puzzles is built in this feature.
-- **FR-038**: Starting a different puzzle MUST NOT discard progress on the one
+- **FR-040**: Starting a different puzzle MUST NOT discard progress on the one
   being left.
 
 ### Key Entities

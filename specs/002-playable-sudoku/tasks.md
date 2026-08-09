@@ -115,10 +115,13 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 - [ ] T035 [US3] Restore progress for a puzzle when it loads, keyed by puzzle identifier so any route to a puzzle finds its own entries (FR-033)
 - [ ] T036 [US3] Evict the least recently played puzzle beyond ten in `site/src/game/progress.ts` (FR-034)
 - [ ] T037 [US3] Discard the whole stored document when its version is unrecognised, and start the player fresh rather than erroring (FR-035, EC-004)
-- [ ] T038 [US3] Keep the puzzle fully playable when storage is denied or full, treating persistence as an enhancement rather than a prerequisite (EC-006)
-- [ ] T039 [US3] Load a puzzle normally when stored entries conflict with its givens, showing the conflict rather than refusing to open (EC-005)
-- [ ] T040 [US3] Give the player a working puzzle when stored progress names a puzzle that no longer exists (EC-003)
-- [ ] T041 [P] [US3] Write `tests/e2e/progress.spec.ts`: fill cells, reload, confirm entries persist; solve, reload, confirm still solved and locked (SC-006)
+- [ ] T038 [US3] Save by merging into the stored document as it currently stands, re-reading before each write, so a tab cannot erase a puzzle it never touched. Two writes in the same instant still resolve to one; the document must remain loadable (FR-037, EC-008, research.md D10)
+- [ ] T039 [US3] Listen for the browser's `storage` event in `site/src/game/progress.ts` and reload and re-render the current puzzle when another tab changes it (FR-036, research.md D10)
+- [ ] T040 [US3] Keep the puzzle fully playable when storage is denied or full, treating persistence as an enhancement rather than a prerequisite (EC-006)
+- [ ] T041 [US3] Load a puzzle normally when stored entries conflict with its givens, showing the conflict rather than refusing to open (EC-005)
+- [ ] T042 [US3] Give the player a working puzzle when stored progress names a puzzle that no longer exists (EC-003)
+- [ ] T043 [P] [US3] Write `tests/e2e/progress.spec.ts`: fill cells, reload, confirm entries persist; solve, reload, confirm still solved and locked (SC-006)
+- [ ] T044 [US3] Extend `tests/e2e/progress.spec.ts` with two browser contexts: entering a value in one tab appears in the other without reload, and a save in a tab showing a different puzzle leaves the first puzzle's progress intact (User Story 3, scenarios 6 and 7)
 
 **Checkpoint**: Progress survives. Principle VI is honoured rather than deferred.
 
@@ -130,12 +133,12 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 
 **Independent Test**: Start a new puzzle, confirm it differs, then go back and confirm the previous puzzle's progress is intact.
 
-- [ ] T042 [US4] Read the puzzle identifier from the query string in `site/src/main.ts` and load that puzzle (FR-026, FR-027, FR-030, contracts/storage.md C1)
-- [ ] T043 [US4] Choose a puzzle at random when none is named, and replace the address with that puzzle's so a reload does not reshuffle (FR-028)
-- [ ] T044 [US4] Give the player a working puzzle when the address names an unknown or malformed identifier (FR-029, EC-010)
-- [ ] T045 [US4] Add the new-puzzle control in `site/src/ui/controls.ts`, choosing a different puzzle at random and moving to its address (FR-036)
-- [ ] T046 [US4] Prefer puzzles the player has not completed when choosing a new one, while unplayed puzzles remain (User Story 4, scenario 4)
-- [ ] T047 [P] [US4] Write `tests/e2e/puzzles.spec.ts`: arriving at `/` yields an address, reloading keeps the same puzzle, the new-puzzle control changes it, the back button returns to the previous puzzle with its progress (SC-007)
+- [ ] T045 [US4] Read the puzzle identifier from the query string in `site/src/main.ts` and load that puzzle (FR-026, FR-027, FR-030, contracts/storage.md C1)
+- [ ] T046 [US4] Choose a puzzle at random when none is named, and replace the address with that puzzle's so a reload does not reshuffle (FR-028)
+- [ ] T047 [US4] Give the player a working puzzle when the address names an unknown or malformed identifier (FR-029, EC-010)
+- [ ] T048 [US4] Add the new-puzzle control in `site/src/ui/controls.ts`, choosing a different puzzle at random and moving to its address (FR-038)
+- [ ] T049 [US4] Prefer puzzles the player has not completed when choosing a new one, while unplayed puzzles remain (User Story 4, scenario 4)
+- [ ] T050 [P] [US4] Write `tests/e2e/puzzles.spec.ts`: arriving at `/` yields an address, reloading keeps the same puzzle, the new-puzzle control changes it, the back button returns to the previous puzzle with its progress (SC-007)
 
 **Checkpoint**: All four stories complete. The game is playable, forgiving, persistent, and navigable.
 
@@ -143,11 +146,11 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T048 Make the service worker's navigation fallback ignore the query string in `site/public/sw.js`, or offline works at `/` and fails at `/?puzzle=p07` (research.md D4, contracts/storage.md C1)
-- [ ] T049 Validate quickstart Scenario 6 by hand on a real iOS device — load a puzzle, go offline, reload at a puzzle address. Playwright cannot drive WebKit service workers, so this is unreachable by the suite
-- [ ] T050 Validate quickstart Scenario 7 by hand: disable storage for the site and confirm the puzzle remains playable
-- [ ] T051 Update `specs/002-playable-sudoku/plan.md` and this file if anything built diverged from what was planned
-- [ ] T052 Write the human-authored `## SDD Notes` section in this feature's pull request body, including whether a defect reached `main` that a unit test would have caught — the result Principle VIII asks be reported
+- [ ] T051 Make the service worker's navigation fallback ignore the query string in `site/public/sw.js`, or offline works at `/` and fails at `/?puzzle=p07` (research.md D4, contracts/storage.md C1)
+- [ ] T052 Validate quickstart Scenario 6 by hand on a real iOS device — load a puzzle, go offline, reload at a puzzle address. Playwright cannot drive WebKit service workers, so this is unreachable by the suite
+- [ ] T053 Validate quickstart Scenario 7 by hand: disable storage for the site and confirm the puzzle remains playable
+- [ ] T054 Update `specs/002-playable-sudoku/plan.md` and this file if anything built diverged from what was planned
+- [ ] T055 Write the human-authored `## SDD Notes` section in this feature's pull request body, including whether a defect reached `main` that a unit test would have caught — the result Principle VIII asks be reported
 
 ---
 

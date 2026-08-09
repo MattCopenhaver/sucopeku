@@ -220,3 +220,36 @@ a grid and observing what the page shows.
 **Recorded for the experiment**: if a defect reaches `main` here that a unit test
 would obviously have caught, that is the result the constitution asks be reported
 rather than quietly patched by adding one.
+
+---
+
+## D10. Cross-tab synchronisation
+
+**Decision**: Two mechanisms, both small.
+
+- **Merge on write.** Before saving, re-read the stored document and apply this
+  puzzle's change to it, rather than writing back the copy held in memory.
+- **Listen for `storage`.** The browser fires that event in every *other* tab
+  when the key changes. On hearing it, a tab reloads its puzzle's progress and
+  re-renders.
+
+**Rationale**: FR-037 needs the first, FR-036 the second, and they solve different
+halves. Merging stops a tab's save from erasing puzzles it never touched — the
+consequence of holding every puzzle in one document (D5). The listener is what
+makes a change in one tab visible in another, which merging alone does not do.
+
+**On the cost of re-reading before every write**: negligible here, and worth
+stating why rather than asserting it. The document is a few kilobytes — twenty
+puzzles of eighty-one cells — reads are synchronous, and writes happen at human
+speed. This would deserve reconsideration if the document grew substantially,
+which pencil marks across twenty puzzles could eventually do.
+
+**Accepted consequence**: two tabs on the *same* puzzle can no longer be used as
+independent scratchpads — typing in one changes the other. That is inherent to
+synchronising rather than a defect, and the alternative (tabs silently diverging
+until one overwrites the other) is worse.
+
+**Residual, and deliberately not solved**: two writes in the same instant still
+resolve to one. EC-008 requires only that the result stay loadable, which
+last-write-wins satisfies. Closing that window properly would need locking or a
+change log, which is far more machinery than a single-player puzzle site warrants.
