@@ -1,8 +1,27 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0
-Ratified: 2026-08-07 | Last amended: 2026-08-07
+Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0 → 2.2.0
+Ratified: 2026-08-07 | Last amended: 2026-08-09
+
+AMENDMENT (2.2.0) — Development Workflow, bootstrap period closed
+  The bootstrap period ended on 2026-08-09. Its own terms required that the
+  ending be recorded as an amendment "so the exemption cannot quietly outlive
+  its purpose"; this is that record.
+
+  Every required check is now enforced, verified against the live ruleset:
+    - branch current with main .... strict_required_status_checks_policy: true
+    - linting ..................... `checks` gate job
+    - browser suite ............... `checks` gate job
+    - preview deployment .......... `deploy` gate job
+
+  Also verified by observation rather than configuration alone: a pull request
+  behind main flipped to BEHIND and could not merge until updated, a lint
+  failure blocked a merge and named itself, and a direct push to main was
+  rejected by the ruleset.
+
+  MINOR: no MUST is downgraded — an exemption is removed, which makes the rules
+  stricter, not weaker. Nothing built under the exemption is invalidated.
 
 AMENDMENT (2.1.0) — Development Workflow, edge cases are requirements
   Adds: every edge case in a spec MUST carry an EC-### identifier and state its
@@ -548,17 +567,21 @@ is RECOMMENDED where useful but never required. Cross-checking spec, plan, and
 tasks against one another before implementing is the clearest example: valuable,
 and not a gate.
 
-**Bootstrap period.** A check cannot gate the work that creates it. Until a
-required check exists, it does not block a merge; each check becomes binding the
-moment it is in place. The bootstrap period ends once every required check is
-enforced, and that ending MUST be recorded as an amendment to this constitution
-so the exemption cannot quietly outlive its purpose.
+**Bootstrap period — CLOSED on 2026-08-09.** A check cannot gate the work that
+creates it, so while the pipeline was being built each required check became
+binding only once it existed. Every one of them is now enforced: branch currency
+by the ruleset's strict policy, linting and the browser suite through the
+`checks` gate, and preview deployment through the `deploy` gate. **Nothing is
+exempt from the required checks any longer.**
 
-The bootstrap period relaxes two things and nothing else: the required checks
-listed above, and the preview-environment requirement in this section. It
-relaxes no principle. Principle I in particular is never relaxed — the pipeline
-and its infrastructure are themselves features, and MUST be specified before
-they are built.
+While it was open the exemption covered two things and nothing else — the
+required checks listed above, and the preview-environment requirement in this
+section. It relaxed no principle; Principle I in particular was never relaxed,
+and the pipeline and its infrastructure were specified before they were built.
+
+This clause is kept rather than deleted so that anyone reading the early history
+can see why the first pull requests merged without checks, and can see that the
+exemption was closed deliberately rather than forgotten.
 
 **Definition of done.** A feature is done when its pull request is merged with
 every required check green, its SDD artifacts are current, and its pull request
@@ -616,4 +639,4 @@ covered under Development Workflow. Beyond that, this project has one
 contributor and needs no further ceremony. The check that matters is whether the
 artifacts tell the truth about the code.
 
-**Version**: 2.1.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-07
+**Version**: 2.2.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-09
