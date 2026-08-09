@@ -16,8 +16,13 @@ function required(name: string): string {
 
 const app = new App();
 
-const repository = required('SUCOPEKU_REPOSITORY'); // e.g. "mattcopenhaver/sucopeku"
+const repository = required('SUCOPEKU_REPOSITORY'); // e.g. "owner/repo"
 const budgetEmail = required('SUCOPEKU_BUDGET_EMAIL');
+// GitHub's OIDC subject claim carries immutable numeric IDs. Fetch with:
+//   gh api repos/<owner>/<repo> --jq '{repo_id: .id, owner_id: .owner.id}'
+// See research.md D10 for why the trust policy pins these rather than the names.
+const ownerId = Number(required('SUCOPEKU_OWNER_ID'));
+const repositoryId = Number(required('SUCOPEKU_REPO_ID'));
 const env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
   region: process.env.CDK_DEFAULT_REGION ?? 'us-east-1',
@@ -33,6 +38,8 @@ new SiteStack(app, 'SucopekuProduction', {
   env,
   oidcProvider: oidc.provider,
   repository,
+  ownerId,
+  repositoryId,
   // Only workflows running from main. A pull request's token carries a
   // different subject and is refused (FR-016).
   trustedSubjects: ['ref:refs/heads/main'],
@@ -45,6 +52,8 @@ new SiteStack(app, 'SucopekuPreviews', {
   env,
   oidcProvider: oidc.provider,
   repository,
+  ownerId,
+  repositoryId,
   trustedSubjects: ['pull_request'],
   // Teardown needs deletion (contract C4), scoped to this bucket alone.
   allowDelete: true,

@@ -11,6 +11,17 @@ export interface SiteStackProps extends StackProps {
   /** `owner/repo`, used to build the OIDC trust condition. */
   readonly repository: string;
   /**
+   * The account's and repository's immutable numeric IDs.
+   *
+   * GitHub issues subject claims in the form
+   * `repo:<owner>@<ownerId>/<repo>@<repoId>:<event>` so that renaming an account
+   * or repository cannot silently transfer trust to whoever claims the freed
+   * name. Older repositories still emit the name-only form, so the trust policy
+   * accepts both — see research.md D10.
+   */
+  readonly ownerId?: number;
+  readonly repositoryId?: number;
+  /**
    * Which OIDC subjects may assume this stack's deploy role.
    *
    * This is where FR-016 is actually enforced. Production names only
@@ -78,13 +89,24 @@ export class SiteStack extends Stack {
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
     });
 
+    // Both subject formats are listed as exact strings rather than matched with
+    // a wildcard. A wildcard over the numeric IDs would re-open exactly the hole
+    // the immutable format exists to close: an attacker who claimed a released
+    // account name would match again.
+    const [owner, repo] = props.repository.split('/');
+    const subjectPrefixes = [`repo:${props.repository}`];
+    if (props.ownerId !== undefined && props.repositoryId !== undefined) {
+      subjectPrefixes.push(`repo:${owner}@${props.ownerId}/${repo}@${props.repositoryId}`);
+    }
+    const trustedSubjectClaims = subjectPrefixes.flatMap((prefix) =>
+      props.trustedSubjects.map((subject) => `${prefix}:${subject}`),
+    );
+
     this.deployRole = new iam.Role(this, 'DeployRole', {
       assumedBy: new iam.WebIdentityPrincipal(props.oidcProvider.openIdConnectProviderArn, {
         StringEquals: { 'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com' },
         StringLike: {
-          'token.actions.githubusercontent.com:sub': props.trustedSubjects.map(
-            (subject) => `repo:${props.repository}:${subject}`,
-          ),
+          'token.actions.githubusercontent.com:sub': trustedSubjectClaims,
         },
       }),
       maxSessionDuration: Duration.hours(1),
