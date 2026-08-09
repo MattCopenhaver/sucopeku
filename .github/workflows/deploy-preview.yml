@@ -3,6 +3,10 @@ name: Deploy preview
 # `reopened` is named explicitly. Omitting it would leave a reopened pull request
 # with no preview — its old one was torn down on close and nothing would rebuild
 # it. See spec Edge Cases.
+#
+# The trigger is unfiltered for the reason given in checks.yml: a workflow that
+# never starts leaves a required check that never reports. The `scope` job
+# decides what to run instead (FR-013, research.md D12).
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -21,7 +25,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Did anything executable change?
+        id: filter
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+          echo "Changed files:"; printf '%s\n' "$changed" | sed 's/^/  /'
+          # See checks.yml for why this captures a list instead of using -qv.
+          code_files=$(printf '%s\n' "$changed" | grep -vE '^(specs/|\.specify/)|\.md$' || true)
+          if [ -n "$code_files" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "Executable changes:"; printf '%s\n' "$code_files" | sed 's/^/  /'
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "Specification and documentation only; the existing preview still matches (FR-013)"
+          fi
+
+  preview:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,3 +112,22 @@ jobs:
             || 'a deploy step failed' }}
           pull-request: ${{ github.event.pull_request.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  # The required status check — always runs, so it always reports. See the same
+  # job in checks.yml for why a skipped job is not good enough.
+  deploy:
+    needs: [scope, preview]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conclude
+        run: |
+          if [ "${{ needs.preview.result }}" = "failure" ] || [ "${{ needs.preview.result }}" = "cancelled" ]; then
+            echo "Preview deployment failed."
+            exit 1
+          fi
+          if [ "${{ needs.scope.outputs.code }}" != "true" ]; then
+            echo "No executable changes — the existing preview already matches this pull request."
+          else
+            echo "Preview deployed."
+          fi

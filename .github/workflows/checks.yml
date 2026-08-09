@@ -1,7 +1,12 @@
 name: Checks
 
 # Linting and the browser suite. Deliberately independent of any deployment
-# (FR-031), so a failing test and a failing deploy stay distinguishable.
+# (FR-032), so a failing test and a failing deploy stay distinguishable.
+#
+# The trigger is deliberately unfiltered. Filtering it with `paths-ignore` would
+# stop the workflow from starting at all, so the required status check would
+# never report and a documentation-only pull request would be permanently
+# unmergeable. The `scope` job decides what to run instead — see research.md D12.
 
 on:
   pull_request:
@@ -16,7 +21,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Did anything executable change?
+        id: filter
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+          echo "Changed files:"; printf '%s\n' "$changed" | sed 's/^/  /'
+          # Spec Kit artifacts and prose are not executable. Everything else is,
+          # including workflow definitions — a change to a workflow must be
+          # exercised by that workflow.
+          #
+          # Captured as a list rather than tested with `grep -qv`: the meaning of
+          # -q combined with -v differs between grep implementations, and this
+          # form is unambiguous everywhere and prints what it decided on.
+          code_files=$(printf '%s\n' "$changed" | grep -vE '^(specs/|\.specify/)|\.md$' || true)
+          if [ -n "$code_files" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "Executable changes:"; printf '%s\n' "$code_files" | sed 's/^/  /'
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "Specification and documentation only; skipping checks (FR-013)"
+          fi
+
+  verify:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,3 +98,24 @@ jobs:
             || 'a check step failed' }}
           pull-request: ${{ github.event.pull_request.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  # The required status check. Always runs, so it always reports — which is what
+  # keeps a specification-only pull request mergeable. A job skipped by `if:`
+  # reports a `skipped` conclusion whose treatment by branch protection is
+  # ambiguous; this removes the ambiguity.
+  checks:
+    needs: [scope, verify]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conclude
+        run: |
+          if [ "${{ needs.verify.result }}" = "failure" ] || [ "${{ needs.verify.result }}" = "cancelled" ]; then
+            echo "Checks failed."
+            exit 1
+          fi
+          if [ "${{ needs.scope.outputs.code }}" != "true" ]; then
+            echo "No executable changes — checks not required for this pull request."
+          else
+            echo "Checks passed."
+          fi

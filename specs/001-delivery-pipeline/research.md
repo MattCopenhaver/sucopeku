@@ -416,3 +416,45 @@ workers entirely).
 **Also removed here**: the distribution's 403/404 → `/index.html` error mapping.
 On a distribution serving many prefixes it answered a missing preview with
 production's entry document and masked genuine failures behind a 200.
+
+---
+
+## D12. Skipping code checks for specification-only changes
+
+**Decision**: Workflow triggers stay unfiltered. Each workflow gains a `scope`
+job that compares the pull request's base and head commits and decides whether
+anything executable changed. The working jobs run conditionally on that answer,
+and a small **gate job that always runs** is what branch protection requires.
+
+```
+scope ──► verify / preview   (conditional: only when code changed)
+   └────► checks / deploy    (gate: always runs, reports the outcome)
+```
+
+**Rationale**: The obvious implementation — `paths-ignore` on the workflow
+trigger — is a trap. A filtered-out workflow never starts, so a required status
+check never reports, and GitHub waits for it indefinitely. A documentation-only
+pull request becomes permanently unmergeable, and the only escape is deleting
+the rule. FR-013 states the mergeability requirement explicitly for this reason.
+
+Conditional jobs alone are not sufficient either: a job skipped by `if:` reports
+a `skipped` conclusion, and whether a required check treats that as passing is
+version- and configuration-dependent. The gate job removes the ambiguity by
+always running and always reporting, so what branch protection observes is never
+in doubt.
+
+**What counts as executable**: anything not under `specs/`, not under
+`.specify/`, and not a `.md` file. Workflow definitions therefore count as code —
+a change to a workflow must be exercised by that workflow.
+
+**Why compare commits rather than use a path-filter action**: `git diff` between
+the pull request's base and head needs no third-party action and no dependency,
+which suits a project whose constitution asks for the least machinery that
+satisfies the requirement.
+
+**Accepted cost**: a specification-only pull request still spends a few seconds
+starting two jobs. The saving is the browser suite, the AWS deploy, and the
+smoke test — minutes of runtime and a real deployment, avoided when nothing the
+site serves has changed.
+
+---
