@@ -1,8 +1,37 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0 → 2.2.0 → 3.0.0 → 3.1.0
+Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0 → 2.2.0 → 3.0.0 → 3.1.0 → 3.2.0
 Ratified: 2026-08-07 | Last amended: 2026-08-09
+
+AMENDMENT (3.2.0) — Development Workflow, the life of a spec
+  Adds three related rules about how specs are written over time:
+
+  1. Identifiers are permanent. Never reused, never reassigned. New ones append;
+     a withdrawn requirement stays in place as a marker with its former text.
+  2. Specs carry a Revisions section once implementation begins, recording what
+     changed after the spec settled and why.
+  3. Specs carry a status: Draft, Ready, Implementing, or Complete.
+
+  Why (1): renumbering silently invalidated references twice — feature 001 once,
+  and feature 002 where eight tasks cited unrelated requirements. A check now
+  catches dangling references, but permanent identifiers remove the failure mode
+  instead of detecting it.
+
+  Why (2): five requirements changed meaning during feature 002's analysis pass
+  and nothing recorded that they had. Clarifications covers the spec being
+  written; nothing covered the spec being revised.
+
+  Why (3): the template has always carried a Status field, and it has never once
+  been maintained — both specs still read Draft. Either it means something and is
+  updated, or it should not exist. The vocabulary is deliberately short: only
+  "settled or not" and "finished or not" cannot be read off the repository.
+
+  MINOR: adds obligations, downgrades nothing.
+
+  Creates work not done here: the spec template and both existing specs need
+  updating to match, and feature 002's identifiers become permanent at their
+  current values. Those are ordinary changes and land separately.
 
 AMENDMENT (3.1.0) — Governance, amendment isolation is checked, not trusted
   Adds: "alone in its pull request" is a property of the diff and MUST be
@@ -622,6 +651,53 @@ changes the design rather than merely exercising it. The test: if it needs tasks
 of its own, or determines how something is built, it is a requirement. If it is a
 specific input or state the design must survive, it stays an edge case.
 
+**Identifiers are permanent.** Once a requirement, edge case, or success
+criterion has an identifier, that identifier MUST NOT be reused or reassigned.
+New ones take the next free number and are appended; the list stops being tidy,
+and that is the price.
+
+A requirement that no longer applies MUST be withdrawn in place rather than
+deleted — kept as a marker pointing at the Revisions entry that explains why,
+with its former text preserved:
+
+```markdown
+- **FR-012**: *(withdrawn 2026-08-20 — see Revisions.)* Formerly: the site MUST
+  prompt before discarding progress.
+```
+
+*Rationale: renumbering silently invalidates every reference in the plan, the
+tasks, the contracts, and the research. It happened in feature 001 and again in
+feature 002, where eight tasks ended up citing unrelated requirements — a task
+about reading a puzzle identifier pointed at the requirement for marking
+conflicts. Permanent identifiers remove the failure mode rather than detecting
+it, which is worth more than the tidiness they cost.*
+
+**Specs record what changed after they settled.** A spec MUST carry a
+`Revisions` section once implementation begins, recording dated entries for
+every requirement added, rewritten, or withdrawn after that point, and why. The
+Clarifications section covers decisions made while writing the spec; Revisions
+covers decisions made once the spec was being built against.
+
+*Rationale: the reasoning behind a change outlives the conversation that
+produced it only if it is written down. This is the same instrument as the Sync
+Impact Report at the top of this constitution, which is the reason its own
+history is legible.*
+
+**A spec carries a status.** Exactly one of:
+
+| Status | Meaning |
+|---|---|
+| `Draft` | Still being iterated. Downstream work SHOULD NOT begin |
+| `Ready` | Clarified and planned. Implementation may begin |
+| `Implementing` | Tasks are being worked |
+| `Complete` | Every task done, and merged |
+
+*Rationale: only two of these cannot be derived from the repository — whether a
+spec is settled, and whether a feature is finished on purpose rather than
+abandoned. The rest are conveniences for a reader who should not have to count
+checkboxes. A status that is never maintained is worse than none, so it MUST be
+updated as part of the change that makes it true.*
+
 *Rationale: an unnumbered edge case is a requirement in disguise. Nothing maps it
 to a task, so it can contradict the requirement printed above it and no review
 will notice. This was not hypothetical — spec 001 stated in an edge case that a
@@ -723,4 +799,4 @@ covered under Development Workflow. Beyond that, this project has one
 contributor and needs no further ceremony. The check that matters is whether the
 artifacts tell the truth about the code.
 
-**Version**: 3.1.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-09
+**Version**: 3.2.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-09
