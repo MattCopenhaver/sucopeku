@@ -477,8 +477,13 @@ requests for a few hundred kilobytes of static assets should be fractions of a
 cent, so the threshold is a tripwire rather than a budget — it fires when
 something is wrong, not when the project gets busy.
 
-**The manual step this creates**: user-defined tags must be *activated* as cost
-allocation tags before any budget can filter on them:
+**The manual step this creates**, and its ordering: user-defined tags must be
+*activated* as cost allocation tags before any budget can filter on them — and
+activation is only possible once AWS has observed the tag on a real resource.
+Attempting it before the tagged stacks are deployed fails with
+`Tag keys not found: Project`. The sequence is therefore: deploy the tagged
+stacks, wait for AWS to discover the key (asynchronous, up to ~24 hours), then
+activate:
 
 ```bash
 aws ce update-cost-allocation-tags-status \
