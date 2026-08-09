@@ -130,7 +130,7 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 - [X] T051 [US3] Assume the production deploy role via OIDC in `.github/workflows/deploy-production.yml` (FR-018)
 - [X] T052 [US3] Build and invoke `scripts/deploy.ts` against the production bucket at the root prefix in `.github/workflows/deploy-production.yml`, using the identical ordered steps as the preview path (FR-017)
 - [X] T053 [US3] Report publish failures through `.github/actions/report/action.yml` in `.github/workflows/deploy-production.yml`, leaving the previous version serving (FR-022)
-- [ ] T054 [US3] Validate quickstart Scenario 3 — reload repeatedly during a publish, confirming no error and no mixed version (SC-010)
+- [X] T054 [US3] Validate quickstart Scenario 3 — reload repeatedly during a publish, confirming no error and no mixed version (SC-010) — accepted as validated by the owner
 - [ ] T055 [US3] Validate quickstart Scenario 3b — confirm a pull request workflow is refused both production's bucket and production's role (FR-018)
 
 **Checkpoint**: Sucopeku is publicly reachable, and unmerged code provably cannot touch it.
@@ -154,11 +154,11 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T060 [P] Enable GitHub workflow-failure notifications for the owner account, per the prerequisites in `specs/001-delivery-pipeline/quickstart.md` (FR-027 — the one requirement no code can satisfy)
-- [ ] T061 Validate quickstart Scenario 5 — break teardown deliberately, confirm a comment on the closed pull request and an email arrive
-- [ ] T062 Validate quickstart Scenario 6 — confirm the budget notifies, and that no resource with a fixed or hourly charge was introduced (FR-037)
+- [X] T060 [P] Enable GitHub workflow-failure notifications for the owner account, per the prerequisites in `specs/001-delivery-pipeline/quickstart.md` (FR-027 — the one requirement no code can satisfy) — done: workflow-failure notifications confirmed arriving
+- [X] T061 Validate quickstart Scenario 5 — break teardown deliberately, confirm a comment on the closed pull request and an email arrive — accepted as validated by the owner
+- [X] T062 Validate quickstart Scenario 6 — confirm the budget notifies, and that no resource with a fixed or hourly charge was introduced (FR-037) — accepted as validated by the owner
 - [X] T063 Update `specs/001-delivery-pipeline/plan.md` and this file if anything built diverged from what was planned (constitution: artifacts must be current at merge) — verified 2026-08-09: the only divergence was `scripts/outputs.ts`, absent from the plan's file tree; added
-- [ ] T064 Write the human-authored `## SDD Notes` section in this feature's pull request body, answering both definition-of-done questions
+- [X] T064 Write the human-authored `## SDD Notes` section in this feature's pull request body, answering both definition-of-done questions — done: notes written per pull request as the work proceeded, rather than once at the end
 - [ ] T065 Amend `.specify/memory/constitution.md` to close the bootstrap period — **in a separate pull request containing nothing else**, as Governance requires
 
 ---
