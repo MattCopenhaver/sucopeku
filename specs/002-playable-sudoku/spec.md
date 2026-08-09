@@ -33,17 +33,23 @@ point of the project even with no conflict marking and no saving.
 
 1. **Given** a player opening Sucopeku, **When** the page loads, **Then** a
    Sudoku grid appears with some cells already filled.
-2. **Given** a digit selected on the number pad, **When** the player chooses an
+2. **Given** a player with an unsolved puzzle in progress, **When** they open
+   Sucopeku without naming a puzzle, **Then** they resume that puzzle rather than
+   receiving a new one.
+3. **Given** a player whose only progress is on solved puzzles, **When** they
+   open Sucopeku without naming a puzzle, **Then** they receive a puzzle chosen
+   at random.
+4. **Given** a digit selected on the number pad, **When** the player chooses an
    empty cell, **Then** that digit appears in the cell and stays selected.
-3. **Given** a selected cell, **When** the player types a digit, **Then** that
+5. **Given** a selected cell, **When** the player types a digit, **Then** that
    digit appears in the cell and becomes the selected digit.
-4. **Given** a cell the player filled and erase selected, **When** they choose
+6. **Given** a cell the player filled and erase selected, **When** they choose
    that cell, **Then** the cell is empty again.
-5. **Given** a cell that came with the puzzle, **When** the player attempts to
+7. **Given** a cell that came with the puzzle, **When** the player attempts to
    change it, **Then** its value does not change.
-6. **Given** a grid one correct value from completion, **When** that value is
+8. **Given** a grid one correct value from completion, **When** that value is
    entered, **Then** the puzzle is shown as solved and the grid locks.
-7. **Given** a solved, locked puzzle, **When** the player uses the unlock
+9. **Given** a solved, locked puzzle, **When** the player uses the unlock
    control, **Then** they can enter and erase values again.
 
 ---
@@ -181,8 +187,13 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - **FR-001**: The site MUST ship with 20 curated Sudoku puzzles as data.
 - **FR-002**: Every curated puzzle MUST have exactly one solution under the
   classic ruleset, per constitution Principle II.
-- **FR-003**: When a player has no puzzle in progress, the site MUST give them
-  one of the curated puzzles chosen at random.
+- **FR-003**: When a player arrives without naming a puzzle, the site MUST give
+  them the most recently played puzzle that is not solved. If every puzzle they
+  have progress on is solved, or they have none, it MUST choose one at random.
+
+  The reason to resume at all is to continue work, and a solved puzzle has none
+  left — landing a returning player on a locked, completed board would be worse
+  than giving them a fresh one.
 - **FR-004**: Cells that come with the puzzle MUST NOT be changeable by the
   player.
 
@@ -248,9 +259,10 @@ cases are traced and covered by tasks exactly as functional requirements are.
   puzzle identifier that is stable across releases.
 - **FR-027**: Opening a puzzle's address MUST load that puzzle. If the player has
   progress on it, that progress MUST be restored.
-- **FR-028**: Arriving without naming a puzzle MUST select one at random and
-  place the player at that puzzle's address, so that reloading keeps them on the
-  same puzzle rather than reshuffling.
+- **FR-028**: Arriving without naming a puzzle MUST place the player at the
+  selected puzzle's address, so that reloading keeps them on the same puzzle
+  rather than reshuffling. Which puzzle is selected is FR-003's business; this
+  requirement governs only the address.
 - **FR-029**: An address naming a puzzle that does not exist MUST NOT produce an
   error. The player MUST be given a working puzzle.
 - **FR-030**: The address MUST carry only a puzzle identifier, not an encoded

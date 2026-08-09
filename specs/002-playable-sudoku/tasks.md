@@ -134,11 +134,13 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 **Independent Test**: Start a new puzzle, confirm it differs, then go back and confirm the previous puzzle's progress is intact.
 
 - [ ] T045 [US4] Read the puzzle identifier from the query string in `site/src/main.ts` and load that puzzle (FR-026, FR-027, FR-030, contracts/storage.md C1)
-- [ ] T046 [US4] Choose a puzzle at random when none is named, and replace the address with that puzzle's so a reload does not reshuffle (FR-028)
-- [ ] T047 [US4] Give the player a working puzzle when the address names an unknown or malformed identifier (FR-029, EC-010)
-- [ ] T048 [US4] Add the new-puzzle control in `site/src/ui/controls.ts`, choosing a different puzzle at random and moving to its address (FR-038)
-- [ ] T049 [US4] Prefer puzzles the player has not completed when choosing a new one, while unplayed puzzles remain (User Story 4, scenario 4)
-- [ ] T050 [P] [US4] Write `tests/e2e/puzzles.spec.ts`: arriving at `/` yields an address, reloading keeps the same puzzle, the new-puzzle control changes it, the back button returns to the previous puzzle with its progress (SC-007)
+- [ ] T046 [US4] Select the puzzle to show when none is named in `site/src/main.ts`: the most recently played unsolved puzzle, falling back to random when every puzzle with progress is solved or there is none (FR-003)
+- [ ] T047 [US4] Replace the address with the selected puzzle's, so a reload does not reshuffle (FR-028)
+- [ ] T048 [US4] Give the player a working puzzle when the address names an unknown or malformed identifier (FR-029, EC-010)
+- [ ] T049 [US4] Add the new-puzzle control in `site/src/ui/controls.ts`, choosing a different puzzle at random and moving to its address (FR-038)
+- [ ] T050 [US4] Prefer puzzles the player has not completed when choosing a new one, while unplayed puzzles remain (User Story 4, scenario 4)
+- [ ] T051 [P] [US4] Write `tests/e2e/puzzles.spec.ts`: arriving at `/` yields an address, reloading keeps the same puzzle, the new-puzzle control changes it, the back button returns to the previous puzzle with its progress (SC-007)
+- [ ] T052 [US4] Extend `tests/e2e/puzzles.spec.ts`: after leaving an unsolved puzzle, arriving at `/` resumes it; after solving every puzzle with progress, arriving at `/` gives a random one (User Story 1, scenarios 2 and 3)
 
 **Checkpoint**: All four stories complete. The game is playable, forgiving, persistent, and navigable.
 
@@ -146,11 +148,11 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T051 Make the service worker's navigation fallback ignore the query string in `site/public/sw.js`, or offline works at `/` and fails at `/?puzzle=p07` (research.md D4, contracts/storage.md C1)
-- [ ] T052 Validate quickstart Scenario 6 by hand on a real iOS device — load a puzzle, go offline, reload at a puzzle address. Playwright cannot drive WebKit service workers, so this is unreachable by the suite
-- [ ] T053 Validate quickstart Scenario 7 by hand: disable storage for the site and confirm the puzzle remains playable
-- [ ] T054 Update `specs/002-playable-sudoku/plan.md` and this file if anything built diverged from what was planned
-- [ ] T055 Write the human-authored `## SDD Notes` section in this feature's pull request body, including whether a defect reached `main` that a unit test would have caught — the result Principle VIII asks be reported
+- [ ] T053 Make the service worker's navigation fallback ignore the query string in `site/public/sw.js`, or offline works at `/` and fails at `/?puzzle=p07` (research.md D4, contracts/storage.md C1)
+- [ ] T054 Validate quickstart Scenario 6 by hand on a real iOS device — load a puzzle, go offline, reload at a puzzle address. Playwright cannot drive WebKit service workers, so this is unreachable by the suite
+- [ ] T055 Validate quickstart Scenario 7 by hand: disable storage for the site and confirm the puzzle remains playable
+- [ ] T056 Update `specs/002-playable-sudoku/plan.md` and this file if anything built diverged from what was planned
+- [ ] T057 Write the human-authored `## SDD Notes` section in this feature's pull request body, including whether a defect reached `main` that a unit test would have caught — the result Principle VIII asks be reported
 
 ---
 
