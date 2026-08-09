@@ -159,7 +159,7 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 - [X] T062 Validate quickstart Scenario 6 — confirm the budget notifies, and that no resource with a fixed or hourly charge was introduced (FR-037) — accepted as validated by the owner
 - [X] T063 Update `specs/001-delivery-pipeline/plan.md` and this file if anything built diverged from what was planned (constitution: artifacts must be current at merge) — verified 2026-08-09: the only divergence was `scripts/outputs.ts`, absent from the plan's file tree; added
 - [X] T064 Write the human-authored `## SDD Notes` section in this feature's pull request body, answering both definition-of-done questions — done: notes written per pull request as the work proceeded, rather than once at the end
-- [ ] T065 Amend `.specify/memory/constitution.md` to close the bootstrap period — **in a separate pull request containing nothing else**, as Governance requires
+- [X] T065 Amend `.specify/memory/constitution.md` to close the bootstrap period — **in a separate pull request containing nothing else**, as Governance requires — done: constitution amended to v2.2.0 in its own pull request, recording that every required check is enforced and that the exemption was closed deliberately rather than allowed to lapse
 
 ---
 
