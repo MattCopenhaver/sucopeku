@@ -131,7 +131,7 @@ Per plan.md: `site/` is the Vite application, `tests/e2e/` the Playwright suite,
 - [X] T052 [US3] Build and invoke `scripts/deploy.ts` against the production bucket at the root prefix in `.github/workflows/deploy-production.yml`, using the identical ordered steps as the preview path (FR-017)
 - [X] T053 [US3] Report publish failures through `.github/actions/report/action.yml` in `.github/workflows/deploy-production.yml`, leaving the previous version serving (FR-022)
 - [X] T054 [US3] Validate quickstart Scenario 3 — reload repeatedly during a publish, confirming no error and no mixed version (SC-010) — accepted as validated by the owner
-- [ ] T055 [US3] Validate quickstart Scenario 3b — confirm a pull request workflow is refused both production's bucket and production's role (FR-018)
+- [X] T055 [US3] Validate quickstart Scenario 3b — confirm a pull request workflow is refused both production's bucket and production's role (FR-018) — proven 2026-08-09 by a temporary workflow whose jobs passed only on refusal: the preview role got `AccessDenied` on `s3:PutObject` against production's bucket, and a pull-request token was refused `sts:AssumeRoleWithWebIdentity` for production's role. Both denials came from AWS, not from workflow logic
 
 **Checkpoint**: Sucopeku is publicly reachable, and unmerged code provably cannot touch it.
 
