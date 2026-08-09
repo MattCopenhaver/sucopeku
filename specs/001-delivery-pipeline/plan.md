@@ -125,7 +125,9 @@ tests/
 
 scripts/                     # Deployment procedure, invoked by workflows
 ├── deploy.ts                # Ordered upload per contracts/deployment.md C3
-└── teardown.ts              # Prefix deletion per C4
+├── teardown.ts              # Prefix deletion per C4
+└── outputs.ts               # Reads each stack's distribution domain, so no
+                             # deployment address is written down anywhere
 
 infra/                       # AWS CDK app — applied by hand, never by CI deploys
 ├── bin/infra.ts             # Instantiates both stacks plus the account budget
