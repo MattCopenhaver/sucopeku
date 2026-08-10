@@ -192,3 +192,38 @@ hung with no error message until selection was changed to move a class.
 were answers. No assertion changed; every emptiness check now reads the value
 element. This is the divergence most worth remembering: nothing failed until a
 test both placed a mark and solved a puzzle.
+
+## What diverged, second pass
+
+Recorded 2026-08-09, after the MVP was played. The first pass of this section
+was written before any of it happened.
+
+**Six rounds of feedback reshaped the interface**, and none of it came from
+review. The pad's layout, the corner-mark arrangement, how marks are sized, how
+colour is reached, and how the board is centred all changed after the feature
+was used. Phase 9 of tasks.md lists the work; FR-051 to FR-059 record the
+obligations it created.
+
+**Two defects came from reading a CSS unit against the wrong thing**, and both
+passed review, the build, and the full suite:
+
+- `calc(var(--board) / 21)` for the pad's font size. `--board` holds a `100%`,
+  which means the container's width in a `width` and a share of the parent's
+  font size in a `font-size`. It computed under a pixel; the pad rendered blank.
+- `em` for marks inside a cell, which measures against the cell's font size
+  rather than its height. Enlarging corner marks pushed them into the middle
+  and they began overlapping centre marks.
+
+Both are now container-query units against the element they sit in. research.md
+D14 carries the reasoning, because the mistake is not obvious from reading
+either line.
+
+**The test suite learned to see size.** Everything before this checked that
+markup existed and had the right classes, which is why a blank pad passed. A
+guard now asserts rendered font size as a ratio of its button at three window
+widths, and the centring test measures against the client width rather than the
+viewport.
+
+**T056 was marked done too early.** It claimed the plan matched what was built,
+and then six rounds of change happened. Reopened and redone; the earlier claim
+was false for several hours.

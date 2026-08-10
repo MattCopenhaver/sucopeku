@@ -230,31 +230,63 @@ test('erase walks value, then marks, then colour — without changing mode', asy
   await expect(page.getByTestId('grid')).toBeVisible();
 });
 
-test('nine corner marks spread across two edges and leave the middle clear', async ({ page }) => {
+test('the ninth corner mark changes only the bottom edge', async ({ page }) => {
   await page.goto('./');
   const target = await firstEmpty(page);
 
   await cell(page, target).click();
   await mode(page, 'corner').click();
-  for (const d of ['1', '2', '3', '4', '5', '6', '7', '8', '9']) await key(page, d).click();
+  for (const d of ['1', '2', '3', '4', '5', '6', '7', '8']) await key(page, d).click();
 
-  // Five along the top, four along the bottom — not doubled up in a corner.
-  await expect(cell(page, target).locator('.corner-row-top')).toHaveText('12345');
+  // Where the first five sit at eight marks.
+  const before = await cell(page, target)
+    .locator('.corner-tl, .corner-tc, .corner-tr, .corner-ml, .corner-mr')
+    .evaluateAll((nodes) =>
+      nodes.map((n) => [n.textContent, Math.round(n.getBoundingClientRect().x)]),
+    );
+
+  await key(page, '9').click();
+
+  // Adding the ninth must not move them (research.md D6).
+  const after = await cell(page, target)
+    .locator('.corner-tl, .corner-tc, .corner-tr, .corner-ml, .corner-mr')
+    .evaluateAll((nodes) =>
+      nodes.map((n) => [n.textContent, Math.round(n.getBoundingClientRect().x)]),
+    );
+  expect(after, 'the ninth mark rearranged the other eight').toEqual(before);
+
+  // The bottom becomes four evenly spaced digits in place of three.
   await expect(cell(page, target).locator('.corner-row-bottom')).toHaveText('6789');
+  await expect(cell(page, target).locator('.corner-row-bottom > span')).toHaveCount(4);
 
-  // Centre marks still fit between them (research.md D6).
+  // And the middle is still free, even at nine corner marks (research.md D6).
   await mode(page, 'centre').click();
   for (const d of ['4', '7']) await key(page, d).click();
   const centre = cell(page, target).locator('.centre');
   await expect(centre).toHaveText('47');
 
-  const [cBox, top, bottom] = await Promise.all([
-    centre.boundingBox(),
-    cell(page, target).locator('.corner-row-top').boundingBox(),
-    cell(page, target).locator('.corner-row-bottom').boundingBox(),
-  ]);
-  expect(cBox!.y).toBeGreaterThanOrEqual(top!.y + top!.height - 1);
-  expect(cBox!.y + cBox!.height).toBeLessThanOrEqual(bottom!.y + 1);
+  // A true box intersection, on both axes. The left and right slots sit at the
+  // vertical middle by design — the guarantee is that the middle of the cell
+  // stays clear, not the middle row — so a vertical-only check calls those an
+  // overlap when nothing is obscured.
+  const centreBox = (await centre.boundingBox())!;
+  const cornerBoxes = await cell(page, target)
+    .locator('.corner')
+    .evaluateAll((nodes) =>
+      nodes.map((n) => {
+        const r = n.getBoundingClientRect();
+        return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+      }),
+    );
+
+  for (const corner of cornerBoxes) {
+    const overlaps =
+      centreBox.x < corner.right - 1 &&
+      corner.left + 1 < centreBox.x + centreBox.width &&
+      centreBox.y < corner.bottom - 1 &&
+      corner.top + 1 < centreBox.y + centreBox.height;
+    expect(overlaps, 'a corner mark overlaps the centre marks').toBe(false);
+  }
 });
 
 test('corner marks read ascending whatever order they were pressed in', async ({ page }) => {

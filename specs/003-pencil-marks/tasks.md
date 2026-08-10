@@ -142,6 +142,28 @@ confirm the choice held. Needs nothing from Stories 1 to 4.
 
 ---
 
+## Phase 9: Corrections from play
+
+Added 2026-08-09. Every item here came from the player using the MVP, not from
+review — which is the result Principle VIII asks be reported. None was visible
+to a suite that was green throughout.
+
+- [X] T058 Put corner marks in the corners: eight perimeter positions, corners before edges, the middle left clear (FR-002, research.md D6)
+- [X] T059 Choose corner positions by how many marks a cell holds, each set in reading order, so a cell reads ascending (FR-059, research.md D6)
+- [X] T060 Change only the bottom edge when a ninth corner mark arrives — four evenly spaced in place of three — so the other eight do not move (FR-059)
+- [X] T061 Wrap centre marks to two balanced rows beyond five rather than shrinking further (FR-058)
+- [X] T062 Inset marks from the cell edge so a selected cell's indicator does not run through them (FR-057)
+- [X] T063 Size everything inside a cell against the cell, and everything inside the pad against the pad, rather than in `em` or from `--board` (research.md D14)
+- [X] T064 Place colours with the digits, so colour mode is operable from the keyboard (FR-051)
+- [X] T065 Fold the palette control into the colour mode control, which shows the nine colours in use (FR-056)
+- [X] T066 Show where a mode's digits land on its control instead of naming the mode, with four distinct corner marks in the real layout (FR-054)
+- [X] T067 Hold the controls at a constant size and position as the mode changes (FR-053)
+- [X] T068 Scale the board with the window, measured against its container so fitting and centring are the same fact (FR-055)
+- [X] T069 Hide corner marks under a value as centre marks already were (FR-023, FR-024)
+- [X] T070 Add a guard asserting rendered size as a *ratio* of its control at three window sizes, since every test was green while the pad was unreadable (FR-052, FR-053)
+
+---
+
 ## Dependencies
 
 ```text

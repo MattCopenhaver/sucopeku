@@ -16,13 +16,26 @@ export type Renderer = (cell: HTMLElement, payload: Payload) => void;
 const renderCentre: Renderer = (cell, payload) => {
   const values = payload as readonly number[];
   if (values.length === 0) return;
+
   const box = document.createElement('span');
   box.className = 'centre';
-  // Sized by how many there are: comfortable when few, shrinking as they
-  // multiply (003 FR-052, research.md D12). A cell holds two or three
-  // candidates far more often than nine.
-  box.dataset.count = String(Math.min(values.length, 9));
-  box.textContent = values.join('');
+  box.dataset.count = String(values.length);
+
+  // Up to five sit on one line. Beyond that they wrap to two balanced rows
+  // rather than shrinking further: a second row costs vertical space the middle
+  // of the cell has, while shrinking costs legibility it does not
+  // (003 FR-058, research.md D12).
+  if (values.length <= 5) {
+    box.textContent = values.join('');
+  } else {
+    const half = Math.ceil(values.length / 2);
+    for (const line of [values.slice(0, half), values.slice(half)]) {
+      const row = document.createElement('span');
+      row.className = 'centre-row';
+      row.textContent = line.join('');
+      box.append(row);
+    }
+  }
   cell.append(box);
 };
 
@@ -60,21 +73,30 @@ const renderCorner: Renderer = (cell, payload) => {
   const values = payload as readonly number[];
   if (values.length === 0) return;
 
-  const row = (edge: 'top' | 'bottom', digits: readonly number[]): void => {
-    const box = document.createElement('span');
-    box.className = `corner corner-row corner-row-${edge}`;
-    box.dataset.count = String(values.length);
-    box.textContent = digits.join('');
-    cell.append(box);
-  };
-
-  // Nine marks will not fit in eight slots without doubling one up, which reads
-  // as a typo rather than a notation. In that one case they spread across two
-  // edges instead — five along the top, four along the bottom. The middle is
-  // still untouched, so centre marks are still unobstructed (research.md D6).
+  // Nine marks need a ninth position, and there are eight. Only the bottom
+  // changes: the first five keep exactly the slots they hold at eight marks,
+  // and the last four spread evenly along the bottom edge in place of the three
+  // that would sit there. Rebuilding the whole arrangement made the cell jump
+  // when the ninth mark landed (research.md D6).
   if (values.length === 9) {
-    row('top', values.slice(0, 5));
-    row('bottom', values.slice(5));
+    const top = LAYOUT[8]!.slice(0, 5);
+    values.slice(0, 5).forEach((value, index) => {
+      const box = document.createElement('span');
+      box.className = `corner corner-${top[index]}`;
+      box.dataset.count = '9';
+      box.textContent = String(value);
+      cell.append(box);
+    });
+
+    const bottom = document.createElement('span');
+    bottom.className = 'corner corner-row corner-row-bottom';
+    bottom.dataset.count = '9';
+    for (const value of values.slice(5)) {
+      const digit = document.createElement('span');
+      digit.textContent = String(value);
+      bottom.append(digit);
+    }
+    cell.append(bottom);
     return;
   }
 

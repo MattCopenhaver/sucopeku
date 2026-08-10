@@ -380,6 +380,13 @@ and confirm it held. Nothing from the other four stories is needed.
   other palette. The colour control MUST show the nine colours currently in use,
   so it is both the mode control and the palette indicator and there is no
   separate palette control.
+- **FR-057**: Marks MUST stay legible when their cell is selected. No selection
+  indicator may sit close enough to a mark to interfere with reading it.
+- **FR-058**: When a cell holds more centre marks than fit comfortably on one
+  line, they MUST wrap to balanced rows rather than shrink further. Vertical
+  space in the middle of a cell is available; legibility is not.
+- **FR-059**: Adding a mark MUST NOT rearrange the marks already present beyond
+  what the new one requires. A cell's contents must not appear to jump.
 
 ### Key Entities
 
@@ -534,3 +541,28 @@ Pad content is now sized in container-query units against the pad's own width,
 which has one meaning. A test asserts the digit's rendered size as a *ratio* of
 its button at three window sizes, because "it built and the tests passed" was
 true the whole time this was broken.
+
+**2026-08-09 — FR-057 to FR-059 added from a fourth round of play.**
+
+*Corner marks were hard to read against a selected cell.* They sat close enough
+to the edge that the selection indicator ran through them. FR-057.
+
+*The ninth corner mark rearranged the other eight.* Nine had been treated as a
+different layout entirely — five along the top, four along the bottom — so the
+cell reorganised itself when the last mark landed. Now the first five keep
+exactly the slots they hold at eight and only the bottom changes, four evenly
+spaced in place of three. FR-059.
+
+*Centre marks shrank rather than wrapping.* Six or more now use two balanced
+rows at a readable size. FR-058.
+
+**2026-08-09 — cell contents are sized against the cell, not its font.** Marks
+were sized in `em`, which measures against the cell's font size — a value with
+no fixed relationship to the cell's height. Enlarging corner marks therefore
+pushed them into the middle, where they began overlapping the centre marks, and
+the fix for one complaint created another. Container-query units against the
+cell make "a quarter of a cell" mean a quarter of a cell.
+
+This is the second time in this feature that a unit was read against the wrong
+thing: `--board` in a `font-size` earlier computed to under a pixel. Both were
+invisible in review and obvious on screen.

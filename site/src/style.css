@@ -225,10 +225,17 @@ p {
 }
 
 /* The cell becomes a stack: colour behind, corner marks at the perimeter, and
-   either the value or the centre marks in the middle (003 data-model.md). */
+   either the value or the centre marks in the middle (003 data-model.md).
+
+   Everything inside is sized in `cqw` — a share of the cell's own width. `em`
+   was wrong here: it measures against the cell's font-size, which has no fixed
+   relationship to the cell's height, so enlarging corner marks quietly pushed
+   them into the middle and they began overlapping the centre marks. Against the
+   cell itself, "a quarter of a cell" means a quarter of a cell. */
 .cell {
   position: relative;
   overflow: hidden;
+  container-type: inline-size;
 }
 
 .cell.coloured {
@@ -252,7 +259,7 @@ p {
 /* A value always reads larger than any mark, so an answer is never mistaken
    for a note (003 FR-052). */
 .cell .value {
-  font-size: 1.25em;
+  font-size: 62cqw;
   line-height: 1;
 }
 
@@ -263,30 +270,37 @@ p {
   line-height: 1;
   letter-spacing: 0.04em;
   color: var(--muted);
-  max-width: 78%;
-  font-size: 0.72em;
+  max-width: 76%;
+  font-size: 32cqw;
+  display: grid;
+  justify-items: center;
 }
 
 .cell .centre[data-count='4'],
 .cell .centre[data-count='5'] {
-  font-size: 0.58em;
+  font-size: 27cqw;
 }
 
+/* Six or more wrap to two balanced rows instead of shrinking further. The
+   middle of the cell has vertical space to give; legibility does not
+   (003 FR-058). */
 .cell .centre[data-count='6'],
-.cell .centre[data-count='7'] {
-  font-size: 0.46em;
-}
-
+.cell .centre[data-count='7'],
 .cell .centre[data-count='8'],
 .cell .centre[data-count='9'] {
-  font-size: 0.36em;
+  font-size: 23cqw;
+  line-height: 1.05;
+}
+
+.cell .centre-row {
+  display: block;
 }
 
 /* Eight perimeter positions, corners first. The middle stays clear, which is
    what keeps corner and centre marks from colliding (research.md D6). */
 .cell .corner {
   position: absolute;
-  font-size: 0.56em;
+  font-size: 26cqw;
   line-height: 1;
   color: var(--muted);
   pointer-events: none;
@@ -294,69 +308,65 @@ p {
 
 .cell .corner[data-count='6'],
 .cell .corner[data-count='7'],
-.cell .corner[data-count='8'] {
-  font-size: 0.46em;
+.cell .corner[data-count='8'],
+.cell .corner[data-count='9'] {
+  font-size: 22cqw;
 }
 
-/* Nine marks spread across the top and bottom edges rather than doubling up in
-   a corner slot (research.md D6). */
+/* The ninth mark's only effect: four digits evenly spaced along the bottom in
+   place of the three that sit there at eight (research.md D6). */
 .cell .corner-row {
-  left: 0.12em;
-  right: 0.12em;
+  left: 7cqw;
+  right: 7cqw;
   display: flex;
   justify-content: space-between;
-  font-size: 0.42em;
-}
-
-.cell .corner-row-top {
-  top: 0.1em;
 }
 
 .cell .corner-row-bottom {
-  bottom: 0.1em;
+  bottom: 5cqw;
 }
 
 .cell .corner-tl {
-  top: 0.1em;
-  left: 0.18em;
+  top: 5cqw;
+  left: 7cqw;
 }
 
 .cell .corner-tr {
-  top: 0.1em;
-  right: 0.18em;
+  top: 5cqw;
+  right: 7cqw;
 }
 
 .cell .corner-bl {
-  bottom: 0.1em;
-  left: 0.18em;
+  bottom: 5cqw;
+  left: 7cqw;
 }
 
 .cell .corner-br {
-  bottom: 0.1em;
-  right: 0.18em;
+  bottom: 5cqw;
+  right: 7cqw;
 }
 
 .cell .corner-tc {
-  top: 0.1em;
+  top: 5cqw;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .cell .corner-bc {
-  bottom: 0.1em;
+  bottom: 5cqw;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .cell .corner-ml {
   top: 50%;
-  left: 0.18em;
+  left: 7cqw;
   transform: translateY(-50%);
 }
 
 .cell .corner-mr {
   top: 50%;
-  right: 0.18em;
+  right: 7cqw;
   transform: translateY(-50%);
 }
 

@@ -162,6 +162,11 @@ five spread along the top edge, four along the bottom. Eight or fewer still use
 the corners. The exception is worth it because it applies only where the corner
 arrangement had already stopped working.
 
+**Amended a third time**: nine marks keep the eight-mark arrangement above and
+change only the bottom edge — four digits evenly spaced in place of three.
+Treating nine as its own layout meant the whole cell reorganised when the last
+mark landed (FR-059).
+
 **Amended again**: which positions are used now depends on how many marks there
 are, and each set is listed in reading order. Filling one fixed slot sequence
 put the fifth mark at top-centre — *between* the first and second — so a cell
@@ -234,6 +239,35 @@ larger and more visible until they run out of space, then shrink."*
 This is also what makes SC-005 survivable. That criterion knowingly accepts
 digits near 6px in a fully loaded cell at 320px; it says nothing about the cell
 holding three marks, which is what a player actually looks at most of the time.
+
+---
+
+## D14. Sizes are measured against the thing they sit in
+
+**Decision**: Anything inside a cell is sized in container-query units against
+the cell. Anything inside the pad is sized against the pad. Neither uses `em`,
+and neither derives a length from `--board`.
+
+**Rationale**: this feature hit the same class of bug twice, and both times the
+code read as obviously correct.
+
+`calc(var(--board) / 21)` for the pad's font size: `--board` contains a `100%`,
+which a `width` declaration reads as the container's width and a `font-size`
+reads as a share of the parent's font size. It computed to under a pixel and the
+pad rendered blank while the build passed and every test was green.
+
+`em` for marks inside a cell: `em` measures against the cell's *font size*,
+which has no fixed relationship to the cell's *height*. Enlarging corner marks
+pushed them into the middle of the cell, where they started overlapping centre
+marks — so fixing one complaint created another, in a way arithmetic on the
+stylesheet would not reveal.
+
+Container-query units have one meaning: a share of the container's width. "A
+quarter of a cell" is a quarter of a cell whatever the font does.
+
+**What this cost**: `container-type: inline-size` on every cell, which is
+containment the browser must honour. At 81 cells that is unmeasurably cheap, and
+Principle VII stays dormant either way.
 
 ---
 
