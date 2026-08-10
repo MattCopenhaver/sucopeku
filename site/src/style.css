@@ -300,7 +300,7 @@ p {
    what keeps corner and centre marks from colliding (research.md D6). */
 .cell .corner {
   position: absolute;
-  font-size: 26cqw;
+  font-size: 23.5cqw;
   line-height: 1;
   color: var(--muted);
   pointer-events: none;
@@ -310,7 +310,7 @@ p {
 .cell .corner[data-count='7'],
 .cell .corner[data-count='8'],
 .cell .corner[data-count='9'] {
-  font-size: 22cqw;
+  font-size: 20cqw;
 }
 
 /* The ninth mark's only effect: four digits evenly spaced along the bottom in
