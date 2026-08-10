@@ -256,3 +256,26 @@ test('nine corner marks spread across two edges and leave the middle clear', asy
   expect(cBox!.y).toBeGreaterThanOrEqual(top!.y + top!.height - 1);
   expect(cBox!.y + cBox!.height).toBeLessThanOrEqual(bottom!.y + 1);
 });
+
+test('corner marks read ascending whatever order they were pressed in', async ({ page }) => {
+  await page.goto('./');
+  const target = await firstEmpty(page);
+
+  await cell(page, target).click();
+  await mode(page, 'corner').click();
+  // Deliberately out of order.
+  for (const d of ['7', '2', '9', '4', '1']) await key(page, d).click();
+
+  // Read the marks in document order, which is reading order in the layout.
+  const shown = await cell(page, target)
+    .locator('.corner')
+    .evaluateAll((nodes) => nodes.map((n) => n.textContent?.trim() ?? ''));
+  expect(shown.join('')).toBe('12479');
+
+  // And their positions run left to right, top to bottom.
+  const boxes = await cell(page, target)
+    .locator('.corner')
+    .evaluateAll((nodes) => nodes.map((n) => n.getBoundingClientRect()).map((r) => [r.x, r.y]));
+  const sorted = [...boxes].sort((a, b) => a[1]! - b[1]! || a[0]! - b[0]!);
+  expect(boxes, 'corner marks are not laid out in reading order').toEqual(sorted);
+});

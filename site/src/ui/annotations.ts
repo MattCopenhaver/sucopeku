@@ -35,7 +35,26 @@ const renderCentre: Renderer = (cell, payload) => {
  * position — nine corner marks in one cell convey almost nothing, so that is
  * the case worth degrading (research.md D6).
  */
-const SLOTS = ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'ml', 'mr'] as const;
+/**
+ * Which positions a given number of corner marks uses, listed in reading order.
+ *
+ * Two rules at once. Corners fill before edges, so few marks sit in the corners
+ * — and each list is already in reading order, so the marks always read
+ * ascending left to right, top to bottom. Filling one fixed slot sequence
+ * instead put the fifth mark at top-centre, *between* the first and second, and
+ * the cell read 1 5 2. Values were sorted the whole time; the arrangement was
+ * what looked arbitrary.
+ */
+const LAYOUT: Readonly<Record<number, readonly string[]>> = {
+  1: ['tl'],
+  2: ['tl', 'tr'],
+  3: ['tl', 'tr', 'bl'],
+  4: ['tl', 'tr', 'bl', 'br'],
+  5: ['tl', 'tc', 'tr', 'bl', 'br'],
+  6: ['tl', 'tc', 'tr', 'bl', 'bc', 'br'],
+  7: ['tl', 'tc', 'tr', 'ml', 'bl', 'bc', 'br'],
+  8: ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'],
+};
 
 const renderCorner: Renderer = (cell, payload) => {
   const values = payload as readonly number[];
@@ -59,19 +78,16 @@ const renderCorner: Renderer = (cell, payload) => {
     return;
   }
 
-  const bySlot = new Map<string, number[]>();
+  const slots = LAYOUT[values.length] ?? LAYOUT[8]!;
   values.forEach((value, index) => {
-    const slot = SLOTS[index % SLOTS.length]!;
-    bySlot.set(slot, [...(bySlot.get(slot) ?? []), value]);
-  });
-
-  for (const [slot, digits] of bySlot) {
+    const slot = slots[index];
+    if (!slot) return;
     const box = document.createElement('span');
     box.className = `corner corner-${slot}`;
     box.dataset.count = String(values.length);
-    box.textContent = digits.join('');
+    box.textContent = String(value);
     cell.append(box);
-  }
+  });
 };
 
 const renderColour: Renderer = (cell, payload) => {

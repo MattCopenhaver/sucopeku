@@ -502,3 +502,9 @@ many there are, and the first pass simply set the sizes too small at every
 count. Nine corner marks now spread across the top and bottom edges rather than
 doubling up in a corner slot, which read as a mistake rather than a notation —
 research D6 carries the reasoning.
+
+**2026-08-09 — corner marks read ascending.** No requirement changed. The values
+were already sorted, but positions were assigned from a fixed slot sequence, so
+the fifth mark landed between the first and second and the cell read "1 5 2".
+Which positions are used now depends on how many marks there are, each set
+listed in reading order. Corners still fill before edges.

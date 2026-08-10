@@ -162,6 +162,13 @@ five spread along the top edge, four along the bottom. Eight or fewer still use
 the corners. The exception is worth it because it applies only where the corner
 arrangement had already stopped working.
 
+**Amended again**: which positions are used now depends on how many marks there
+are, and each set is listed in reading order. Filling one fixed slot sequence
+put the fifth mark at top-centre — *between* the first and second — so a cell
+holding 1 to 5 read "1 5 2". The values had been sorted the whole time; the
+arrangement was what looked arbitrary, which is a useful reminder that "sorted"
+and "reads in order" are different claims.
+
 ---
 
 ## D7. Stored progress moves to version 2 and discards version 1
