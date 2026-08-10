@@ -24,10 +24,31 @@ test('the pad shows nine swatches in colour mode and keeps its shape (FR-034)', 
   page,
 }) => {
   await page.goto('./');
-  await expect(page.locator('.key:not(.erase)')).toHaveCount(9);
+  const before = await page.getByTestId('keys').boundingBox();
+  await expect(page.locator('.key')).toHaveCount(9);
 
   await mode(page, 'colour').click();
   await expect(page.locator('.key.swatch')).toHaveCount(9);
+
+  // The same nine keys, wearing colours — the pad does not resize when the mode
+  // changes (003 FR-053).
+  const after = await page.getByTestId('keys').boundingBox();
+  expect(after!.width).toBeCloseTo(before!.width, 0);
+  expect(after!.height).toBeCloseTo(before!.height, 0);
+});
+
+test('digits place colours, so colour mode is operable from the keyboard (FR-051)', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const target = await firstEmpty(page);
+
+  await cell(page, target).click();
+  await page.keyboard.press('v');
+  await page.keyboard.press('4');
+
+  await expect(cell(page, target)).toHaveClass(/coloured/);
+  await expect(cell(page, target)).toHaveAttribute('data-cell', String(target));
 });
 
 test('applying a colour, and applying it again to remove it (FR-033)', async ({ page }) => {
@@ -36,10 +57,10 @@ test('applying a colour, and applying it again to remove it (FR-033)', async ({ 
 
   await cell(page, target).click();
   await mode(page, 'colour').click();
-  await page.locator('[data-key="l3"]').click();
+  await page.locator('[data-swatch="l3"]').click();
   await expect(cell(page, target)).toHaveClass(/coloured/);
 
-  await page.locator('[data-key="l3"]').click();
+  await page.locator('[data-swatch="l3"]').click();
   await expect(cell(page, target)).not.toHaveClass(/coloured/);
 });
 
@@ -48,11 +69,12 @@ test('the palette control reaches the second nine (FR-034, FR-042)', async ({ pa
   await mode(page, 'colour').click();
 
   await expect(page.getByTestId('palette')).toBeVisible();
-  await expect(page.locator('[data-key="l1"]')).toBeVisible();
+  await expect(page.getByTestId('palette')).toBeEnabled();
+  await expect(page.locator('[data-swatch="l1"]')).toBeVisible();
 
   await page.getByTestId('palette').click();
-  await expect(page.locator('[data-key="d1"]')).toBeVisible();
-  await expect(page.locator('[data-key="l1"]')).toHaveCount(0);
+  await expect(page.locator('[data-swatch="d1"]')).toBeVisible();
+  await expect(page.locator('[data-swatch="l1"]')).toHaveCount(0);
 });
 
 test('a colour applies to a cell that came with the puzzle', async ({ page }) => {
@@ -61,7 +83,7 @@ test('a colour applies to a cell that came with the puzzle', async ({ page }) =>
 
   await given.click();
   await mode(page, 'colour').click();
-  await page.locator('[data-key="l6"]').click();
+  await page.locator('[data-swatch="l6"]').click();
 
   // Colour annotates the cell rather than what is written in it, so unlike
   // marks it is allowed on givens (contracts/annotations.md).
@@ -80,7 +102,7 @@ test('a value, a centre mark, and a corner mark stay readable on a colour in gre
   await mode(page, 'corner').click();
   await page.locator('[data-key="8"]').click();
   await mode(page, 'colour').click();
-  await page.locator('[data-key="l1"]').click();
+  await page.locator('[data-swatch="l1"]').click();
 
   await page.addStyleTag({ content: 'html { filter: grayscale(1) !important; }' });
 
@@ -88,7 +110,7 @@ test('a value, a centre mark, and a corner mark stay readable on a colour in gre
   // hue were carrying the contrast, these would be indistinguishable once the
   // colour is gone from both.
   const coloured = await cell(page, target).screenshot();
-  await page.locator('[data-key="l1"]').click();
+  await page.locator('[data-swatch="l1"]').click();
   await expect(cell(page, target)).not.toHaveClass(/coloured/);
   const plain = await cell(page, target).screenshot();
 
@@ -109,7 +131,7 @@ for (const scheme of ['light', 'dark'] as const) {
 
       await cell(page, target).click();
       await mode(page, 'colour').click();
-      await page.locator('[data-key="l9"]').click();
+      await page.locator('[data-swatch="l9"]').click();
 
       const painted = await cell(page, target).evaluate(
         (node) => getComputedStyle(node).backgroundColor,

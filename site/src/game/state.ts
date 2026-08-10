@@ -4,7 +4,7 @@ import { allKinds, kindFor, type Payload } from './annotations/registry.js';
 import { CENTRE, CORNER } from './annotations/marks.js';
 import { COLOUR } from './annotations/colour.js';
 import { givenCells, type Puzzle } from './data.js';
-import type { PaletteId } from './palettes.js';
+import { palettes, type PaletteId } from './palettes.js';
 import { load, save, type PuzzleProgress, type StoredAnnotations } from './progress.js';
 
 /**
@@ -164,8 +164,18 @@ export class Game {
       this.erase();
       return;
     }
-    if (this.mode === 'value') this.placeValue(entry);
-    else this.placeAnnotation(this.mode, entry);
+    if (this.mode === 'value') {
+      this.placeValue(entry);
+      return;
+    }
+    if (this.mode === COLOUR) {
+      // A digit places the nth colour of the active palette, so colour is
+      // operable from the keyboard like every other mode (003 FR-051).
+      const swatch = palettes[this.palette][entry - 1];
+      if (swatch) this.placeAnnotation(COLOUR, swatch.id);
+      return;
+    }
+    this.placeAnnotation(this.mode, entry);
   }
 
   /** Applies a colour by palette entry identifier rather than by digit. */

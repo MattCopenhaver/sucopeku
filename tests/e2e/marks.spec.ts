@@ -201,7 +201,7 @@ test('erase walks value, then marks, then colour — without changing mode', asy
 
   await cell(page, target).click();
   await mode(page, 'colour').click();
-  await page.locator('[data-key="l4"]').click();
+  await page.locator('[data-swatch="l4"]').click();
   await mode(page, 'centre').click();
   await key(page, '1').click();
   await mode(page, 'corner').click();

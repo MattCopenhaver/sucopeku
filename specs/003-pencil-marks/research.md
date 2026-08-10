@@ -134,23 +134,27 @@ unpredictably in the middle of the range, which is where legibility is worst.
 
 ---
 
-## D6. Corner marks use the top and bottom edges, never the middle
+## D6. Corner marks go in the corners, and nine share eight slots
 
-**Decision**: Corner marks render along the top edge first, up to five, and then
-along the bottom edge, up to four. The middle band of the cell is never used by
-corner marks.
+**Decision**: Corner marks occupy the eight perimeter positions of the cell —
+four corners first, then the four edge midpoints. The middle is never used. A
+ninth mark shares the top-left position rather than claiming a ninth slot.
 
-**Rationale**: US3's second acceptance scenario requires that centre and corner
-marks not obscure one another. The traditional layout — a three-by-three
-sub-grid using the perimeter — has exactly eight usable positions once the
-middle is reserved, and a nine-value ruleset can produce nine corner marks. Any
-scheme that reaches nine by using the middle collides with centre marks at
-exactly the moment a cell is most crowded.
+**Superseded 2026-08-09.** This originally put corner marks along the top edge,
+up to five, and the bottom edge, up to four. The reasoning was sound and the
+result was wrong: the arrangement guaranteed no collision with centre marks, but
+it stopped looking like corner marks at all, which is the entire point of the
+notation. The player named it on first play — *"the corner pencilmarks aren't
+going in the corners."*
 
-Splitting five and four across two edges holds nine, keeps the middle clear by
-construction, and needs no special case. It reads slightly less like "corners"
-than the traditional layout; that is the trade, and it buys a guarantee rather
-than a hope.
+The original problem was real: eight perimeter slots, nine possible values. The
+answer is to let one slot hold two digits, not to invent a layout. Nine corner
+marks in one cell says almost nothing anyway — a player who has ruled out
+nothing is not recording it — so the crowded case is the one worth degrading.
+
+**What survives from the first version**: the middle stays clear, so centre and
+corner marks still never collide (US3 scenario 2). That guarantee was the good
+half of the original decision and it is kept.
 
 ---
 
@@ -200,6 +204,41 @@ keeping the two in separate fields — there is no clearing step to write and no
 to forget. It also means FR-040 needs no code at all: a solved board is one
 where every cell has a value, so annotations are already hidden by the ordinary
 rule and already intact underneath.
+
+---
+
+## D12. Marks are sized by how many there are
+
+**Decision**: Centre marks render at a comfortable size when there are few and
+shrink as they multiply. Values render larger than any mark, so a real answer is
+never mistaken for a note.
+
+**Rationale**: a fixed size has to be chosen for the worst case, and the worst
+case is rare. Sizing for nine marks makes the common case — two or three
+candidates — needlessly tiny, which the player hit immediately: *"should be
+larger and more visible until they run out of space, then shrink."*
+
+This is also what makes SC-005 survivable. That criterion knowingly accepts
+digits near 6px in a fully loaded cell at 320px; it says nothing about the cell
+holding three marks, which is what a player actually looks at most of the time.
+
+---
+
+## D13. Colour is placed by digit, like everything else
+
+**Decision**: In colour mode the digits 1 to 9 place the nine colours of the
+active palette. The swatches are the same nine keys, wearing colours.
+
+**Rationale**: FR-011 says a digit press acts on the current mode. Colour was
+the one mode where that was untrue — the swatches were clickable and the digits
+did nothing, so colour was the only mode a keyboard could not reach. The player
+found it before the tests did, which is the tests' fault: FR-010 was asserted
+for the mode *buttons* and never for what the mode then does.
+
+**The palette control shows colours rather than the words "light digits".** Two
+rows of swatches are self-describing; the words describe an implementation
+detail — which treatment the digits get — that the player has no reason to hold
+in their head.
 
 ---
 

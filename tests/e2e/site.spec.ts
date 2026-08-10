@@ -79,3 +79,16 @@ test('an unreadable stored theme falls back to the device (EC-011)', async ({ pa
   expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBeNull();
   await expect(page.getByTestId('grid')).toBeVisible();
 });
+
+test('the board scales with the window rather than sitting fixed (FR-055)', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1200 });
+  await page.goto('./');
+  const large = (await page.getByTestId('grid').boundingBox())!.width;
+
+  await page.setViewportSize({ width: 900, height: 700 });
+  const small = (await page.getByTestId('grid').boundingBox())!.width;
+
+  expect(large, 'the board did not grow on a larger window').toBeGreaterThan(small);
+  // And it never outgrows the window (002 FR-029 still holds).
+  expect(large).toBeLessThanOrEqual(1600 * 0.92);
+});

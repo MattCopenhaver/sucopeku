@@ -361,6 +361,22 @@ and confirm it held. Nothing from the other four stories is needed.
 - **FR-050**: A theme change made in one tab MUST appear in the site's other
   tabs without a reload, on the same basis progress already does.
 
+**Legibility and layout**
+
+- **FR-051**: In colour mode the digits MUST place colours, so that every mode
+  is operable from the keyboard and not only its mode button.
+- **FR-052**: Marks MUST be sized by how many the cell holds — comfortable when
+  there are few, shrinking as they multiply — and a value MUST always render
+  larger than any mark.
+- **FR-053**: The controls MUST NOT change size or position when the mode
+  changes. Only what they contain may change.
+- **FR-054**: A mode control MUST show where its digits will land rather than
+  naming the mode in words, and the palette control MUST show the colours it
+  switches to.
+- **FR-055**: The board MUST scale with the window rather than sitting at a
+  fixed size, so a large display does not leave the game small enough to invite
+  zooming, while a small screen still shows it whole.
+
 ### Key Entities
 
 - **Annotation**: What a player records in a cell that is not a value. Has a
@@ -430,3 +446,34 @@ code inside `game/annotations/` — the layer that must not have any. Behaviour
 and appearance are now separate registries keyed by the same identifier, which
 leaves FR-007 intact: a fourth kind is one file in each and no edit to the
 others.
+
+**2026-08-09 — first play produced eight corrections; four became requirements.**
+FR-051 to FR-054 appended, research D6 rewritten, D12 and D13 added.
+
+*Corner marks were not in the corners.* D6 had put them along the top and bottom
+edges to guarantee they never collided with centre marks. The guarantee held and
+the notation stopped being recognisable, which is worse. They now use the eight
+perimeter positions with corners filled first, and a ninth mark shares a slot.
+The no-collision guarantee survives.
+
+*Colour was the only mode a keyboard could not operate.* FR-011 says a digit
+press acts on the current mode; in colour mode the digits did nothing and the
+swatches took clicks. The tests asserted FR-010 for the mode buttons and never
+for what the mode then does, so they passed. FR-051 closes it.
+
+*Marks were sized for the worst case.* A cell holds two or three candidates far
+more often than nine, and sizing for nine made the common case unreadable.
+FR-052.
+
+*The pad moved when the mode changed*, and the erase and palette controls were
+far larger than anything else. FR-053.
+
+*The mode buttons named modes in words.* Showing where the digit lands is
+self-describing; "Centre" is not. FR-054.
+
+**2026-08-09 — FR-055 added: the board scales with the window.** It was a fixed
+30rem, which fills a phone and leaves most of a high-resolution monitor empty.
+The width is now the smallest of 92% of the viewport width, 62% of its height,
+and 46rem — the height term is what makes a large screen useful, and the cap is
+what stops the board becoming absurd on a very large one. 002 FR-029's
+phone-width guarantee is unaffected: 92vw still wins there.

@@ -13,36 +13,45 @@ import type { Payload } from '../game/annotations/registry.js';
  */
 export type Renderer = (cell: HTMLElement, payload: Payload) => void;
 
-const renderMarks = (className: string): Renderer => {
-  return (cell, payload) => {
-    const values = payload as readonly number[];
-    if (values.length === 0) return;
-    const box = document.createElement('span');
-    box.className = className;
-    box.textContent = values.join('');
-    cell.append(box);
-  };
+const renderCentre: Renderer = (cell, payload) => {
+  const values = payload as readonly number[];
+  if (values.length === 0) return;
+  const box = document.createElement('span');
+  box.className = 'centre';
+  // Sized by how many there are: comfortable when few, shrinking as they
+  // multiply (003 FR-052, research.md D12). A cell holds two or three
+  // candidates far more often than nine.
+  box.dataset.count = String(Math.min(values.length, 9));
+  box.textContent = values.join('');
+  cell.append(box);
 };
 
 /**
- * Corner marks go along the top edge, up to five, then the bottom edge.
+ * Corner marks go in the corners.
  *
- * Never the middle. The traditional three-by-three perimeter has eight usable
- * positions once the middle is reserved, and a nine-value ruleset can produce
- * nine marks — so any scheme reaching nine that way collides with centre marks
- * exactly when a cell is most crowded (research.md D6).
+ * Eight perimeter positions, corners filled first, then edge midpoints. The
+ * middle is never used, so centre and corner marks cannot collide (US3
+ * scenario 2). A ninth mark shares the first slot rather than claiming a ninth
+ * position — nine corner marks in one cell convey almost nothing, so that is
+ * the case worth degrading (research.md D6).
  */
+const SLOTS = ['tl', 'tr', 'bl', 'br', 'tc', 'bc', 'ml', 'mr'] as const;
+
 const renderCorner: Renderer = (cell, payload) => {
   const values = payload as readonly number[];
   if (values.length === 0) return;
-  for (const [edge, slice] of [
-    ['top', values.slice(0, 5)],
-    ['bottom', values.slice(5, 9)],
-  ] as const) {
-    if (slice.length === 0) continue;
+
+  const bySlot = new Map<string, number[]>();
+  values.forEach((value, index) => {
+    const slot = SLOTS[index % SLOTS.length]!;
+    bySlot.set(slot, [...(bySlot.get(slot) ?? []), value]);
+  });
+
+  for (const [slot, digits] of bySlot) {
     const box = document.createElement('span');
-    box.className = `corner corner-${edge}`;
-    box.textContent = slice.join(' ');
+    box.className = `corner corner-${slot}`;
+    box.dataset.count = String(Math.min(values.length, 9));
+    box.textContent = digits.join('');
     cell.append(box);
   }
 };
@@ -55,7 +64,7 @@ const renderColour: Renderer = (cell, payload) => {
 };
 
 export const renderers: Readonly<Record<string, Renderer>> = {
-  [CENTRE]: renderMarks('centre'),
+  [CENTRE]: renderCentre,
   [CORNER]: renderCorner,
   [COLOUR]: renderColour,
 };
