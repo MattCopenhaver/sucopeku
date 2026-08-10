@@ -1,8 +1,42 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0 → 2.2.0 → 3.0.0 → 3.1.0 → 3.2.0
+Version change: 1.0.0 → 2.0.0 → 2.0.1 → 2.1.0 → 2.2.0 → 3.0.0 → 3.1.0 → 3.2.0 → 3.3.0
 Ratified: 2026-08-07 | Last amended: 2026-08-09
+
+AMENDMENT (3.3.0) — Governance, identifiers harden when a spec is Complete
+  Changes: 3.2.0 required every retired requirement to be withdrawn in place,
+  from the moment it was written. That obligation now begins at `Complete`.
+  Before then a requirement may be rewritten or deleted outright, provided the
+  number is never reassigned and every citation of it is corrected in the same
+  change. The no-reuse rule is unchanged and now stated separately from the
+  tombstone rule, because only one of the two needs to bind at all times.
+
+  Why: a tombstone protects a reader who cannot see the change that removed the
+  requirement. While a feature is being built, the spec and everything citing it
+  move together in one pull request and no such reader exists. Feature 002
+  withdrew FR-011 — "indicate which digit is selected" — hours after writing it,
+  when cell-first entry removed the concept. Nothing had ever depended on it.
+  The marker recorded a decision nobody had made against.
+
+  Why the no-reuse half survives unconditionally: it is what makes a number mean
+  one thing forever, which is the only property references actually rely on.
+
+  Why the citation condition is explicit: feature 002 reassigned sixteen
+  identifiers during clarification and left its checklist mapping Principle IX
+  to three requirements that had become unrelated. The citation check passed the
+  whole time — every reference resolved, just to the wrong requirement. The rule
+  has to carry what the tool cannot.
+
+  MINOR rather than MAJOR: the obligation it relaxes is procedural and applies
+  only before a spec is Complete. No guarantee about shipped software changes,
+  and nothing that was permitted becomes forbidden.
+
+  Creates work not done here: feature 002's checklist citations are wrong and
+  need correcting, and its FR-011 marker should become a plain deletion. Both
+  land in that feature's own pull request. Whether the citation check should
+  also verify that a citation's description still matches what it points at is
+  open, and belongs to feature 001.
 
 AMENDMENT (3.2.0) — Development Workflow, the life of a spec
   Adds three related rules about how specs are written over time:
@@ -651,14 +685,22 @@ changes the design rather than merely exercising it. The test: if it needs tasks
 of its own, or determines how something is built, it is a requirement. If it is a
 specific input or state the design must survive, it stays an edge case.
 
-**Identifiers are permanent.** Once a requirement, edge case, or success
-criterion has an identifier, that identifier MUST NOT be reused or reassigned.
-New ones take the next free number and are appended; the list stops being tidy,
-and that is the price.
+**Identifiers are never reused.** Once a requirement, edge case, or success
+criterion has held an identifier, that identifier MUST NOT be reassigned to a
+different obligation — not while the spec is being written, not after it is
+finished, not ever. New ones take the next free number and are appended; the
+list stops being tidy, and that is the price.
 
-A requirement that no longer applies MUST be withdrawn in place rather than
-deleted — kept as a marker pointing at the Revisions entry that explains why,
-with its former text preserved:
+**They harden when the spec is `Complete`.** Before then, a requirement MAY be
+rewritten or deleted outright, with no marker left behind, provided that:
+
+- the number it held is never given to anything else, and
+- every citation of it — in the plan, tasks, contracts, research, checklists,
+  and code comments — is corrected in the same change.
+
+From `Complete` onward a requirement that no longer applies MUST be withdrawn in
+place rather than deleted — kept as a marker pointing at the Revisions entry
+that explains why, with its former text preserved:
 
 ```markdown
 - **FR-012**: *(withdrawn 2026-08-20 — see Revisions.)* Formerly: the site MUST
@@ -669,8 +711,22 @@ with its former text preserved:
 tasks, the contracts, and the research. It happened in feature 001 and again in
 feature 002, where eight tasks ended up citing unrelated requirements — a task
 about reading a puzzle identifier pointed at the requirement for marking
-conflicts. Permanent identifiers remove the failure mode rather than detecting
-it, which is worth more than the tidiness they cost.*
+conflicts. Never reusing a number removes that failure mode rather than
+detecting it, which is worth more than the tidiness it costs.*
+
+*Rationale for the two regimes: a tombstone protects a reader who cannot see the
+change that removed the requirement. Before `Complete` there is no such reader —
+the spec and everything citing it move together, and a marker for a requirement
+that never shipped is archaeology of a decision nobody made against. After
+`Complete` the spec is something others build and reason against, and silent
+deletion is exactly the rot the rule exists to stop. What both regimes share is
+the part that matters: a retired number stays retired.*
+
+*The second condition above is not a formality. Feature 002 reassigned sixteen
+identifiers during clarification and left its own checklist mapping Principle IX
+to three requirements that had become unrelated. The citation check passed
+throughout, because every reference still resolved — to the wrong requirement.
+Correcting citations in the same change is what the check cannot do for us.*
 
 **Specs record what changed after they settled.** A spec MUST carry a
 `Revisions` section once implementation begins, recording dated entries for
@@ -799,4 +855,4 @@ covered under Development Workflow. Beyond that, this project has one
 contributor and needs no further ceremony. The check that matters is whether the
 artifacts tell the truth about the code.
 
-**Version**: 3.2.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-09
+**Version**: 3.3.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-09
