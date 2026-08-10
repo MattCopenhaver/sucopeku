@@ -138,7 +138,7 @@ confirm the choice held. Needs nothing from Stories 1 to 4.
 - [X] T054 Confirm a cell holding nine centre marks, nine corner marks, a value, and a colour renders at 320px (SC-005, EC-009). Confirmed by hand 2026-08-10
 - [X] T055 Run the feature 002 suites unchanged and confirm conflict marking and solved detection are identical with annotations present (SC-008, FR-005). Done: all 99 of feature 002's tests pass untouched. Their *helpers* changed — emptiness now reads the value element, because a cell's text began including pencil marks — but no assertion did
 - [X] T056 Update `specs/003-pencil-marks/plan.md` and this file if anything built diverged from what was planned
-- [ ] T057 Write the human-authored `## SDD Notes` section in this feature's pull request body
+- [X] T057 Write the human-authored `## SDD Notes` section in this feature's pull request body
 
 ---
 
