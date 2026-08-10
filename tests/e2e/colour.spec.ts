@@ -68,13 +68,19 @@ test('the palette control reaches the second nine (FR-034, FR-042)', async ({ pa
   await page.goto('./');
   await mode(page, 'colour').click();
 
+  // The colour mode control is also the palette control: choosing colour again
+  // switches to the other nine (003 FR-056). There is no separate strip.
   await expect(page.getByTestId('palette')).toBeVisible();
-  await expect(page.getByTestId('palette')).toBeEnabled();
   await expect(page.locator('[data-swatch="l1"]')).toBeVisible();
+  await expect(page.locator('.palette-toggle')).toHaveCount(0);
 
   await page.getByTestId('palette').click();
   await expect(page.locator('[data-swatch="d1"]')).toBeVisible();
   await expect(page.locator('[data-swatch="l1"]')).toHaveCount(0);
+
+  // And by keyboard, on the same control (003 FR-010).
+  await page.keyboard.press('v');
+  await expect(page.locator('[data-swatch="l1"]')).toBeVisible();
 });
 
 test('a colour applies to a cell that came with the puzzle', async ({ page }) => {

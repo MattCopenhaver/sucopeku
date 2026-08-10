@@ -21,7 +21,7 @@ const MODES: readonly { id: Mode; key: string; name: string }[] = [
 ];
 
 /** A miniature cell showing where this mode's digits land (003 FR-054). */
-function modePreview(id: Mode): HTMLElement {
+function modePreview(id: Mode, palette: PaletteId): HTMLElement {
   const preview = document.createElement('span');
   preview.className = 'preview';
   preview.setAttribute('aria-hidden', 'true');
@@ -41,23 +41,16 @@ function modePreview(id: Mode): HTMLElement {
       preview.append(dot);
     }
   } else {
+    // The nine colours in use, radiating from the centre. The control is also
+    // the palette indicator, so it must show which nine (003 FR-056).
     preview.classList.add('preview-colour');
+    const slice = 360 / palettes[palette].length;
+    const stops = palettes[palette]
+      .map((entry, i) => `${entry.colour} ${i * slice}deg ${(i + 1) * slice}deg`)
+      .join(', ');
+    preview.style.setProperty('--wheel', `conic-gradient(from -90deg, ${stops})`);
   }
   return preview;
-}
-
-/** Nine swatches of a palette, small — the control shows its own colours. */
-function palettePreview(palette: PaletteId): HTMLElement {
-  const strip = document.createElement('span');
-  strip.className = 'strip';
-  strip.setAttribute('aria-hidden', 'true');
-  for (const entry of palettes[palette]) {
-    const chip = document.createElement('i');
-    chip.className = 'chip';
-    chip.style.setProperty('--chip', entry.colour);
-    strip.append(chip);
-  }
-  return strip;
 }
 
 export function renderPad(root: HTMLElement, game: Game, onChange: () => void): void {
@@ -108,13 +101,18 @@ export function renderPad(root: HTMLElement, game: Game, onChange: () => void): 
     button.type = 'button';
     button.className = 'mode';
     button.dataset.mode = mode.id;
-    button.append(modePreview(mode.id));
-    button.setAttribute('aria-label', mode.name);
-    button.setAttribute('aria-pressed', String(game.mode === mode.id));
+    button.append(modePreview(mode.id, game.palette));
+    const active = game.mode === mode.id;
+    button.setAttribute(
+      'aria-label',
+      mode.id === COLOUR && active ? 'Colour — press again for the other palette' : mode.name,
+    );
+    if (mode.id === COLOUR) button.dataset.testid = 'palette';
+    button.setAttribute('aria-pressed', String(active));
     button.setAttribute('aria-keyshortcuts', mode.key);
-    if (game.mode === mode.id) button.classList.add('active');
+    if (active) button.classList.add('active');
     button.addEventListener('click', () => {
-      game.mode = mode.id;
+      chooseMode(game, mode.id);
       onChange();
     });
     modes.append(button);
@@ -133,22 +131,19 @@ export function renderPad(root: HTMLElement, game: Game, onChange: () => void): 
   });
   side.append(erase);
   root.append(side);
+}
 
-  // Always present, so the pad does not resize when the mode changes
-  // (003 FR-053). Inert unless colour mode is active.
-  const palette = document.createElement('button');
-  palette.type = 'button';
-  palette.className = 'palette-toggle';
-  palette.dataset.testid = 'palette';
-  palette.append(palettePreview(game.palette === 'light' ? 'dark' : 'light'));
-  palette.setAttribute(
-    'aria-label',
-    `Switch to the ${game.palette === 'light' ? 'dark' : 'light'}-digit palette`,
-  );
-  palette.disabled = game.mode !== COLOUR;
-  palette.addEventListener('click', () => {
+/**
+ * Choosing a mode, with one exception: choosing colour when colour is already
+ * active switches palette instead (003 FR-056).
+ *
+ * Shared by the button and the keyboard so the two cannot diverge — the same
+ * reason placement goes through one function.
+ */
+export function chooseMode(game: Game, mode: Mode): void {
+  if (mode === COLOUR && game.mode === COLOUR) {
     game.palette = game.palette === 'light' ? 'dark' : 'light';
-    onChange();
-  });
-  root.append(palette);
+    return;
+  }
+  game.mode = mode;
 }

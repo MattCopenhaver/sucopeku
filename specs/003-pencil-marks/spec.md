@@ -376,6 +376,10 @@ and confirm it held. Nothing from the other four stories is needed.
 - **FR-055**: The board MUST scale with the window rather than sitting at a
   fixed size, so a large display does not leave the game small enough to invite
   zooming, while a small screen still shows it whole.
+- **FR-056**: Choosing colour mode while it is already active MUST switch to the
+  other palette. The colour control MUST show the nine colours currently in use,
+  so it is both the mode control and the palette indicator and there is no
+  separate palette control.
 
 ### Key Entities
 
@@ -477,3 +481,17 @@ The width is now the smallest of 92% of the viewport width, 62% of its height,
 and 46rem — the height term is what makes a large screen useful, and the cap is
 what stops the board becoming absurd on a very large one. 002 FR-029's
 phone-width guarantee is unaffected: 92vw still wins there.
+
+**2026-08-09 — FR-056 added: the colour control is the palette control.** The
+separate palette strip is gone.
+
+It had to exist whatever the mode, so it would not resize the pad (FR-053), and
+outside colour mode it was a disabled bar taking space to do nothing. Folding it
+into the colour mode button removes a control rather than arranging one better:
+the button shows the nine colours in use, and choosing colour mode again
+switches to the other nine.
+
+FR-034 and FR-042 are unchanged in substance — the pad still shows nine swatches
+in the same arrangement, and the active palette is still visible without
+interacting and still reachable three ways. What changed is which control does
+it.

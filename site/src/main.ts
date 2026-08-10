@@ -4,7 +4,7 @@ import { mostRecentUnsolved, onExternalChange, solvedIds } from './game/progress
 import { Game, type Mode } from './game/state.js';
 import { renderControls } from './ui/controls.js';
 import { renderGrid } from './ui/grid.js';
-import { renderPad } from './ui/pad.js';
+import { chooseMode, renderPad } from './ui/pad.js';
 import { followOtherTabs, initTheme } from './ui/theme.js';
 
 const PARAM = 'puzzle';
@@ -110,7 +110,9 @@ function start(): void {
     };
     const mode = modeKeys[event.key.toLowerCase()];
     if (mode && !event.ctrlKey && !event.metaKey) {
-      game.mode = mode;
+      // Pressing v again switches palette, exactly as clicking the control does
+      // (003 FR-056).
+      chooseMode(game, mode);
       draw();
       return;
     }
