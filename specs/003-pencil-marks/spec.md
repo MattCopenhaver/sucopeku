@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Implementing
+**Status**: Complete
 
 **Input**: User description: "Pencil marks and multi-cell selection. Centre
 marks, corner marks, and colour. Selection becomes a set of cells. The number
@@ -626,3 +626,19 @@ replace what is present, and it does. What made this wrong is FR-022, added by
 this feature: every mark toggles off when pressed again, and values were then
 the one thing on the pad that did not. The inconsistency arrived with pencil
 marks rather than being inherited, so the correction belongs here.
+
+**2026-08-10 — feature complete.** All 75 tasks done and merged in #23. Status
+`Implementing` → `Complete`, which hardens this spec's identifiers: from here a
+requirement that stops applying is withdrawn in place rather than deleted
+(constitution 3.3.0).
+
+Worth recording what the numbers became. The spec was written with 44
+requirements; it ends with 62. Eighteen were added after implementation began,
+and all but two of those came from playing the thing rather than from review —
+the pad's layout, how marks are sized and arranged, how colour is reached and
+combined, how the board is centred, and values toggling like everything else.
+
+The player's own note on the pull request reads: *"Lots of iteration here,
+almost all on the visual aspects of the implementation. I guess this indicates
+it's tough to fully articulate those types of requirements up front. But the
+iteration worked well."*
