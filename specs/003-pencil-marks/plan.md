@@ -104,6 +104,7 @@ site/
     ├── rulesets/                # UNCHANGED
     ├── puzzles/                 # UNCHANGED
     ├── game/
+    │   ├── palettes.ts          # The eighteen colours as data (added, see below)
     │   ├── data.ts              # Unchanged
     │   ├── progress.ts          # Version 2; annotations; separate theme key
     │   ├── state.ts             # selection: Set, anchor, mode, palette
@@ -112,6 +113,7 @@ site/
     │       ├── marks.ts         # centre and corner — one implementation, two ids
     │       └── colour.ts        # one palette entry per cell
     ├── ui/
+    │   ├── annotations.ts       # Renderers, by kind id (added, see below)
     │   ├── grid.ts              # Pointer drag, multi-cell indication, layered cell
     │   ├── pad.ts               # 3x3 digits, mode buttons, swatches, palette control
     │   ├── controls.ts          # Gains the theme control
@@ -157,3 +159,36 @@ Recorded so they are choices rather than oversights:
 ## Complexity Tracking
 
 > No constitution violations requiring justification.
+
+## What diverged from this plan
+
+Recorded under T056.
+
+**Interaction state has five fields, not four.** The plan named selection,
+anchor, mode, and palette. A cursor was missing: a range needs a fixed end and a
+moving one, and with only the anchor a second shift+arrow recomputes the same
+range. Two tests failed identically before this was understood. research.md D2
+and the data model now carry it.
+
+**`site/src/ui/annotations.ts` was added**, and `render` left the kind contract.
+As planned, a kind supplied its own renderer — which would have put DOM code
+inside `game/annotations/`, the layer that must not have any. Behaviour and
+appearance are now separate registries keyed by the same identifier. FR-007 is
+unaffected: a fourth kind is still one file in each and no edit to the others.
+
+**`site/src/game/palettes.ts` was added.** The plan implied the eighteen colours
+would live in `style.css` alone, but the colour kind must validate a stored
+identifier against them, so they exist as data with CSS reading from it.
+
+**Selection is painted, not re-rendered.** The plan said nothing either way, and
+the obvious implementation — call the existing redraw — hangs every click:
+pointerdown precedes click, so rebuilding destroys the button before its own
+click event completes. Feature 002 documented that exact hazard for focus, three
+lines above where the new code went, and it was walked into anyway. Four tests
+hung with no error message until selection was changed to move a class.
+
+**Test helpers changed across every existing spec.** Emptiness was decided with
+`cell.textContent`, which silently starts returning pencil marks as though they
+were answers. No assertion changed; every emptiness check now reads the value
+element. This is the divergence most worth remembering: nothing failed until a
+test both placed a mark and solved a puzzle.

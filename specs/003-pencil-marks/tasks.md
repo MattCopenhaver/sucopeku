@@ -136,8 +136,8 @@ confirm the choice held. Needs nothing from Stories 1 to 4.
 - [ ] T052 Validate quickstart Scenario 9 by hand on a real device: drag across the grid and confirm cells are selected and the page does not scroll. Playwright drives the drag but will not reliably report scrolling (SC-007, research.md D8)
 - [ ] T053 Validate quickstart Scenario 11 by hand: block storage for the site and confirm annotation still works for the session (FR-038, EC-008)
 - [ ] T054 Confirm a cell holding nine centre marks, nine corner marks, a value, and a colour renders at 320px (SC-005, EC-009). The spec knowingly accepts digits near 6px here — see the Clarifications entry before judging the result
-- [ ] T055 Run the feature 002 suites unchanged and confirm conflict marking and solved detection are identical with annotations present (SC-008, FR-005)
-- [ ] T056 Update `specs/003-pencil-marks/plan.md` and this file if anything built diverged from what was planned
+- [X] T055 Run the feature 002 suites unchanged and confirm conflict marking and solved detection are identical with annotations present (SC-008, FR-005). Done: all 99 of feature 002's tests pass untouched. Their *helpers* changed — emptiness now reads the value element, because a cell's text began including pencil marks — but no assertion did
+- [X] T056 Update `specs/003-pencil-marks/plan.md` and this file if anything built diverged from what was planned
 - [ ] T057 Write the human-authored `## SDD Notes` section in this feature's pull request body
 
 ---
