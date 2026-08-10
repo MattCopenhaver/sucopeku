@@ -10,6 +10,28 @@
 marks, corner marks, and colour. Selection becomes a set of cells. The number
 pad becomes a three by three grid with explicit mode buttons."
 
+## Clarifications
+
+### Session 2026-08-09
+
+- Q: When the player presses erase, should it clear only the kind of thing the
+  current mode governs, or everything in the selected cells at once? → A:
+  Progressive — value, then marks, then colour.
+- Q: With several cells selected where some hold values and some hold only
+  marks, does erase decide once for the whole selection or per cell? → A: Once
+  for the whole selection.
+- Q: How does the player reach eighteen colours when the pad is a three-by-three
+  grid of nine? → A: The pad stays 3×3 and a palette control switches between
+  the two nines.
+- Q: When a player completes a puzzle, are their pencil marks and colours
+  cleared or kept? → A: Kept, hidden under the completed values like any other
+  value.
+- Q: Should SC-005 keep requiring a cell holding nine centre marks, nine corner
+  marks, a value and a colour to be legible at 320px, given a cell is about 31px
+  there and the digits would land near 6px? → A: Keep it as written; digits that
+  small are accepted at that width. Recorded so the criterion is understood to
+  have been chosen with its cost known, not written by accident.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Pencil in the candidates for a cell (Priority: P1)
@@ -219,9 +241,18 @@ digit in them, given or entered, remains readable.
   without deleting them.
 - **FR-024**: Erasing a value MUST make that cell's hidden pencil marks visible
   again.
-- **FR-025**: The erase key MUST clear
-  [NEEDS CLARIFICATION: does erase remove only what the current mode governs, or
-  everything in the selected cells — value, marks, and colour together?]
+- **FR-025**: The erase key MUST clear the selected cells one layer at a time,
+  in the order value, then marks, then colour. The layer MUST be chosen once for
+  the whole selection: if any selected cell holds a value, the press clears
+  values from every selected cell; otherwise if any holds a mark, it clears
+  centre and corner marks from every selected cell together; otherwise it clears
+  colour. Repeated presses walk the whole selection down the layers in step.
+- **FR-041**: Erase MUST ignore the current mode. It is the only control on the
+  pad that does, so that a cluttered cell can be emptied without switching modes
+  four times.
+- **FR-044**: The selection MUST survive a placement. FR-022's rule — press
+  again to remove — is only reachable if the same cells are still selected after
+  the first press.
 - **FR-026**: A placement that changes nothing — an annotation on a given cell,
   an erase on empty cells — MUST do nothing and MUST NOT report an error.
 
@@ -240,10 +271,14 @@ digit in them, given or entered, remains readable.
 - **FR-032**: Every digit shown in a coloured cell — given, entered, centre
   mark, or corner mark — MUST remain legible against that colour.
 - **FR-033**: Applying a cell's current colour again MUST remove the colour.
-- **FR-034**: Both palettes MUST be reachable
-  [NEEDS CLARIFICATION: how does the player reach eighteen colours from a
-  three-by-three pad — two pages with a toggle, a longer scrolling palette, or
-  something else?]
+- **FR-034**: In colour mode the number pad MUST show nine swatches in the same
+  three-by-three arrangement the digits use, and a palette control MUST switch
+  between the light-digit nine and the dark-digit nine. The pad MUST NOT change
+  shape between modes.
+- **FR-042**: The active palette MUST be visible without interacting with it,
+  and MUST be reachable by keyboard, by pointer, and by touch.
+- **FR-043**: The active palette MUST NOT be part of saved progress. Like the
+  mode, it is working state and MUST reset when a puzzle loads.
 
 **Persistence**
 
@@ -260,9 +295,10 @@ digit in them, given or entered, remains readable.
 
 - **FR-039**: While a puzzle is solved and locked, annotations MUST be refused
   exactly as values are.
-- **FR-040**: Unlocking MUST restore the ability to annotate
-  [NEEDS CLARIFICATION: should solving a puzzle clear its annotations, or leave
-  them in place under the completed grid?]
+- **FR-040**: Solving a puzzle MUST NOT clear its annotations. A completed board
+  is a board where every cell holds a value, and marks are hidden under values
+  by FR-023 already — no special case applies. Unlocking and erasing a cell MUST
+  reveal that cell's marks exactly as it does on an unsolved board.
 
 ### Key Entities
 

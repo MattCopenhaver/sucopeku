@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -24,16 +24,21 @@
 
 ## Feature Readiness
 
-- [ ] All functional requirements have clear acceptance criteria
+- [x] All functional requirements have clear acceptance criteria
 - [x] User scenarios cover primary flows
 - [x] Feature meets measurable outcomes defined in Success Criteria
 - [x] No implementation details leak into specification
 
 ## Notes
 
-Three [NEEDS CLARIFICATION] markers remain, all deliberate — FR-025, FR-034, and
-FR-040. Each has several defensible answers with different consequences, and the
-player has been consistent that assumptions should not be made on their behalf.
+All markers resolved in the clarification session of 2026-08-09. FR-025, FR-034
+and FR-040 were answered, and four requirements were appended as consequences:
+FR-041 (erase ignores the mode), FR-042 and FR-043 (the palette control and that
+it is working state), and FR-044 (the selection survives a placement).
+
+SC-005 was questioned and deliberately kept as written. At 320px a cell is about
+31px, so a fully loaded cell renders digits near 6px; that cost was weighed and
+accepted rather than overlooked. The Clarifications section records it.
 
 ### Constitutional constraints reflected in this spec
 
