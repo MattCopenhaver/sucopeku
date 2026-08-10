@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -33,16 +33,19 @@
 
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`
 
-### Outstanding
+### Resolved 2026-08-09
 
-Two [NEEDS CLARIFICATION] markers remain:
+Both questions answered by the owner and folded into the spec:
 
-1. How the single solution of each curated puzzle is verified. Principle II
-   requires it; Principle VIII constrains how it can be tested. The options
-   differ by a solver's worth of work.
-2. What happens to the puzzle a player leaves when they start another. FR-023
-   protects its progress but nothing says how they return to it, which decides
-   whether this feature needs a navigation surface.
+1. Uniqueness is verified **once, outside the repository**, before the data
+   ships. No solver is built here — the puzzles are fixed, so one-time
+   verification is evidence rather than a standing promise.
+2. **Each puzzle has its own address.** Returning means opening that link again,
+   so no list or navigation surface is needed. Arriving without naming a puzzle
+   picks one at random and places the player at its address, so a reload does not
+   reshuffle.
+
+All checklist items now pass.
 
 ### Constitutional constraints reflected in this spec
 
@@ -50,10 +53,19 @@ Recorded so a reviewer can see these were derived rather than invented:
 
 - **Principle II** → FR-002 (every curated puzzle has exactly one solution)
 - **Principle III** → FR-005, FR-006 (ruleset as data; evaluator ruleset-agnostic)
-- **Principle V** → FR-021 (stored progress versioned, every version loadable)
-- **Principle VI** → FR-017 to FR-020 (automatic, per-puzzle, capped at 10)
-- **Principle IX** → FR-011, FR-012, FR-015 (input parity, phone width, conflicts
+- **Principle V (as amended in 3.0.0)** → FR-035 (progress and addresses carry a
+  version identifier; before 1.0 they may break, provided unreadable state is
+  discarded gracefully rather than causing an error)
+- **Principle VI** → FR-031 to FR-034 (automatic, per-puzzle, capped at 10)
+- **Principle IX** → FR-017, FR-018, FR-021 (input parity, phone width, conflicts
   not signalled by colour alone)
+
+*Corrected 2026-08-09. These cited FR-026, FR-022 to FR-025, and the eleventh,
+twelfth and fifteenth requirements — the numbers those obligations held before
+clarification inserted the
+interaction requirements and shifted everything after them. Every one of those
+references still resolved, which is why the citation check never objected: it
+proves a reference exists, not that it still points at what the text claims.*
 
 ### Note on edge case numbering
 

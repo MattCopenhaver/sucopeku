@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Draft
+**Status**: Implementing
 
 **Input**: User description: "A playable Sudoku game. When a player starts, they are given one of 20 curated puzzles chosen at random. They can enter and clear values in cells, and the game shows conflicts under the classic Sudoku ruleset. Progress on a puzzle is saved in the browser and restored when the player returns to it. Playable by keyboard, mouse, and touch. Puzzle generation is out of scope for this feature — the 20 puzzles are curated data shipped with the site."
 
@@ -33,14 +33,24 @@ point of the project even with no conflict marking and no saving.
 
 1. **Given** a player opening Sucopeku, **When** the page loads, **Then** a
    Sudoku grid appears with some cells already filled.
-2. **Given** an empty cell, **When** the player enters a number from 1 to 9,
-   **Then** that number appears in the cell.
-3. **Given** a cell the player filled, **When** they clear it, **Then** the cell
-   is empty again.
-4. **Given** a cell that came with the puzzle, **When** the player attempts to
+2. **Given** a player with an unsolved puzzle in progress, **When** they open
+   Sucopeku without naming a puzzle, **Then** they resume that puzzle rather than
+   receiving a new one.
+3. **Given** a player whose only progress is on solved puzzles, **When** they
+   open Sucopeku without naming a puzzle, **Then** they receive a puzzle chosen
+   at random.
+4. **Given** a digit selected on the number pad, **When** the player chooses an
+   empty cell, **Then** that digit appears in the cell and stays selected.
+5. **Given** a selected cell, **When** the player types a digit, **Then** that
+   digit appears in the cell and becomes the selected digit.
+6. **Given** a cell the player filled and erase selected, **When** they choose
+   that cell, **Then** the cell is empty again.
+7. **Given** a cell that came with the puzzle, **When** the player attempts to
    change it, **Then** its value does not change.
-5. **Given** a grid one correct value from completion, **When** that value is
-   entered, **Then** the player is told the puzzle is solved.
+8. **Given** a grid one correct value from completion, **When** that value is
+   entered, **Then** the puzzle is shown as solved and the grid locks.
+9. **Given** a solved, locked puzzle, **When** the player uses the unlock
+   control, **Then** they can enter and erase values again.
 
 ---
 
@@ -82,6 +92,10 @@ their entries intact.
 Losing a half-finished grid to a reload is the kind of failure that ends a
 player's relationship with a site.
 
+Each puzzle has its own address, so returning is a matter of opening that link
+again — from a bookmark, from history, or by being given the same puzzle another
+day.
+
 **Independent Test**: Fill several cells, reload the page, and confirm those
 cells still hold their values.
 
@@ -93,9 +107,15 @@ cells still hold their values.
    browser entirely, **Then** their progress is still there.
 3. **Given** a solved puzzle, **When** the player returns, **Then** it is still
    shown as solved.
-4. **Given** progress on a puzzle, **When** the player starts a different puzzle
+4. **Given** progress on a puzzle, **When** the player opens that puzzle's
+   address directly, **Then** the puzzle loads with their entries intact.
+5. **Given** progress on a puzzle, **When** the player starts a different puzzle
    and later returns to the first, **Then** the first puzzle's progress is
    intact.
+6. **Given** the same puzzle open in two tabs, **When** the player enters a value
+   in one, **Then** the other shows it without being reloaded.
+7. **Given** two tabs showing different puzzles, **When** one saves, **Then** the
+   other puzzle's progress is unaffected.
 
 ---
 
@@ -113,11 +133,13 @@ one, and that the previous one's progress is unaffected.
 
 **Acceptance Scenarios**:
 
-1. **Given** a player on any puzzle, **When** they ask for a new one, **Then** a
-   different puzzle from the curated set is shown.
-2. **Given** a new puzzle has been started, **When** the player returns to the
-   previous one, **Then** its progress is intact.
-3. **Given** the player has played several puzzles, **When** they ask for another,
+1. **Given** a player on any puzzle, **When** they use the new-puzzle control,
+   **Then** a different puzzle from the curated set is shown, at its own address.
+2. **Given** a player who has moved to a new puzzle, **When** they go back in
+   their browser, **Then** the previous puzzle is shown with its progress.
+3. **Given** a new puzzle has been started, **When** the player opens the
+   previous puzzle's address, **Then** its progress is intact.
+4. **Given** the player has played several puzzles, **When** they ask for another,
    **Then** they are not repeatedly given one they have already completed while
    unplayed puzzles remain.
 
@@ -135,6 +157,8 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - **EC-003**: When stored progress refers to a puzzle that no longer exists in
   the curated set, the player MUST be given a working puzzle rather than an
   error or an empty grid.
+- **EC-010**: When an address names a puzzle identifier that is malformed or
+  unknown, the player MUST be given a working puzzle rather than an error.
 - **EC-004**: When stored progress is unreadable or corrupt, the player MUST be
   given a working puzzle. Losing progress is acceptable; failing to start is not.
 - **EC-005**: When a stored entry conflicts with the puzzle's fixed values —
@@ -143,10 +167,14 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - **EC-006**: When the browser denies or exhausts storage, the puzzle MUST remain
   fully playable for the session. Persistence is an enhancement on top of a game
   that already works.
-- **EC-007**: When the player completes a puzzle, further entry into it MUST NOT
-  be able to break the solved state into an inconsistent one.
-- **EC-008**: When the same puzzle is open in two browser tabs, neither MUST
-  corrupt the other's stored progress into an unloadable state.
+- **EC-007**: When a player unlocks a solved puzzle and then clears a value, the
+  puzzle MUST stop being shown as solved rather than holding a stale solved
+  state. Completing it again MUST show it as solved again.
+- **EC-008**: When two tabs write at the same instant, one write wins and the
+  stored document MUST remain loadable. Losing the later of two simultaneous
+  entries is acceptable; an unreadable document is not. *Promoted in part to
+  FR-036 and FR-037 — reflecting one tab's work in another changes the design
+  rather than exercising it.*
 - **EC-009**: When the grid is displayed at 320px width, every cell MUST remain
   legible and reachable without horizontal scrolling.
 
@@ -159,8 +187,13 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - **FR-001**: The site MUST ship with 20 curated Sudoku puzzles as data.
 - **FR-002**: Every curated puzzle MUST have exactly one solution under the
   classic ruleset, per constitution Principle II.
-- **FR-003**: When a player has no puzzle in progress, the site MUST give them
-  one of the curated puzzles chosen at random.
+- **FR-003**: When a player arrives without naming a puzzle, the site MUST give
+  them the most recently played puzzle that is not solved. If every puzzle they
+  have progress on is solved, or they have none, it MUST choose one at random.
+
+  The reason to resume at all is to continue work, and a solved puzzle has none
+  left — landing a returning player on a locked, completed board would be worse
+  than giving them a fresh one.
 - **FR-004**: Cells that come with the puzzle MUST NOT be changeable by the
   player.
 
@@ -179,42 +212,88 @@ cases are traced and covered by tasks exactly as functional requirements are.
 
 - **FR-008**: A player MUST be able to enter a value from 1 to 9 into any cell
   they are permitted to change.
-- **FR-009**: A player MUST be able to clear a value they entered.
-- **FR-010**: The site MUST indicate which cell the player is currently acting
+- **FR-009**: The site MUST present a number pad of the digits 1 to 9 that is
+  visible whenever a puzzle is shown.
+- **FR-010**: Entry MUST be cell-first: the player chooses a cell, and then
+  chooses a digit to place in it. The chosen cell MUST remain selected after
+  placement, so its value can be corrected without selecting it again.
+- **FR-012**: Typing a digit MUST place it in the selected cell. This is a
+  shortcut over the same model, not a second one: every action it performs is
+  also reachable from the number pad, and both act on the selected cell.
+- **FR-013**: A player MUST be able to clear a value they entered.
+- **FR-014**: The number pad MUST include an erase key. Choosing it clears the
+  player's value in the selected cell. Pressing Backspace or Delete MUST do the
+  same.
+- **FR-015**: Choosing erase while the selected cell holds no player value MUST
+  do nothing, and MUST NOT report an error.
+- **FR-016**: The site MUST indicate which cell the player is currently acting
   on.
-- **FR-011**: Every action a player can take MUST be possible by keyboard, by
+- **FR-017**: Every action a player can take MUST be possible by keyboard, by
   pointer, and by touch, with no action reachable by only one of them, per
   constitution Principle IX.
-- **FR-012**: The grid MUST be usable at 320px width without horizontal
+- **FR-018**: The grid MUST be usable at 320px width without horizontal
   scrolling.
 
 **Conflicts and completion**
 
-- **FR-013**: When a value violates a constraint, the cells involved MUST be
+- **FR-019**: When a value violates a constraint, the cells involved MUST be
   marked as conflicting.
-- **FR-014**: When a conflict is resolved, the marking MUST clear.
-- **FR-015**: Conflicts MUST be distinguishable by something other than colour
+- **FR-020**: When a conflict is resolved, the marking MUST clear.
+- **FR-021**: Conflicts MUST be distinguishable by something other than colour
   alone.
-- **FR-016**: When the board is complete and violates no constraint, the player
-  MUST be told the puzzle is solved.
+- **FR-022**: When the board is complete and violates no constraint, the site
+  MUST show that the puzzle is solved, visibly enough that a person does not have
+  to inspect individual cells to know.
+- **FR-023**: On solving, the grid MUST lock: while locked, no value can be
+  entered or erased.
+- **FR-024**: The site MUST present a control that unlocks a solved puzzle for
+  further editing. Once unlocked it behaves as any puzzle in progress, and is
+  shown as solved again if completed again.
+- **FR-025**: Whether a puzzle is solved, and whether it has been unlocked, MUST
+  be part of its stored progress, so returning restores what the player left.
+
+**Each puzzle has an address**
+
+- **FR-026**: Every curated puzzle MUST have its own address, derived from a
+  puzzle identifier that is stable across releases.
+- **FR-027**: Opening a puzzle's address MUST load that puzzle. If the player has
+  progress on it, that progress MUST be restored.
+- **FR-028**: Arriving without naming a puzzle MUST place the player at the
+  selected puzzle's address, so that reloading keeps them on the same puzzle
+  rather than reshuffling. Which puzzle is selected is FR-003's business; this
+  requirement governs only the address.
+- **FR-029**: An address naming a puzzle that does not exist MUST NOT produce an
+  error. The player MUST be given a working puzzle.
+- **FR-030**: The address MUST carry only a puzzle identifier, not an encoded
+  board. The puzzles ship with the site.
 
 **Progress**
 
-- **FR-017**: A puzzle in progress MUST be saved in the browser and restored when
+- **FR-031**: A puzzle in progress MUST be saved in the browser and restored when
   the player returns to it, per constitution Principle VI.
-- **FR-018**: Saving MUST NOT require the player to take any action.
-- **FR-019**: Progress MUST be stored per puzzle, so that returning to an earlier
-  puzzle restores that puzzle's own entries.
-- **FR-020**: The site MUST retain progress for at most 10 puzzles, discarding
+- **FR-032**: Saving MUST NOT require the player to take any action.
+- **FR-033**: Progress MUST be stored against the puzzle's identifier, so that
+  reaching a puzzle by any route — its address, or being given it at random —
+  restores that puzzle's own entries.
+- **FR-034**: The site MUST retain progress for at most 10 puzzles, discarding
   the least recently played beyond that, per constitution Principle VI.
-- **FR-021**: Stored progress MUST carry a version identifier, and every version
-  ever released MUST remain loadable, per constitution Principle V.
+- **FR-035**: Stored progress and puzzle addresses MUST each carry a version
+  identifier. Before Sucopeku 1.0 they MAY break: state that can no longer be
+  read MUST be discarded gracefully rather than causing an error, per
+  constitution Principle V as amended in 3.0.0.
+
+- **FR-036**: A change made in one browser tab MUST be reflected in any other tab
+  showing the same puzzle, without the player reloading.
+- **FR-037**: Saving MUST NOT discard another puzzle's progress. A tab writes by
+  merging its change into the stored document as it currently stands, rather than
+  replacing the document with what it last read.
 
 **Starting another puzzle**
 
-- **FR-022**: A player MUST be able to start a different puzzle from the curated
-  set.
-- **FR-023**: Starting a different puzzle MUST NOT discard progress on the one
+- **FR-038**: The site MUST present a single control that starts a different
+  puzzle, chosen at random from the curated set, and moves the player to that
+  puzzle's address.
+- **FR-039**: Starting a different puzzle MUST NOT discard progress on the one
   being left.
 
 ### Key Entities
@@ -242,22 +321,33 @@ cases are traced and covered by tasks exactly as functional requirements are.
   the keyboard, and again using only a pointer, and again using only touch.
 - **SC-004**: Entering a conflicting value marks it within one action — the
   player never has to do anything extra to find out.
-- **SC-005**: After filling cells and reloading, 100% of the player's entries are
+- **SC-005**: A solved puzzle is identifiable without inspecting individual
+  cells, and no value can be entered or erased until it is unlocked.
+- **SC-006**: After filling cells and reloading, 100% of the player's entries are
   still present.
-- **SC-006**: After playing a second puzzle and returning to the first, 100% of
+- **SC-007**: After playing a second puzzle and returning to the first, 100% of
   the first puzzle's entries are still present.
-- **SC-007**: The grid is fully usable at 320px width, with no horizontal
+- **SC-008**: The grid is fully usable at 320px width, with no horizontal
   scrolling and every cell reachable.
-- **SC-008**: A conflict is identifiable in a greyscale screenshot.
+- **SC-009**: A conflict is identifiable in a greyscale screenshot.
 
 ## Assumptions
 
 - **Generation is out of scope.** The 20 puzzles are curated data. Generating
-  puzzles, rating difficulty, and verifying uniqueness at runtime belong to a
-  later feature.
-- **Sharing is out of scope.** No links, no encoded puzzle state in the URL.
-  Constitution Principle V still binds what this feature does store, which is why
-  stored progress carries a version identifier.
+  puzzles and rating difficulty belong to a later feature.
+- **Uniqueness is verified once, outside the repository.** Each curated puzzle is
+  confirmed to have exactly one solution before it ships, and how that was done is
+  recorded alongside the data. No solver is built here — that satisfies Principle
+  II for fixed data without dragging the generation feature's hardest piece
+  forward.
+- **Addresses name a puzzle; they do not encode one.** A link carries a puzzle
+  identifier, and the board itself ships with the site. Sharing an arbitrary or
+  generated puzzle — which requires encoding a board into a link — belongs to the
+  generation feature.
+- **Formats may break before 1.0.** Constitution 3.0.0 makes stored progress and
+  addresses provisional until 1.0 is declared, provided failures are graceful.
+  This is what allows persistence to be built now without committing forever to a
+  shape chosen before variants and generation exist.
 - **Classic Sudoku only.** One ruleset. The point of expressing it as data is
   that adding variants later requires no engine change — not that variants exist
   now.
@@ -265,26 +355,170 @@ cases are traced and covered by tasks exactly as functional requirements are.
   Principle IV requires.
 - **Difficulty is not modelled.** The curated puzzles may vary in difficulty, but
   nothing labels, sorts, or filters by it.
-- **No solving assistance.** No hints, no auto-fill, no pencil marks, no undo
-  history. Each is defensible and each is a separate feature.
+- **No solving assistance.** No hints, no auto-fill, no undo history. Each is
+  defensible and each is a separate feature.
+- **No navigation surface is built.** Because each puzzle has its own address,
+  returning to a previous puzzle needs nothing beyond browser history — no list
+  of puzzles, no menu. This was chosen over a puzzle list during clarification
+  and is recorded here rather than as a requirement, since it describes work
+  deliberately not done. A future feature adding a list is reversing this
+  decision, not filling a gap.
+- **Pencil marks are out of scope, but not designed out.** Marking candidate
+  values in a cell belongs to a later feature. The digit-first input model was
+  chosen partly because it accommodates them: with a digit already selected, a
+  notes mode can mark several cells without reselecting. Nothing here should make
+  that harder.
 - **Accessibility posture inherited.** Colourblind-safe conflict marking is
-  required by FR-015 because it is free at design time; screen reader support is
+  required by FR-021 because it is free at design time; screen reader support is
   supported where free but does not constrain other decisions, per Principle IX.
 
-## Clarifications Needed
+## Clarifications
 
-- **[NEEDS CLARIFICATION: How is a curated puzzle's single solution verified, and
-  by whom?]** Principle II requires every puzzle presented to have exactly one
-  solution, and requires mechanical verification for generated puzzles. These are
-  curated rather than generated, and Principle VIII forbids tests that a player
-  could not perform — so a solver-based uniqueness test does not obviously fit.
-  The options differ substantially in work: verify once by hand outside the
-  repository and trust the data; build a solver in this feature purely to check
-  the curated set; or defer verification to the generation feature that will need
-  a solver anyway.
-- **[NEEDS CLARIFICATION: When a player asks for a new puzzle, what happens to
-  the one they were on?]** FR-023 says progress is not discarded, but not how the
-  player gets back. Options range from no way back at all (progress is retained
-  but unreachable, which makes FR-019 untestable), to a list of puzzles in
-  progress, to simply cycling through the set in order. This determines whether
-  this feature needs any navigation surface at all.
+### Session 2026-08-09
+
+- Q: How does a player put a number into a cell on a touchscreen? → A: An
+  always-visible number pad, and the interaction is digit-first: the player
+  selects the number they want, then taps the cells to place it into. Chosen
+  partly because it extends to pencil marks later — with a digit already held,
+  a notes mode can mark several cells without reselecting.
+- Q: On a keyboard, does the player also work digit-first, or can they move to a
+  cell and type the number? → A: Digit-first is the shared model, but typing a
+  digit while a cell is selected both selects that digit and places it. Parity
+  holds because every keyboard action also exists on the pad; keyboard players
+  simply get a shortcut rather than a separate mental model.
+- Q: With entry being digit-first, how does a player clear a value? → A: An erase
+  key on the number pad, selected like a digit and then applied to cells.
+  Backspace and Delete do the same from the keyboard. Erase behaves as a tenth
+  key rather than a new interaction concept, so it inherits input parity.
+- Q: How does a player get a different puzzle, and where does that control live?
+  → A: A single "new puzzle" control that picks a different one at random and
+  moves the player to that puzzle's address. Returning to a previous puzzle needs
+  no navigation of its own — browser history does it, because each puzzle already
+  has an address.
+- Q: When the player solves a puzzle, what changes on screen and can they keep
+  editing? → A: A visible solved indication and the grid locks, plus an explicit
+  control to unlock and keep editing. Locking makes the completed state
+  unambiguous for storage and for tests; the unlock keeps the player in charge
+  rather than shut out of their own board.
+
+- Q: How is each curated puzzle's single solution verified, and by whom? → A:
+  Verified once outside the repository, before the data ships. No solver is built
+  in this feature; the puzzles are fixed, so one-time verification is real
+  evidence rather than a standing promise.
+- Q: When a player starts a different puzzle, how do they get back to the one they
+  left? → A: Each puzzle has its own address. Returning means opening that link
+  again — from a bookmark, from history, or by being given the same puzzle at
+  random. No list or navigation surface is needed.
+- Q: Does reloading reshuffle the puzzle? → A: No. Arriving without naming a
+  puzzle selects one at random and places the player at that puzzle's address, so
+  a reload keeps them where they were.
+
+## Revisions
+
+Changes made after this specification settled, per constitution 3.2.0.
+Identifiers are permanent from this point. Those assigned earlier are the product
+of renumbering during clarification and are frozen at their current values.
+
+**2026-08-09 — cross-tab reflection promoted out of an edge case.** FR-036 and
+FR-037 added; EC-008 narrowed to the residual. EC-008 had required only that
+concurrent writes leave a loadable document, which last-write-wins already
+satisfies. Reflecting one tab's work in another changes the design — a storage
+listener and a merge strategy — so by the promotion test in constitution 2.1.0 it
+is a requirement rather than an edge case.
+
+**2026-08-09 — returning players resume their puzzle.** FR-003 rewritten and
+FR-028 narrowed. FR-003 predated the addressing decision, and its trigger — "has
+no puzzle in progress" — was no longer a condition the site evaluates. It now
+selects the most recently played unsolved puzzle, falling back to random; FR-028
+governs only the address. This needed no new data, since `playedAt` already
+existed for the ten-puzzle eviction cap.
+
+**2026-08-09 — the no-navigation decision moved to Assumptions.** A requirement
+stating that no puzzle list is built described work deliberately not done. It
+could never carry a task, so the coverage map permanently showed one uncovered
+item — which trains a reader to ignore uncovered items.
+
+**2026-08-09 — eleven citations corrected in `tasks.md`.** Eight tasks cited
+requirements that meant something else, a consequence of five renumbering passes
+during clarification. No requirement changed; the record is here because the
+correction is why identifiers are now permanent (constitution 3.2.0) and why the
+citation check exists.
+
+**2026-08-09 — three defects found by browser tests, all invisible to Chromium.**
+Recorded here because Principle VIII asks that the experiment's results be
+reported, and these are results.
+
+*Backspace navigated the browser back.* Safari treats Backspace outside a text
+field as "go back", so pressing erase on a keyboard left the site mid-puzzle.
+Fixed by preventing the default in `site/src/main.ts`. No unit test of the
+keyboard handler would have found this: the handler was correct, and the
+browser did something else afterwards.
+
+*A keyboard player could not enter the grid.* Safari leaves buttons out of the
+tab order unless the player has turned on full keyboard access, and the game
+started with no cell selected. Fixed by selecting the first writable cell on
+load (`site/src/game/state.ts`), so there is always somewhere to be. FR-016 is
+now satisfied from the first frame rather than after the first click.
+
+*Focus and selection could diverge.* Reaching a cell by Tab moved focus without
+selecting it, so a keyboard player typed into nothing; and rebuilding the grid
+after every change dropped focus entirely. Both fixed in `site/src/ui/grid.ts`.
+The focus handler deliberately does not re-render — browsers focus on
+mousedown, so rebuilding there would destroy the button before its own click
+event fired, fixing keyboard input by breaking pointer input.
+
+**2026-08-09 — the service worker's cache key now ignores the query string.**
+T053 as planned. Worth recording why it was not cosmetic: every `?puzzle=`
+address serves the same document, so keeping the query cached one identical copy
+per puzzle *and* made an offline visit to a puzzle address miss a document
+already held. Offline worked at `/` and failed at every address a shared link
+actually has.
+
+**2026-08-09 — T044 cannot use two browser contexts.** Separate contexts do not
+share `localStorage`, so they cannot exercise cross-tab synchronisation at all.
+The test uses two tabs in one context, which is also what a player has.
+
+**2026-08-09 — feature 001's placeholder requirement was superseded.** FR-028
+of `001-delivery-pipeline` required the deployed site to serve a page with no
+gameplay. This feature makes that false, so it was withdrawn in place there and
+FR-029 was amended; `tests/e2e/placeholder.spec.ts` became
+`tests/e2e/site.spec.ts`. This is the first requirement retired under the
+3.2.0 rules, and the mechanism held: the identifier stays taken, the reason is
+on the record, and the citation check still passes.
+
+**2026-08-09 — entry reversed from digit-first to cell-first.** FR-010, FR-012,
+FR-014, and FR-015 amended. The requirement that the site indicate the currently
+selected digit was **deleted outright** — the eleventh, whose number is retired
+and will never be reused. Constitution 3.3.0 permits deletion without a marker
+before a spec is `Complete`, on the grounds that the spec and everything citing
+it move together and no reader can be stranded by it.
+
+Digit-first was chosen before there was anything to use. In use it reads wrong:
+a pointer player picks a digit and enters a *mode*, while a keyboard player
+selects a cell and types into it. Two models, and the pad was the odd one out.
+
+Cell-first removes a concept rather than adding one. There is no selected digit,
+so there is no mode, no indicator for one, and no state to keep in sync — which
+is why the digit-indicator requirement had nothing left to require. Every input
+now does one of two
+things: move the selection, or place into it. Pointer, touch, and keyboard
+become the same model in fact rather than only in wording, which is what FR-012
+always claimed and what FR-017 has to be checkable against.
+
+The cost is that filling several cells with the same digit now takes two actions
+per cell instead of one. That is the trade, and it is the right way round:
+correcting a single cell is the common act; repeating one digit across a region
+is not.
+
+**2026-08-09 — the WebKit fixes confirmed in real Safari.** Playwright's WebKit
+is not Safari, so the three defects it found were re-checked by hand in Safari
+on macOS: Backspace erases rather than navigating back, a cell is selected on
+load, and the whole grid is reachable by arrow keys and typing with no pointer.
+
+Offline was confirmed at a `?puzzle=` address rather than only at `/`, and the
+puzzle stayed playable with all cookies blocked.
+
+Outstanding, and named rather than quietly closed: none of this ran on a real
+iOS device. macOS Safari confirms the mechanism — WebKit's service worker
+serving a query-string address offline — but iOS evicts storage on its own
+schedule and applies stricter limits. That difference is unverified.

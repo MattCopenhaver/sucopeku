@@ -11,7 +11,7 @@ test('the deployed site renders', async ({ page }) => {
     400,
   );
   await expect(page.getByRole('heading', { name: 'Sucopeku' })).toBeVisible();
-  await expect(page.getByTestId('tagline')).toBeVisible();
+  await expect(page.getByTestId('grid')).toBeVisible();
 });
 
 test('the deployed site serves its assets', async ({ page }) => {
