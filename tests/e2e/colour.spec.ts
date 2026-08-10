@@ -149,3 +149,20 @@ for (const scheme of ['light', 'dark'] as const) {
     });
   });
 }
+
+test('the corner mode control shows four distinct marks in the real layout (FR-054)', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const pips = page.locator('[data-mode="corner"] .pip');
+
+  await expect(pips).toHaveCount(4);
+  await expect(pips).toHaveText(['1', '2', '3', '4']);
+
+  // Same positions four real corner marks take: reading order, corners only.
+  const boxes = await pips.evaluateAll((nodes) =>
+    nodes.map((n) => n.getBoundingClientRect()).map((r) => [Math.round(r.x), Math.round(r.y)]),
+  );
+  const sorted = [...boxes].sort((a, b) => a[1]! - b[1]! || a[0]! - b[0]!);
+  expect(boxes, 'the corner preview is not in reading order').toEqual(sorted);
+});

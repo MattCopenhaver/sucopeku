@@ -34,11 +34,14 @@ function modePreview(id: Mode, palette: PaletteId): HTMLElement {
     preview.textContent = '123';
   } else if (id === CORNER) {
     preview.classList.add('preview-corner');
-    for (const slot of ['tl', 'tr', 'bl', 'br']) {
-      const dot = document.createElement('i');
-      dot.className = `pip pip-${slot}`;
-      dot.textContent = '1';
-      preview.append(dot);
+    // The same four positions, in the same order, that four real corner marks
+    // would take — so the control shows the arrangement and not just the idea
+    // of one (003 FR-054, research.md D6).
+    for (const [index, slot] of ['tl', 'tr', 'bl', 'br'].entries()) {
+      const pip = document.createElement('i');
+      pip.className = `pip pip-${slot}`;
+      pip.textContent = String(index + 1);
+      preview.append(pip);
     }
   } else {
     // The nine colours in use, radiating from the centre. The control is also
