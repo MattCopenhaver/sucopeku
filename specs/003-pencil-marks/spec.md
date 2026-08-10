@@ -522,3 +522,15 @@ was wider than the space it occupied. The container stretched past the window,
 the result looked like a centring bug with nothing visibly wrong. The board is
 now measured against its container, which makes fitting and centring the same
 fact rather than two that have to agree.
+
+**2026-08-09 — the pad's content shrank to under a pixel.** Sizing it from
+`--board` looked reasonable and was wrong twice over: the token contains a
+`100%`, which a `width` reads as the container's width and a `font-size` reads
+as a share of the parent's font size. The same token, two meanings, and
+`calc(var(--board) / 21)` came out below one pixel — the buttons rendered blank
+while the build succeeded and every test passed.
+
+Pad content is now sized in container-query units against the pad's own width,
+which has one meaning. A test asserts the digit's rendered size as a *ratio* of
+its button at three window sizes, because "it built and the tests passed" was
+true the whole time this was broken.

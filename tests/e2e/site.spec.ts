@@ -125,3 +125,33 @@ test('the board and the heading are centred in the window', async ({ page }) => 
     expect(grid.x + grid.width).toBeLessThanOrEqual(usable);
   }
 });
+
+test('pad content fills its buttons at every window size', async ({ page }) => {
+  // A regression guard with teeth. The pad's text was once sized from a token
+  // holding a percentage, which a font-size reads as a share of the parent font
+  // rather than of the width: it computed under a pixel and the pad rendered
+  // blank. A ratio check catches that class of mistake, which "it built and the
+  // tests passed" does not.
+  for (const size of [
+    { width: 1600, height: 1200 },
+    { width: 900, height: 800 },
+    { width: 375, height: 720 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto('./');
+
+    const digit = page.locator('[data-key="5"]');
+    const box = (await digit.boundingBox())!;
+    const fontPx = await digit.evaluate((n) => parseFloat(getComputedStyle(n).fontSize));
+
+    expect(fontPx, `digit unreadably small at ${size.width}px`).toBeGreaterThan(9);
+    expect(fontPx / box.height, `digit too small for its key at ${size.width}px`).toBeGreaterThan(
+      0.3,
+    );
+    expect(fontPx / box.height, `digit overflows its key at ${size.width}px`).toBeLessThan(0.95);
+
+    const wheel = page.locator('.preview-colour');
+    const wheelBox = (await wheel.boundingBox())!;
+    expect(wheelBox.width, `colour wheel invisible at ${size.width}px`).toBeGreaterThan(12);
+  }
+});

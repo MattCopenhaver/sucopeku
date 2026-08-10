@@ -369,12 +369,15 @@ p {
   gap: 0.5rem;
   width: var(--board);
 
-  /* One scale for everything in the pad, tied to the board rather than to the
-     root. Sizes below are in em, so a digit, a colour wheel, and a mode preview
-     all grow together with the board and stay in proportion to the buttons that
-     hold them. A fixed rem size left the content small inside large buttons on
-     a big screen. */
-  font-size: calc(var(--board) / 21);
+  /* Everything inside is sized in `cqw` — a percentage of the pad's own width —
+     so digits, the colour wheel, and the mode previews grow with the board and
+     stay in proportion to the buttons holding them.
+
+     Deliberately not `calc(var(--board) / n)`: `--board` contains a `100%`,
+     which means the container's width in a `width` declaration and the parent's
+     font size in a `font-size` one. The same token, read two ways; it computed
+     to under a pixel and the pad went blank. */
+  container-type: inline-size;
 }
 
 .keys {
@@ -387,7 +390,7 @@ p {
 .key {
   aspect-ratio: 3 / 2;
   padding: 0;
-  font-size: 1.15em;
+  font-size: 7.5cqw;
   line-height: 1;
 }
 
@@ -412,9 +415,9 @@ p {
 .mode {
   display: grid;
   place-items: center;
-  padding: 0.12em;
+  padding: 2%;
   font: inherit;
-  font-size: 1em;
+  font-size: 4cqw;
   background: var(--paper);
   color: var(--ink);
   border: 2px solid var(--muted);
@@ -429,7 +432,7 @@ p {
 }
 
 .mode.erase {
-  font-size: 0.55em;
+  font-size: 4cqw;
   padding: 0.5em 0.3em;
 }
 
@@ -442,26 +445,25 @@ p {
   place-items: center;
   width: 100%;
   height: 100%;
-  min-height: 1.7em;
+  min-height: 8cqw;
   border-radius: 0.2rem;
   color: var(--ink);
-  container-type: inline-size;
 }
 
 .preview-value {
-  font-size: 1.35em;
+  font-size: 9cqw;
   line-height: 1;
 }
 
 .preview-centre {
-  font-size: 0.62em;
+  font-size: 4.4cqw;
   line-height: 1;
   letter-spacing: 0.06em;
 }
 
 .preview-corner .pip {
   position: absolute;
-  font-size: 0.5em;
+  font-size: 3.6cqw;
   font-style: normal;
   line-height: 1;
 }
@@ -492,9 +494,9 @@ p {
 .preview-colour {
   background: var(--wheel);
   border-radius: 50%;
-  width: min(100%, 1.9em);
-  height: min(100%, 1.9em);
-  min-height: 1.5em;
+  width: min(100%, 12cqw);
+  height: min(100%, 12cqw);
+  min-height: 9cqw;
   justify-self: center;
   align-self: center;
 }
