@@ -155,3 +155,96 @@ test('pad content fills its buttons at every window size', async ({ page }) => {
     expect(wheelBox.width, `colour wheel invisible at ${size.width}px`).toBeGreaterThan(12);
   }
 });
+
+test('the theme control still works when storage is refused (EC-008, EC-011)', async ({ page }) => {
+  await page.addInitScript(() => {
+    const deny = (): never => {
+      throw new DOMException('denied', 'SecurityError');
+    };
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      get: () => ({ getItem: deny, setItem: deny, removeItem: deny, clear: deny }),
+    });
+  });
+
+  await page.goto('./');
+  await expect(page.getByTestId('grid')).toBeVisible();
+
+  // The theme lives under its own key with its own write path, so feature 002's
+  // storage handling says nothing about it. It must apply for the session even
+  // though the choice cannot be remembered.
+  const control = page.getByTestId('theme');
+  await control.click();
+  await expect(control).toHaveText('Theme: Light');
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe(
+    'light',
+  );
+
+  await control.click();
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe(
+    'dark',
+  );
+});
+
+test('annotation keeps working when storage is refused (FR-038, EC-008)', async ({ page }) => {
+  await page.addInitScript(() => {
+    const deny = (): never => {
+      throw new DOMException('denied', 'SecurityError');
+    };
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      get: () => ({ getItem: deny, setItem: deny, removeItem: deny, clear: deny }),
+    });
+  });
+
+  await page.goto('./');
+  const empty = await page
+    .locator('.cell')
+    .evaluateAll((nodes) =>
+      nodes.map((n, i) => (n.querySelector('.value') ? -1 : i)).filter((i) => i >= 0),
+    );
+  const target = empty[0]!;
+
+  await page.locator(`[data-cell="${target}"]`).click();
+  await page.locator('[data-mode="centre"]').click();
+  await page.locator('[data-key="4"]').click();
+  await expect(page.locator(`[data-cell="${target}"] .centre`)).toHaveText('4');
+
+  await page.locator('[data-mode="colour"]').click();
+  await page.locator('[data-swatch="l2"]').click();
+  await expect(page.locator(`[data-cell="${target}"]`)).toHaveClass(/coloured/);
+});
+
+test('a full storage quota does not stop play (EC-008)', async ({ page }) => {
+  // Denial and exhaustion are different failures that reach the same catch.
+  // Annotations make a puzzle's record several times larger, so exhaustion is
+  // far more reachable than it was — worth its own test rather than assuming
+  // the denial one covers it.
+  await page.addInitScript(() => {
+    const real = window.localStorage;
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      get: () => ({
+        getItem: (k: string) => real.getItem(k),
+        removeItem: (k: string) => real.removeItem(k),
+        clear: () => real.clear(),
+        setItem: () => {
+          throw new DOMException('exceeded', 'QuotaExceededError');
+        },
+      }),
+    });
+  });
+
+  await page.goto('./');
+  const empty = await page
+    .locator('.cell')
+    .evaluateAll((nodes) =>
+      nodes.map((n, i) => (n.querySelector('.value') ? -1 : i)).filter((i) => i >= 0),
+    );
+  const target = empty[0]!;
+
+  await page.locator(`[data-cell="${target}"]`).click();
+  await page.locator('[data-key="5"]').click();
+  await expect(page.locator(`[data-cell="${target}"] .value`)).toHaveText('5');
+  await expect(page.getByTestId('grid')).toBeVisible();
+});

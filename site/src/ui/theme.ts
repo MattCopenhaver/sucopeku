@@ -16,6 +16,17 @@ import { loadTheme, onThemeChange, saveTheme, type ThemeChoice } from '../game/p
 
 const ORDER: readonly ThemeChoice[] = [null, 'light', 'dark'];
 
+/**
+ * The choice in memory, which is the source of truth for this session.
+ *
+ * Reading it back from storage each time looked tidier and broke the control
+ * outright when storage is refused: the write is swallowed, the read returns
+ * nothing, and every press cycles from the beginning — so the theme jumps to
+ * light and stays there while the label never changes. Persistence is an
+ * enhancement here exactly as it is for progress (003 FR-038, EC-008).
+ */
+let current: ThemeChoice = null;
+
 export function applyTheme(choice: ThemeChoice): void {
   const root = document.documentElement;
   if (choice === null) root.removeAttribute('data-theme');
@@ -23,14 +34,14 @@ export function applyTheme(choice: ThemeChoice): void {
 }
 
 export function currentChoice(): ThemeChoice {
-  return loadTheme();
+  return current;
 }
 
 export function cycleTheme(): ThemeChoice {
-  const next = ORDER[(ORDER.indexOf(currentChoice()) + 1) % ORDER.length] ?? null;
-  saveTheme(next);
-  applyTheme(next);
-  return next;
+  current = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length] ?? null;
+  saveTheme(current);
+  applyTheme(current);
+  return current;
 }
 
 export function describeChoice(choice: ThemeChoice): string {
@@ -42,12 +53,14 @@ export function describeChoice(choice: ThemeChoice): string {
 /** Another tab changed the theme; follow it without a reload (003 FR-050). */
 export function followOtherTabs(after: () => void): void {
   onThemeChange(() => {
-    applyTheme(loadTheme());
+    current = loadTheme();
+    applyTheme(current);
     after();
   });
 }
 
 /** Applied before the game renders, so there is no flash of the wrong theme. */
 export function initTheme(): void {
-  applyTheme(loadTheme());
+  current = loadTheme();
+  applyTheme(current);
 }

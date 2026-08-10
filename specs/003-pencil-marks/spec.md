@@ -597,3 +597,19 @@ what guarantees FR-032 rather than the colours themselves.
 That also dissolves a distinction. The two palettes existed because one rendered
 light digits and the other dark; a cell mixing both has no single treatment, so
 they are now simply two sets of nine.
+
+**2026-08-10 — the theme control was unusable when storage is refused.** Asked
+whether anything about storage still needed testing by hand, the honest answer
+was that the theme writes to its own key with its own path and had never been
+exercised under denial. Writing that test found the defect immediately.
+
+`cycleTheme` read the current position back from storage, so with storage
+refused every press cycled from the beginning: the theme jumped to light and
+stayed there while the label never changed. The session now holds the choice and
+storage only remembers it — the same relationship FR-038 already requires for
+progress, applied to the preference that was added later and did not inherit it.
+
+Also covered now: annotations under refused storage, and a *full* quota as
+distinct from a denied one. Annotations make a puzzle's record several times
+larger, so exhaustion is far more reachable than it was, and it is a different
+failure reaching the same catch.

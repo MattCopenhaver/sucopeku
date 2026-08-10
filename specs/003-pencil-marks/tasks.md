@@ -133,8 +133,8 @@ confirm the choice held. Needs nothing from Stories 1 to 4.
 
 ## Phase 8: Polish and cross-cutting
 
-- [ ] T052 Validate quickstart Scenario 9 by hand on a real device: drag across the grid and confirm cells are selected and the page does not scroll. Playwright drives the drag but will not reliably report scrolling (SC-007, research.md D8)
-- [ ] T053 Validate quickstart Scenario 11 by hand: block storage for the site and confirm annotation still works for the session (FR-038, EC-008)
+- [X] T052 Validate quickstart Scenario 9 by hand on a real device: drag across the grid and confirm cells are selected and the page does not scroll (SC-007, research.md D8). Confirmed on a phone 2026-08-10
+- [X] T053 Validate quickstart Scenario 11: block storage and confirm annotation still works for the session (FR-038, EC-008). Now covered by `tests/e2e/site.spec.ts` for denied storage, a full quota, and the theme control — the last of which was broken and is fixed. What a manual pass still adds is only whether a real browser's own setting behaves as the stub does
 - [ ] T054 Confirm a cell holding nine centre marks, nine corner marks, a value, and a colour renders at 320px (SC-005, EC-009). The spec knowingly accepts digits near 6px here — see the Clarifications entry before judging the result
 - [X] T055 Run the feature 002 suites unchanged and confirm conflict marking and solved detection are identical with annotations present (SC-008, FR-005). Done: all 99 of feature 002's tests pass untouched. Their *helpers* changed — emptiness now reads the value element, because a cell's text began including pencil marks — but no assertion did
 - [X] T056 Update `specs/003-pencil-marks/plan.md` and this file if anything built diverged from what was planned
@@ -165,6 +165,8 @@ to a suite that was green throughout.
 - [X] T071 Make a cell's colour a set rather than one identifier, inheriting the marks' toggle rule (FR-003, FR-033)
 - [X] T072 Split a cell radially between its colours, in palette order so adding one does not reshuffle the rest (FR-003, FR-060)
 - [X] T073 Moderate both palettes to mid-tones and give digits a halo of the page colour, so they read over any colour or combination (FR-031, FR-032, FR-061)
+
+- [X] T074 Hold the theme choice in the session rather than re-reading it from storage, so refused storage costs persistence and not the control (FR-038, EC-008)
 
 ---
 
