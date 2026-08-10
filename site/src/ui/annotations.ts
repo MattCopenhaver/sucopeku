@@ -112,11 +112,31 @@ const renderCorner: Renderer = (cell, payload) => {
   });
 };
 
+/**
+ * One colour fills the cell; several split it radially (003 FR-003).
+ *
+ * A conic gradient with hard stops, in palette order so adding a colour does
+ * not reshuffle the others (003 FR-060). Digits stay legible over any of them
+ * because they carry a halo, not because the background was chosen to suit them
+ * (003 FR-061).
+ */
 const renderColour: Renderer = (cell, payload) => {
-  const entry = paletteEntry(payload as string);
-  if (!entry) return;
-  cell.style.setProperty('--cell-colour', entry.colour);
-  cell.classList.add('coloured', `on-${entry.palette}`);
+  const ids = payload as readonly string[];
+  const entries = ids.map((id) => paletteEntry(id)).filter((entry) => entry !== undefined);
+  if (entries.length === 0) return;
+
+  cell.classList.add('coloured');
+  if (entries.length === 1) {
+    cell.style.setProperty('--cell-colour', entries[0]!.colour);
+    return;
+  }
+
+  const slice = 360 / entries.length;
+  const stops = entries
+    .map((entry, i) => `${entry.colour} ${i * slice}deg ${(i + 1) * slice}deg`)
+    .join(', ');
+  cell.style.setProperty('--cell-colour', `conic-gradient(from -90deg, ${stops})`);
+  cell.classList.add('multi');
 };
 
 export const renderers: Readonly<Record<string, Renderer>> = {

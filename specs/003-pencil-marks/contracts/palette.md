@@ -4,27 +4,29 @@
 
 Two palettes, nine entries each (FR-031).
 
-| Palette | Digits rendered | Colours are |
-|---|---|---|
-| `light-digit` | Light | Saturated and darker |
-| `dark-digit` | Dark | Pale tints |
+Two sets of nine, and nothing more. They were once distinguished by whether
+digits on them render light or dark; a cell may now hold colours from both at
+once, so no per-palette treatment can exist.
 
 Each entry has a permanent identifier — it is stored in progress — and a colour
-value.
+value. Entries have a fixed order across both palettes, which is the order a
+cell shows them in (FR-060).
 
 ## Obligations
 
-- **Contrast**: every entry MUST reach at least 4.5:1 against its own palette's
-  digit treatment (FR-032). This is measured, not judged.
+- **Legibility**: digits MUST stay readable on every colour and on any
+  combination of them (FR-032). This is achieved by the digits carrying a halo
+  of the page colour (FR-061), not by choosing backgrounds that suit one digit
+  colour — a cell split between several has no single suitable background.
 - **Distinguishable from the grid**: every entry MUST be visibly different from
   both theme backgrounds, `#fdfdfb` and `#16171a`. The site is light by default
   and dark under `prefers-color-scheme`, so a colour that vanishes in either
   theme fails (research.md D5).
 - **Distinguishable from each other**: within a palette, no two entries should
   be confusable at the size of a cell at 320px.
-- **The digit treatment belongs to the palette, not the theme.** A `light-digit`
-  colour renders light digits in either theme. This is what makes one set of
-  colours work in both.
+- **The digit treatment belongs to nothing.** Digits render in the page's ink
+  colour with a halo of the page colour, in both themes and over every
+  background. That is what allows a cell to mix colours at all.
 
 ## Reaching the second nine
 
@@ -37,5 +39,9 @@ The active palette resets to `light-digit` when a puzzle loads (FR-043).
 
 ## Applying
 
-Applying a cell's current colour removes it (FR-033). Applying a different
-colour replaces it — a cell holds at most one.
+A cell holds a *set* of colours, which makes it the same shape as centre and
+corner marks and gives it their toggle rule for free: applying a colour the cell
+already holds removes it and leaves the rest (FR-033).
+
+Several colours split the cell radially, in palette order, so adding one does
+not reshuffle those already there (FR-003, FR-060).

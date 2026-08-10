@@ -242,18 +242,23 @@ p {
   background: var(--cell-colour);
 }
 
-.cell.on-light,
-.cell.on-light .value,
-.cell.on-light .centre,
-.cell.on-light .corner {
-  color: #ffffff;
-}
+/* Digits carry a halo of the page colour, so they read against any background
+   and any combination of them. This is what makes a cell split between several
+   colours legible at all, and what lets the palettes be moderate mid-tones
+   rather than extremes chosen to suit one digit colour (003 FR-032, FR-061).
 
-.cell.on-dark,
-.cell.on-dark .value,
-.cell.on-dark .centre,
-.cell.on-dark .corner {
-  color: #101010;
+   Four offsets rather than a blur: a blur washes out at the size a centre mark
+   renders, where the halo matters most. */
+.cell.coloured .value,
+.cell.coloured .centre,
+.cell.coloured .corner {
+  color: var(--ink);
+  text-shadow:
+    0 0 0.08em var(--paper),
+    0.04em 0 0.04em var(--paper),
+    -0.04em 0 0.04em var(--paper),
+    0 0.04em 0.04em var(--paper),
+    0 -0.04em 0.04em var(--paper);
 }
 
 /* A value always reads larger than any mark, so an answer is never mistaken

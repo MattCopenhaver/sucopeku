@@ -162,6 +162,10 @@ to a suite that was green throughout.
 - [X] T069 Hide corner marks under a value as centre marks already were (FR-023, FR-024)
 - [X] T070 Add a guard asserting rendered size as a *ratio* of its control at three window sizes, since every test was green while the pad was unreadable (FR-052, FR-053)
 
+- [X] T071 Make a cell's colour a set rather than one identifier, inheriting the marks' toggle rule (FR-003, FR-033)
+- [X] T072 Split a cell radially between its colours, in palette order so adding one does not reshuffle the rest (FR-003, FR-060)
+- [X] T073 Moderate both palettes to mid-tones and give digits a halo of the page colour, so they read over any colour or combination (FR-031, FR-032, FR-061)
+
 ---
 
 ## Dependencies

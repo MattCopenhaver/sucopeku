@@ -132,6 +132,19 @@ chosen by luminance. Fewer colours to pick and no palette control needed —
 but the player asked for eighteen, and automatic contrast selection lands
 unpredictably in the middle of the range, which is where legibility is worst.
 
+**Superseded 2026-08-10, when a cell gained the ability to hold several
+colours.** A per-palette digit treatment cannot survive a cell split between
+both palettes, so the distinction is gone and the two are simply two sets of
+nine.
+
+What replaced it is worth stating, because the request and the fix point in
+opposite directions. The ask was to moderate the colours so digits read whether
+black or white — but mid-tones are the *worst* case for that: a mid-grey is near
+4:1 against white and 5:1 against black, so neither is comfortable. Legibility
+over an unknown background comes from an outline, not from a well-chosen
+background. Digits now carry a halo of the page colour, and that is what makes
+moderating the palettes safe rather than what moderating them achieved.
+
 ---
 
 ## D6. Corner marks go in the corners, and nine share eight slots

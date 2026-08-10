@@ -166,3 +166,75 @@ test('the corner mode control shows four distinct marks in the real layout (FR-0
   const sorted = [...boxes].sort((a, b) => a[1]! - b[1]! || a[0]! - b[0]!);
   expect(boxes, 'the corner preview is not in reading order').toEqual(sorted);
 });
+
+test('a cell holds several colours, split radially (FR-003, FR-060)', async ({ page }) => {
+  await page.goto('./');
+  const target = await firstEmpty(page);
+
+  await cell(page, target).click();
+  await mode(page, 'colour').click();
+  await page.locator('[data-swatch="l6"]').click();
+  await expect(cell(page, target)).toHaveClass(/coloured/);
+  await expect(cell(page, target)).not.toHaveClass(/multi/);
+
+  await page.locator('[data-swatch="l2"]').click();
+  await expect(cell(page, target)).toHaveClass(/multi/);
+
+  // Split radially, in palette order — not the order they were pressed, so the
+  // first colour does not move when a second arrives (FR-060).
+  const background = await cell(page, target).evaluate(
+    (node) => getComputedStyle(node).backgroundImage,
+  );
+  expect(background).toContain('conic-gradient');
+  const l2 = background.indexOf('194, 121, 63');
+  const l6 = background.indexOf('75, 131, 173');
+  expect(l2).toBeGreaterThan(-1);
+  expect(l6).toBeGreaterThan(-1);
+  expect(l2, 'colours are not in palette order').toBeLessThan(l6);
+});
+
+test('removing one colour leaves the others (FR-033)', async ({ page }) => {
+  await page.goto('./');
+  const target = await firstEmpty(page);
+
+  await cell(page, target).click();
+  await mode(page, 'colour').click();
+  for (const id of ['l1', 'l4', 'l7']) await page.locator(`[data-swatch="${id}"]`).click();
+  await expect(cell(page, target)).toHaveClass(/multi/);
+
+  await page.locator('[data-swatch="l4"]').click();
+  const background = await cell(page, target).evaluate(
+    (node) => getComputedStyle(node).backgroundImage,
+  );
+  expect(background, 'the removed colour is still shown').not.toContain('91, 145, 99');
+  await expect(cell(page, target)).toHaveClass(/coloured/);
+
+  for (const id of ['l1', 'l7']) await page.locator(`[data-swatch="${id}"]`).click();
+  await expect(cell(page, target)).not.toHaveClass(/coloured/);
+});
+
+test('digits stay legible on a cell split between several colours (FR-032, FR-061)', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const target = await firstEmpty(page);
+
+  await cell(page, target).click();
+  await page.locator('[data-key="7"]').click();
+  await mode(page, 'colour').click();
+  for (const id of ['l1', 'l6']) await page.locator(`[data-swatch="${id}"]`).click();
+
+  // The second nine are behind the same control — choosing colour again
+  // switches palette (FR-056), so a cell can mix colours from both.
+  await page.getByTestId('palette').click();
+  for (const id of ['d3', 'd8']) await page.locator(`[data-swatch="${id}"]`).click();
+
+  // Every digit carries a halo, so no background can swallow it (FR-061).
+  const shadow = await cell(page, target)
+    .locator('.value')
+    .evaluate((node) => getComputedStyle(node).textShadow);
+  expect(shadow, 'the value has no halo to read against the colours').not.toBe('none');
+
+  await expect(cell(page, target).locator('.value')).toHaveText('7');
+  await expect(cell(page, target)).toHaveClass(/multi/);
+});

@@ -13,7 +13,7 @@ it. The three shipped here:
 |---|---|---|
 | `centre` | A set of values from `ruleset.values` | Add the digit unless every selected cell has it, then remove (FR-022) |
 | `corner` | A set of values from `ruleset.values` | Same as centre |
-| `colour` | One palette entry identifier | Apply, or remove if the cell already holds that exact colour (FR-033) |
+| `colour` | A set of palette entry identifiers | Same as the marks: add unless every selected cell has it, then remove (FR-022, FR-033) |
 
 Adding a fourth kind means adding a row here, a registry entry, and a renderer.
 It must not mean touching the other three — that obligation is FR-007, and it is
@@ -36,7 +36,7 @@ sucopeku.progress
       annotations: {
         centre: { "<cell>": [values] },
         corner: { "<cell>": [values] },
-        colour: { "<cell>": "<paletteEntryId>" }
+        colour: { "<cell>": [paletteEntryIds] }
       },
       solved:   boolean,
       unlocked: boolean,
@@ -115,6 +115,10 @@ this feature away from the part of the system Principle III protects.
 
 A cell draws, back to front: colour, then corner marks, then either the value or
 the centre marks — never both (research.md D9).
+
+A cell holding several colours draws them as a radial split in palette order
+(FR-003, FR-060), and every digit carries a halo so it reads over any of them
+(FR-061).
 
 Corner marks occupy the top edge up to five and the bottom edge up to four,
 never the middle (research.md D6), so they coexist with whatever the middle

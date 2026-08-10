@@ -235,8 +235,9 @@ and confirm it held. Nothing from the other four stories is needed.
   from the ruleset's values, shown small in the middle of the cell.
 - **FR-002**: A player MUST be able to record corner marks on a cell: digits
   from the ruleset's values, shown small at the cell's edges.
-- **FR-003**: A player MUST be able to apply a colour to a cell, changing its
-  background.
+- **FR-003**: A player MUST be able to apply one or more colours to a cell. A
+  cell holding several MUST show them split radially, so every colour applied is
+  visible at once.
 - **FR-004**: Centre marks, corner marks, and colour MUST be independent — a
   cell may carry any combination, and changing one MUST NOT alter another.
 - **FR-005**: Annotations MUST NOT be treated as values. The board evaluated for
@@ -311,11 +312,15 @@ and confirm it held. Nothing from the other four stories is needed.
 
 **Colour**
 
-- **FR-031**: The site MUST offer two palettes of nine colours: one on which
-  digits are rendered light, one on which they are rendered dark.
+- **FR-031**: The site MUST offer two palettes of nine colours. *(Amended
+  2026-08-09: the palettes were formerly distinguished by whether digits on them
+  render light or dark. A cell may now hold colours from both at once, so no
+  per-palette digit treatment exists and the two are simply two sets of nine.)*
 - **FR-032**: Every digit shown in a coloured cell — given, entered, centre
-  mark, or corner mark — MUST remain legible against that colour.
-- **FR-033**: Applying a cell's current colour again MUST remove the colour.
+  mark, or corner mark — MUST remain legible against every colour it may sit on,
+  including a cell split between several.
+- **FR-033**: Applying a colour a cell already holds MUST remove that colour,
+  leaving any others in place.
 - **FR-034**: In colour mode the number pad MUST show nine swatches in the same
   three-by-three arrangement the digits use, and a palette control MUST switch
   between the light-digit nine and the dark-digit nine. The pad MUST NOT change
@@ -387,6 +392,10 @@ and confirm it held. Nothing from the other four stories is needed.
   space in the middle of a cell is available; legibility is not.
 - **FR-059**: Adding a mark MUST NOT rearrange the marks already present beyond
   what the new one requires. A cell's contents must not appear to jump.
+- **FR-060**: A cell's colours MUST be shown in a stable order, so adding one
+  does not reshuffle those already there.
+- **FR-061**: Digits MUST carry a treatment that keeps them legible against an
+  arbitrary background, rather than relying on the background being known.
 
 ### Key Entities
 
@@ -432,7 +441,8 @@ and confirm it held. Nothing from the other four stories is needed.
 - **The digits available as marks are the ruleset's values**, not a hardcoded 1
   to 9. A future 4x4 ruleset gets a 2x2 pad and four marks without changing this
   specification.
-- **Colour is a property of the cell, not of a digit.** One colour per cell.
+- **Colour is a property of the cell, not of a digit.** A cell may hold several,
+  shown split radially.
 - **Existing saved progress is discarded**, not upgraded. Constitution 3.0.0
   permits this before Sucopeku 1.0 and the player confirmed the choice.
 - **No undo.** Out of scope here; nothing in this feature should make it harder
@@ -566,3 +576,24 @@ cell make "a quarter of a cell" mean a quarter of a cell.
 This is the second time in this feature that a unit was read against the wrong
 thing: `--board` in a `font-size` earlier computed to under a pixel. Both were
 invisible in review and obvious on screen.
+
+**2026-08-09 — a cell may hold several colours.** FR-003, FR-031, FR-032 and
+FR-033 amended; FR-060 and FR-061 added.
+
+Colour was one identifier per cell. It is now a set, shown split radially — the
+same shape as centre and corner marks, which means it inherits their toggle rule
+for free rather than needing one of its own.
+
+**The part worth arguing with**: the request was to moderate the palettes so
+digits read whether they are black or white. Mid-tones are actually the worst
+case for that — a mid-grey is near 4:1 against white and 5:1 against black, so
+neither is comfortable. What makes a digit legible on an unknown background is a
+contrasting outline, not a carefully chosen background.
+
+So both were done, and the second is what makes the first safe: digits carry a
+halo of the page colour, and the palettes were moderated knowing the halo is
+what guarantees FR-032 rather than the colours themselves.
+
+That also dissolves a distinction. The two palettes existed because one rendered
+light digits and the other dark; a cell mixing both has no single treatment, so
+they are now simply two sets of nine.

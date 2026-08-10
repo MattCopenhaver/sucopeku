@@ -4,12 +4,15 @@
  * Each entry's identifier is permanent — it is written into stored progress, so
  * reusing one would recolour saved boards.
  *
- * The digit treatment belongs to the palette, not to the theme. A `light`
- * palette colour renders light digits whether the site is in light or dark
- * mode, which is what lets one set of colours work on both grounds
- * (research.md D5). Every colour is chosen to clear 4.5:1 against its own
- * treatment and to stay distinguishable from both theme backgrounds, #fdfdfb
- * and #16171a — so no near-white and no near-black.
+ * These are two sets of nine, and nothing more. They were once distinguished by
+ * whether digits on them render light or dark; a cell may now hold colours from
+ * both at once, so no per-palette treatment can exist. Legibility comes from
+ * the digits carrying a halo of the page colour instead (003 FR-061), which is
+ * what lets these be moderate mid-tones rather than extremes.
+ *
+ * Every colour still stays clear of both theme backgrounds, #fdfdfb and
+ * #16171a, so none of them disappears into the grid in either theme
+ * (research.md D5).
  */
 
 export type PaletteId = 'light' | 'dark';
@@ -20,40 +23,46 @@ export interface PaletteEntry {
   readonly colour: string;
 }
 
-/** Saturated and darker: digits on these are rendered light. */
-const lightDigit: readonly PaletteEntry[] = [
-  { id: 'l1', palette: 'light', colour: '#8c2f39' },
-  { id: 'l2', palette: 'light', colour: '#a34d1a' },
-  { id: 'l3', palette: 'light', colour: '#6b5a10' },
-  { id: 'l4', palette: 'light', colour: '#2f6b3a' },
-  { id: 'l5', palette: 'light', colour: '#116b63' },
-  { id: 'l6', palette: 'light', colour: '#1f5b8c' },
-  { id: 'l7', palette: 'light', colour: '#3b3f8f' },
-  { id: 'l8', palette: 'light', colour: '#6b2f7a' },
-  { id: 'l9', palette: 'light', colour: '#4a4a4a' },
+/** The first nine: deeper mid-tones. */
+const first: readonly PaletteEntry[] = [
+  { id: 'l1', palette: 'light', colour: '#b4535c' },
+  { id: 'l2', palette: 'light', colour: '#c2793f' },
+  { id: 'l3', palette: 'light', colour: '#a08a34' },
+  { id: 'l4', palette: 'light', colour: '#5b9163' },
+  { id: 'l5', palette: 'light', colour: '#3f938c' },
+  { id: 'l6', palette: 'light', colour: '#4b83ad' },
+  { id: 'l7', palette: 'light', colour: '#6d70b4' },
+  { id: 'l8', palette: 'light', colour: '#95609f' },
+  { id: 'l9', palette: 'light', colour: '#7d7d7d' },
 ];
 
-/** Pale tints: digits on these are rendered dark. */
-const darkDigit: readonly PaletteEntry[] = [
-  { id: 'd1', palette: 'dark', colour: '#f6c6c9' },
-  { id: 'd2', palette: 'dark', colour: '#f7d5b0' },
-  { id: 'd3', palette: 'dark', colour: '#f0e6a8' },
-  { id: 'd4', palette: 'dark', colour: '#c3e6c8' },
-  { id: 'd5', palette: 'dark', colour: '#b8e4e0' },
-  { id: 'd6', palette: 'dark', colour: '#bcd8f0' },
-  { id: 'd7', palette: 'dark', colour: '#cdcdf2' },
-  { id: 'd8', palette: 'dark', colour: '#e6c8ee' },
-  { id: 'd9', palette: 'dark', colour: '#d6d6d6' },
+/** The second nine: lighter mid-tones, but not pastels. */
+const second: readonly PaletteEntry[] = [
+  { id: 'd1', palette: 'dark', colour: '#e0949a' },
+  { id: 'd2', palette: 'dark', colour: '#e5ab77' },
+  { id: 'd3', palette: 'dark', colour: '#d3c06d' },
+  { id: 'd4', palette: 'dark', colour: '#96c49e' },
+  { id: 'd5', palette: 'dark', colour: '#82c2bd' },
+  { id: 'd6', palette: 'dark', colour: '#8fb6d6' },
+  { id: 'd7', palette: 'dark', colour: '#a5a7d9' },
+  { id: 'd8', palette: 'dark', colour: '#c199c9' },
+  { id: 'd9', palette: 'dark', colour: '#adadad' },
 ];
 
 export const palettes: Readonly<Record<PaletteId, readonly PaletteEntry[]>> = {
-  light: lightDigit,
-  dark: darkDigit,
+  light: first,
+  dark: second,
 };
 
-const byId = new Map<string, PaletteEntry>(
-  [...lightDigit, ...darkDigit].map((entry) => [entry.id, entry]),
-);
+const byId = new Map<string, PaletteEntry>([...first, ...second].map((entry) => [entry.id, entry]));
+
+/** Stable display order, so adding a colour does not reshuffle the others
+ *  (003 FR-060). */
+const ORDER = new Map<string, number>([...first, ...second].map((entry, i) => [entry.id, i]));
+
+export function paletteOrder(id: string): number {
+  return ORDER.get(id) ?? Number.MAX_SAFE_INTEGER;
+}
 
 export function isPaletteEntry(id: string): boolean {
   return byId.has(id);
