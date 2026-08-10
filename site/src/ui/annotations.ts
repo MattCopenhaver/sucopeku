@@ -41,6 +41,24 @@ const renderCorner: Renderer = (cell, payload) => {
   const values = payload as readonly number[];
   if (values.length === 0) return;
 
+  const row = (edge: 'top' | 'bottom', digits: readonly number[]): void => {
+    const box = document.createElement('span');
+    box.className = `corner corner-row corner-row-${edge}`;
+    box.dataset.count = String(values.length);
+    box.textContent = digits.join('');
+    cell.append(box);
+  };
+
+  // Nine marks will not fit in eight slots without doubling one up, which reads
+  // as a typo rather than a notation. In that one case they spread across two
+  // edges instead — five along the top, four along the bottom. The middle is
+  // still untouched, so centre marks are still unobstructed (research.md D6).
+  if (values.length === 9) {
+    row('top', values.slice(0, 5));
+    row('bottom', values.slice(5));
+    return;
+  }
+
   const bySlot = new Map<string, number[]>();
   values.forEach((value, index) => {
     const slot = SLOTS[index % SLOTS.length]!;
@@ -50,7 +68,7 @@ const renderCorner: Renderer = (cell, payload) => {
   for (const [slot, digits] of bySlot) {
     const box = document.createElement('span');
     box.className = `corner corner-${slot}`;
-    box.dataset.count = String(Math.min(values.length, 9));
+    box.dataset.count = String(values.length);
     box.textContent = digits.join('');
     cell.append(box);
   }

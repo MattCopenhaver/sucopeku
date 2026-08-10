@@ -156,6 +156,12 @@ nothing is not recording it — so the crowded case is the one worth degrading.
 corner marks still never collide (US3 scenario 2). That guarantee was the good
 half of the original decision and it is kept.
 
+**Amended after a second play**: doubling a slot up reads as a typo rather than
+a notation, so the nine-mark case gets the old layout back as a special case —
+five spread along the top edge, four along the bottom. Eight or fewer still use
+the corners. The exception is worth it because it applies only where the corner
+arrangement had already stopped working.
+
 ---
 
 ## D7. Stored progress moves to version 2 and discards version 1

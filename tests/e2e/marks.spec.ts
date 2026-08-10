@@ -229,3 +229,30 @@ test('erase walks value, then marks, then colour — without changing mode', asy
   await key(page, 'erase').click();
   await expect(page.getByTestId('grid')).toBeVisible();
 });
+
+test('nine corner marks spread across two edges and leave the middle clear', async ({ page }) => {
+  await page.goto('./');
+  const target = await firstEmpty(page);
+
+  await cell(page, target).click();
+  await mode(page, 'corner').click();
+  for (const d of ['1', '2', '3', '4', '5', '6', '7', '8', '9']) await key(page, d).click();
+
+  // Five along the top, four along the bottom — not doubled up in a corner.
+  await expect(cell(page, target).locator('.corner-row-top')).toHaveText('12345');
+  await expect(cell(page, target).locator('.corner-row-bottom')).toHaveText('6789');
+
+  // Centre marks still fit between them (research.md D6).
+  await mode(page, 'centre').click();
+  for (const d of ['4', '7']) await key(page, d).click();
+  const centre = cell(page, target).locator('.centre');
+  await expect(centre).toHaveText('47');
+
+  const [cBox, top, bottom] = await Promise.all([
+    centre.boundingBox(),
+    cell(page, target).locator('.corner-row-top').boundingBox(),
+    cell(page, target).locator('.corner-row-bottom').boundingBox(),
+  ]);
+  expect(cBox!.y).toBeGreaterThanOrEqual(top!.y + top!.height - 1);
+  expect(cBox!.y + cBox!.height).toBeLessThanOrEqual(bottom!.y + 1);
+});

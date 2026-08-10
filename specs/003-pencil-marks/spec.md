@@ -495,3 +495,10 @@ FR-034 and FR-042 are unchanged in substance — the pad still shows nine swatch
 in the same arrangement, and the active palette is still visible without
 interacting and still reachable three ways. What changed is which control does
 it.
+
+**2026-08-09 — marks enlarged again, and nine corner marks get their own
+layout.** No requirement changed; FR-052 already asks that marks be sized by how
+many there are, and the first pass simply set the sizes too small at every
+count. Nine corner marks now spread across the top and bottom edges rather than
+doubling up in a corner slot, which read as a mistake rather than a notation —
+research D6 carries the reasoning.
