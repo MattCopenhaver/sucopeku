@@ -11,7 +11,12 @@ assume about every kind. This is the contract FR-007 rests on.
 | `empty()` | The payload meaning "nothing here". Used to decide whether a cell carries the kind at all |
 | `toggle(payload, input, allHaveIt)` | Returns the new payload. `allHaveIt` is computed across the whole selection, never per cell (FR-022) |
 | `parse(raw, ruleset)` | Reads a stored payload, dropping anything invalid rather than throwing |
-| `render(cell, payload)` | Draws it. The one part that cannot be generic |
+| `render(cell, payload)` | Draws it. Registered on the UI side under the same `id`, not in `game/`, so the data half stays free of the DOM |
+
+The split is deliberate: `game/annotations/` holds behaviour and knows nothing
+about elements; `ui/` holds a renderer registry keyed by the same identifiers.
+Adding a kind therefore means one file in each, and touching neither of the
+others — which is the whole of FR-007.
 
 ## The site may assume
 

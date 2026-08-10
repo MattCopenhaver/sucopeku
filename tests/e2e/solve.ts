@@ -61,9 +61,12 @@ function search(board: (number | null)[]): boolean {
 
 /** Reads the grid on screen and returns a full solution for it. */
 export async function solutionFor(page: Page): Promise<Solution> {
+  // Read the value element, not the cell's text: a cell may also contain
+  // pencil marks, and `textContent` would return those as though they were the
+  // answer (feature 003).
   const shown = await page.locator('.cell').evaluateAll((nodes) =>
     nodes.map((node) => {
-      const text = node.textContent?.trim() ?? '';
+      const text = node.querySelector('.value')?.textContent?.trim() ?? '';
       return text === '' ? null : Number(text);
     }),
   );
@@ -99,7 +102,7 @@ async function fill(
     .locator('.cell')
     .evaluateAll((nodes) =>
       nodes
-        .map((node, index) => (node.textContent?.trim() === '' ? index : -1))
+        .map((node, index) => (node.querySelector('.value') ? -1 : index))
         .filter((index) => index >= 0),
     );
 

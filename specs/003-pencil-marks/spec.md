@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Ready
+**Status**: Implementing
 
 **Input**: User description: "Pencil marks and multi-cell selection. Centre
 marks, corner marks, and colour. Selection becomes a set of cells. The number

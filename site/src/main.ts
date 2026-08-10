@@ -1,10 +1,11 @@
 import './style.css';
 import { puzzleFor, puzzles, rulesetFor, type Puzzle } from './game/data.js';
 import { mostRecentUnsolved, onExternalChange, solvedIds } from './game/progress.js';
-import { Game } from './game/state.js';
+import { Game, type Mode } from './game/state.js';
 import { renderControls } from './ui/controls.js';
 import { renderGrid } from './ui/grid.js';
 import { renderPad } from './ui/pad.js';
+import { followOtherTabs, initTheme } from './ui/theme.js';
 
 const PARAM = 'puzzle';
 
@@ -36,6 +37,9 @@ function addressFor(id: string): string {
   url.searchParams.set(PARAM, id);
   return `${url.pathname}${url.search}`;
 }
+
+// Applied before anything renders, so there is no flash of the wrong theme.
+initTheme();
 
 function start(): void {
   const app = document.querySelector<HTMLElement>('#app');
@@ -75,7 +79,7 @@ function start(): void {
   app.replaceChildren(grid, pad, controls);
 
   const draw = (): void => {
-    renderGrid(grid, game, draw);
+    renderGrid(grid, game);
     renderPad(pad, game, draw);
     renderControls(controls, game, {
       onUnlock: () => {
@@ -95,6 +99,21 @@ function start(): void {
   window.addEventListener('keydown', (event) => {
     const { width, height } = ruleset.geometry;
     const cell = game.selectedCell;
+
+    // Mode keys switch and place nothing, so there is one way to place a mark
+    // rather than two that could drift (003 FR-010, research.md D4).
+    const modeKeys: Record<string, Mode> = {
+      z: 'value',
+      x: 'centre',
+      c: 'corner',
+      v: 'colour',
+    };
+    const mode = modeKeys[event.key.toLowerCase()];
+    if (mode && !event.ctrlKey && !event.metaKey) {
+      game.mode = mode;
+      draw();
+      return;
+    }
 
     if (event.key >= '1' && event.key <= '9') {
       game.place(Number(event.key));
@@ -120,23 +139,29 @@ function start(): void {
     const step = moves[event.key];
     if (step !== undefined) {
       event.preventDefault();
-      const from = cell ?? 0;
+      const from = cell ?? game.anchor ?? 0;
       const to = from + step;
       // Left and right must not wrap across a row edge.
       const sameRow = Math.floor(from / width) === Math.floor(to / width);
       const vertical = step === width || step === -width;
       if (to >= 0 && to < width * height && (vertical || sameRow)) {
-        game.selectCell(to);
+        // Shift extends from the anchor; a bare arrow replaces the selection
+        // (003 FR-018).
+        if (event.shiftKey) game.extendTo(to);
+        else game.selectOnly(to);
         draw();
       }
     }
   });
 
-  // Another tab changed the stored document; show its work (FR-036).
+  // Another tab changed the stored document; show its work (002 FR-036).
   onExternalChange(() => {
     game.reloadFromStorage();
     draw();
   });
+
+  // And a theme change from another tab (003 FR-050).
+  followOtherTabs(draw);
 }
 
 start();

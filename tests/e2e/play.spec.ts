@@ -15,7 +15,7 @@ async function firstEmptyCell(page: Page): Promise<number> {
   const count = await cells.count();
   for (let i = 0; i < count; i += 1) {
     const c = cells.nth(i);
-    if ((await c.textContent())?.trim() === '') return i;
+    if ((await c.locator('.value').count()) === 0) return i;
   }
   throw new Error('no empty cell');
 }

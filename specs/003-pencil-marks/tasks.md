@@ -9,8 +9,8 @@ here, and their absence is a constitutional choice rather than an oversight.
 
 ## Phase 1: Setup
 
-- [ ] T001 [P] Create `site/src/game/annotations/registry.ts` with the kind contract from contracts/annotations.md — `id`, `empty`, `toggle`, `parse`, `render` — and a lookup that returns undefined for an unknown id rather than throwing (FR-007)
-- [ ] T002 [P] Add the interaction types to `site/src/game/state.ts`: a mode of value, centre, corner, or colour, and a palette of light-digit or dark-digit (FR-008, FR-043)
+- [X] T001 [P] Create `site/src/game/annotations/registry.ts` with the kind contract from contracts/annotations.md — `id`, `empty`, `toggle`, `parse`, `render` — and a lookup that returns undefined for an unknown id rather than throwing (FR-007)
+- [X] T002 [P] Add the interaction types to `site/src/game/state.ts`: a mode of value, centre, corner, or colour, and a palette of light-digit or dark-digit (FR-008, FR-043)
 
 ---
 
@@ -21,19 +21,19 @@ rather than in User Story 2, because every reader of interaction state changes
 with it and doing that twice would be worse than doing it early — User Story 1
 simply uses a set of size one.
 
-- [ ] T003 Replace `selectedCell` with `selection: Set<number>` and an `anchor` in `site/src/game/state.ts`, updating every reader (FR-014, research.md D2)
-- [ ] T004 Indicate every selected cell in `site/src/ui/grid.ts`, not just one (FR-019)
-- [ ] T005 [P] Implement the shared mark kind in `site/src/game/annotations/marks.ts`, registered twice under the ids `centre` and `corner` — the payload and toggle rule are identical and only the renderer differs (FR-001, FR-002, FR-004)
-- [ ] T006 [P] Implement the colour kind in `site/src/game/annotations/colour.ts`: one palette entry per cell, re-applying the same colour removes it (FR-003, FR-033)
-- [ ] T007 Route every placement through the registry in `site/src/game/state.ts`, applying to all selected cells with the toggle computed once across the selection (FR-021, FR-022, contracts/annotations.md)
-- [ ] T008 Exclude given cells from both the toggle test and the change, so a mixed selection behaves as though the givens were not selected. A placement that changes nothing MUST stay silent rather than reporting an error (FR-006, FR-026, EC-001)
-- [ ] T009 Keep the selection intact after a placement, or FR-022's press-again-to-remove is unreachable (FR-044)
-- [ ] T010 Implement the erase layer walk in `site/src/game/state.ts`: value, then both mark kinds together, then colour, with the layer chosen once for the whole selection and the mode ignored. Erasing cells that hold nothing does nothing and reports no error (FR-025, FR-026, FR-041)
-- [ ] T011 Move stored progress to version 2 in `site/src/game/progress.ts`, adding `annotations` keyed by kind, and discard a version 1 document rather than upgrading it (FR-035, FR-036, FR-037, EC-005, data-model.md)
-- [ ] T012 Drop annotation payloads that name values outside `ruleset.values` or unknown kinds when loading, rather than treating bad data as fatal (contracts/annotations.md)
-- [ ] T013 Rebuild the number pad in `site/src/ui/pad.ts` as a three-by-three grid of digits with an erase key and four mode buttons, the active mode visible without interaction (FR-009, FR-027, FR-028, FR-029)
-- [ ] T014 Reset mode to value, palette to light-digit, and the selection to a single writable cell when a puzzle loads. None of the three is stored (FR-013, FR-020, FR-043, EC-006)
-- [ ] T015 Confirm nothing under `site/src/engine/` changed and that the board passed to `evaluate` still holds only givens and entries (FR-005, plan.md Structure Decision)
+- [X] T003 Replace `selectedCell` with `selection: Set<number>` and an `anchor` in `site/src/game/state.ts`, updating every reader (FR-014, research.md D2)
+- [X] T004 Indicate every selected cell in `site/src/ui/grid.ts`, not just one (FR-019)
+- [X] T005 [P] Implement the shared mark kind in `site/src/game/annotations/marks.ts`, registered twice under the ids `centre` and `corner` — the payload and toggle rule are identical and only the renderer differs (FR-001, FR-002, FR-004)
+- [X] T006 [P] Implement the colour kind in `site/src/game/annotations/colour.ts`: one palette entry per cell, re-applying the same colour removes it (FR-003, FR-033)
+- [X] T007 Route every placement through the registry in `site/src/game/state.ts`, applying to all selected cells with the toggle computed once across the selection (FR-021, FR-022, contracts/annotations.md)
+- [X] T008 Exclude given cells from both the toggle test and the change, so a mixed selection behaves as though the givens were not selected. A placement that changes nothing MUST stay silent rather than reporting an error (FR-006, FR-026, EC-001)
+- [X] T009 Keep the selection intact after a placement, or FR-022's press-again-to-remove is unreachable (FR-044)
+- [X] T010 Implement the erase layer walk in `site/src/game/state.ts`: value, then both mark kinds together, then colour, with the layer chosen once for the whole selection and the mode ignored. Erasing cells that hold nothing does nothing and reports no error (FR-025, FR-026, FR-041)
+- [X] T011 Move stored progress to version 2 in `site/src/game/progress.ts`, adding `annotations` keyed by kind, and discard a version 1 document rather than upgrading it (FR-035, FR-036, FR-037, EC-005, data-model.md)
+- [X] T012 Drop annotation payloads that name values outside `ruleset.values` or unknown kinds when loading, rather than treating bad data as fatal (contracts/annotations.md)
+- [X] T013 Rebuild the number pad in `site/src/ui/pad.ts` as a three-by-three grid of digits with an erase key and four mode buttons, the active mode visible without interaction (FR-009, FR-027, FR-028, FR-029)
+- [X] T014 Reset mode to value, palette to light-digit, and the selection to a single writable cell when a puzzle loads. None of the three is stored (FR-013, FR-020, FR-043, EC-006)
+- [X] T015 Confirm nothing under `site/src/engine/` changed and that the board passed to `evaluate` still holds only givens and entries (FR-005, plan.md Structure Decision)
 
 **Checkpoint**: the pad is a 3×3 grid with modes, the registry exists, and
 selection is a set. Nothing is visibly annotatable yet.
@@ -47,14 +47,14 @@ selection is a set. Nothing is visibly annotatable yet.
 **Independent test**: select one cell, place three centre marks, remove one,
 enter a value, erase it. Needs nothing from Stories 2 to 5.
 
-- [ ] T016 [US1] Render centre marks in the middle of a cell in `site/src/ui/grid.ts`, drawn only when the cell holds no value (FR-001, FR-023, research.md D9)
-- [ ] T017 [US1] Draw the value over hidden marks without deleting them, so erasing the value reveals them again (FR-023, FR-024, EC-007)
-- [ ] T018 [US1] Add mode switching in `site/src/main.ts` on the keys z, x, c, and v, which switch the mode and place nothing (FR-010, FR-011, FR-012, research.md D4)
-- [ ] T019 [US1] Refuse annotations while a puzzle is solved and locked, exactly as values are refused — and confirm solving does not *clear* them: unlocking and erasing a cell must reveal what was there (FR-039, FR-040, EC-004)
-- [ ] T020 [US1] Style centre marks in `site/src/style.css` so they read as annotations rather than values and stay legible at 320px (FR-030)
-- [ ] T021 [P] [US1] Write `tests/e2e/marks.spec.ts`: place three centre marks, press one again to remove it, confirm the cell still counts as empty for conflicts (FR-005, FR-022, SC-001)
-- [ ] T022 [US1] Extend `tests/e2e/marks.spec.ts`: enter a value over marks, confirm they are hidden, erase the value, confirm they return, then reload and confirm every mark is still present (FR-023, FR-024, SC-004, quickstart Scenario 1)
-- [ ] T023 [US1] Extend `tests/e2e/marks.spec.ts` to reach every mode by keyboard alone and by pointer alone, proving parity (FR-010, SC-003, quickstart Scenario 2)
+- [X] T016 [US1] Render centre marks in the middle of a cell in `site/src/ui/grid.ts`, drawn only when the cell holds no value (FR-001, FR-023, research.md D9)
+- [X] T017 [US1] Draw the value over hidden marks without deleting them, so erasing the value reveals them again (FR-023, FR-024, EC-007)
+- [X] T018 [US1] Add mode switching in `site/src/main.ts` on the keys z, x, c, and v, which switch the mode and place nothing (FR-010, FR-011, FR-012, research.md D4)
+- [X] T019 [US1] Refuse annotations while a puzzle is solved and locked, exactly as values are refused — and confirm solving does not *clear* them: unlocking and erasing a cell must reveal what was there (FR-039, FR-040, EC-004)
+- [X] T020 [US1] Style centre marks in `site/src/style.css` so they read as annotations rather than values and stay legible at 320px (FR-030)
+- [X] T021 [P] [US1] Write `tests/e2e/marks.spec.ts`: place three centre marks, press one again to remove it, confirm the cell still counts as empty for conflicts (FR-005, FR-022, SC-001)
+- [X] T022 [US1] Extend `tests/e2e/marks.spec.ts`: enter a value over marks, confirm they are hidden, erase the value, confirm they return, then reload and confirm every mark is still present (FR-023, FR-024, SC-004, quickstart Scenario 1)
+- [X] T023 [US1] Extend `tests/e2e/marks.spec.ts` to reach every mode by keyboard alone and by pointer alone, proving parity (FR-010, SC-003, quickstart Scenario 2)
 
 **Checkpoint**: this is the MVP. A player can pencil in their thinking, which is
 the whole request. Everything after it makes that faster or richer.

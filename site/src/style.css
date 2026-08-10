@@ -16,6 +16,21 @@
   }
 }
 
+/* An explicit choice wins over the device in both directions. With no choice
+   the attribute is absent and the media query above applies with no script
+   involved (003 FR-045, FR-047, research.md D11). */
+:root[data-theme='light'] {
+  --ink: #1a1a1a;
+  --paper: #fdfdfb;
+  --muted: #5a5a5a;
+}
+
+:root[data-theme='dark'] {
+  --ink: #ececec;
+  --paper: #16171a;
+  --muted: #a3a3a3;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -185,4 +200,112 @@ p {
 
 .status.solved::before {
   content: '✓ ';
+}
+
+/* --- Feature 003: annotations, the 3x3 pad, and modes --- */
+
+/* A drag across the grid selects rather than scrolling the page. Scoped to the
+   grid alone: on the whole page it would stop a short screen scrolling to the
+   pad (003 EC-002, SC-007). */
+.grid {
+  touch-action: none;
+}
+
+/* The cell becomes a stack: colour behind, corner marks at the edges, and
+   either the value or the centre marks in the middle (003 data-model.md). */
+.cell {
+  position: relative;
+  overflow: hidden;
+}
+
+.cell.coloured {
+  background: var(--cell-colour);
+}
+
+.cell.on-light,
+.cell.on-light .value,
+.cell.on-light .centre,
+.cell.on-light .corner {
+  color: #ffffff;
+}
+
+.cell.on-dark,
+.cell.on-dark .value,
+.cell.on-dark .centre,
+.cell.on-dark .corner {
+  color: #101010;
+}
+
+.cell .value {
+  font-size: inherit;
+  line-height: 1;
+}
+
+.cell .centre {
+  font-size: 0.34em;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  max-width: 92%;
+  overflow-wrap: anywhere;
+}
+
+.cell .corner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  font-size: 0.3em;
+  line-height: 1;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.cell .corner-top {
+  top: 0.15em;
+}
+
+.cell .corner-bottom {
+  bottom: 0.15em;
+}
+
+/* Three by three, whatever fills it — digits or swatches (003 FR-027, FR-034). */
+.keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.key.swatch {
+  background: var(--swatch);
+  min-height: 2.4rem;
+}
+
+.modes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.mode {
+  padding: 0.45rem 0.3rem;
+  font: inherit;
+  font-size: 0.85rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--muted);
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+
+/* The active mode is visible without interacting with anything (003 FR-009). */
+.mode.active {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 14%, var(--paper));
+  font-weight: 700;
+}
+
+.palette-toggle {
+  width: 100%;
+  margin-top: 0.4rem;
 }
