@@ -36,6 +36,13 @@ and FR-040 were answered, and four requirements were appended as consequences:
 FR-041 (erase ignores the mode), FR-042 and FR-043 (the palette control and that
 it is working state), and FR-044 (the selection survives a placement).
 
+User Story 5 (the theme control) was added during planning, after the
+clarification session had run. It was scanned separately rather than assumed
+clean, and that scan found a real defect: a two-way toggle would have made
+FR-047's device-following behaviour unreachable after first use. FR-045 now
+specifies three positions. Cross-tab behaviour was settled at the same time
+(FR-050).
+
 SC-005 was questioned and deliberately kept as written. At 320px a cell is about
 31px, so a fully loaded cell renders digits near 6px; that cost was weighed and
 accepted rather than overlooked. The Clarifications section records it.

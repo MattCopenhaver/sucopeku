@@ -45,7 +45,8 @@ a drag gesture (FR-010, FR-016, SC-003, SC-007). Annotations never reach the
 board (FR-005). A fourth kind must not disturb the first three (FR-007). Usable
 at 320px (FR-030)
 
-**Scale/Scope**: 81 cells, 3 annotation kinds, 18 colours, 2 themes, 1 player
+**Scale/Scope**: 81 cells, 3 annotation kinds, 18 colours, 3 theme positions,
+1 player
 
 ## Constitution Check
 
@@ -114,7 +115,7 @@ site/
     │   ├── grid.ts              # Pointer drag, multi-cell indication, layered cell
     │   ├── pad.ts               # 3x3 digits, mode buttons, swatches, palette control
     │   ├── controls.ts          # Gains the theme control
-    │   └── theme.ts             # Read, apply, and store the choice (D11)
+    │   └── theme.ts             # Three positions; absence is 'follow device' (D11)
     └── (no new dependencies)
 
 tests/e2e/

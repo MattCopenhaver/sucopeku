@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Draft
+**Status**: Ready
 
 **Input**: User description: "Pencil marks and multi-cell selection. Centre
 marks, corner marks, and colour. Selection becomes a set of cells. The number
@@ -26,6 +26,14 @@ pad becomes a three by three grid with explicit mode buttons."
 - Q: When a player completes a puzzle, are their pencil marks and colours
   cleared or kept? → A: Kept, hidden under the completed values like any other
   value.
+- Q: Should the theme control be a two-way toggle, or offer a third "follow my
+  device" position? → A: Three positions — Light, Dark, Auto — cycling in that
+  order, with Auto the default. Without it, FR-047's device-following behaviour
+  becomes unreachable after the first interaction.
+- Q: Should a theme change in one tab appear in another? → A: Yes. Progress
+  already synchronises through the browser's storage event and the theme is
+  written to the same storage, so not following it would be a visible
+  inconsistency rather than a saving.
 - Q: Should the site gain a light/dark toggle? → A: Yes, as User Story 5. The
   theme became load-bearing when eighteen colours had to work on both grounds,
   and validating that otherwise means changing an operating system setting.
@@ -179,6 +187,9 @@ and confirm it held. Nothing from the other four stories is needed.
    choice is still in effect.
 3. **Given** the player has never chosen, **When** they arrive, **Then** the site
    follows the device setting as it does today.
+4. **Given** the player has chosen a theme, **When** they cycle the control back
+   to following their device, **Then** the site follows the device again and
+   nothing is left stored.
 4. **Given** cells are coloured, **When** the theme changes, **Then** every
    colour is still distinguishable from the grid and every digit still legible.
 
@@ -336,8 +347,9 @@ and confirm it held. Nothing from the other four stories is needed.
 
 **Theme**
 
-- **FR-045**: A player MUST be able to choose the light or the dark theme
-  directly, without changing a device setting.
+- **FR-045**: A player MUST be able to choose the light theme, the dark theme,
+  or to follow their device, directly and without changing a device setting. The
+  control MUST cycle through all three, so no choice is a trap.
 - **FR-046**: The choice MUST persist across visits.
 - **FR-047**: With no choice made, the site MUST follow the device setting, as
   it does today.
@@ -345,7 +357,9 @@ and confirm it held. Nothing from the other four stories is needed.
   preference, not progress: it must survive the storage format changing and must
   not be evicted when a puzzle is.
 - **FR-049**: The theme control MUST be reachable by keyboard, by pointer, and
-  by touch, and MUST show which theme is active.
+  by touch, and MUST show which of the three positions is active.
+- **FR-050**: A theme change made in one tab MUST appear in the site's other
+  tabs without a reload, on the same basis progress already does.
 
 ### Key Entities
 

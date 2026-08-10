@@ -109,9 +109,11 @@ also scrolled, so this half is manual (research.md D8).
 1. Use the theme control. **Expect** the whole site follows and the control
    shows which is active.
 2. Reload. **Expect** your choice held (FR-046).
-3. Clear the stored choice and reload. **Expect** the site follows the device
-   setting (FR-047).
-4. Choose a theme, then play until a puzzle is evicted, then reload. **Expect**
+3. Cycle the control to *follow my device*. **Expect** the site follows the
+   device setting again, and nothing is left stored (FR-045, FR-047).
+4. Open a second tab and change the theme there. **Expect** the first tab
+   follows without a reload (FR-050).
+5. Choose a theme, then play until a puzzle is evicted, then reload. **Expect**
    the theme choice survived — it is not part of progress (FR-048).
 
 ## Scenario 11 — Storage, by hand

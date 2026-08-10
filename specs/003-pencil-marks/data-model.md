@@ -88,6 +88,11 @@ sucopeku.theme
 "light" | "dark"          absent means follow the device
 ```
 
+Three states, two of which are stored. Cycling to *follow the device* removes
+the key rather than writing `"auto"`, so a player who has never chosen and a
+player who has changed their mind reach byte-identical storage — one state, not
+two that behave alike (research.md D11).
+
 Deliberately outside `sucopeku.progress`: that document is versioned, is
 discarded when the version moves, and evicts puzzles beyond ten. A preference
 must survive all three. Anything unreadable falls back to the device setting

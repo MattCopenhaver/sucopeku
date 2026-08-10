@@ -198,9 +198,15 @@ rule and already intact underneath.
 
 ## D11. The theme is chosen explicitly, and stored apart from progress
 
-**Decision**: A theme control writes `light` or `dark` to its own storage key,
-separate from `sucopeku.progress`. With nothing stored, the site follows
-`prefers-color-scheme` exactly as it does now. The choice is applied by a
+**Decision**: A theme control cycles through three positions — light, dark, and
+following the device — writing `light` or `dark` to its own storage key and
+*removing* the key for the third. With nothing stored, the site follows
+`prefers-color-scheme` exactly as it does now.
+
+Absence is the third state rather than a stored `"auto"`, which is what makes
+the default and the chosen-then-released case identical instead of merely
+equivalent. A theme change is announced to other tabs through the same storage
+event progress already uses (FR-050). The choice is applied by a
 `data-theme` attribute on the root element, and the existing custom properties
 are redefined under it.
 
