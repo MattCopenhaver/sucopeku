@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Implementing
+**Status**: Complete
 
 **Input**: User description: "A playable Sudoku game. When a player starts, they are given one of 20 curated puzzles chosen at random. They can enter and clear values in cells, and the game shows conflicts under the classic Sudoku ruleset. Progress on a puzzle is saved in the browser and restored when the player returns to it. Playable by keyboard, mouse, and touch. Puzzle generation is out of scope for this feature — the 20 puzzles are curated data shipped with the site."
 
@@ -522,3 +522,8 @@ Outstanding, and named rather than quietly closed: none of this ran on a real
 iOS device. macOS Safari confirms the mechanism — WebKit's service worker
 serving a query-string address offline — but iOS evicts storage on its own
 schedule and applies stricter limits. That difference is unverified.
+
+**2026-08-09 — feature complete.** All 57 tasks done and merged in #20. Status
+`Implementing` → `Complete`, which also means this spec's identifiers harden:
+from here a requirement that stops applying is withdrawn in place rather than
+deleted (constitution 3.3.0).
