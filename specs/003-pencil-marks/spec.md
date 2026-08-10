@@ -26,6 +26,9 @@ pad becomes a three by three grid with explicit mode buttons."
 - Q: When a player completes a puzzle, are their pencil marks and colours
   cleared or kept? → A: Kept, hidden under the completed values like any other
   value.
+- Q: Should the site gain a light/dark toggle? → A: Yes, as User Story 5. The
+  theme became load-bearing when eighteen colours had to work on both grounds,
+  and validating that otherwise means changing an operating system setting.
 - Q: Should SC-005 keep requiring a cell holding nine centre marks, nine corner
   marks, a value and a colour to be legible at 320px, given a cell is about 31px
   there and the digits would land near 6px? → A: Keep it as written; digits that
@@ -153,6 +156,34 @@ digit in them, given or entered, remains readable.
 
 ---
 
+### User Story 5 - Choose light or dark (Priority: P5)
+
+A player on a phone in bright sun wants the light theme even though their
+device is set to dark. They press a control and the site changes; it stays
+changed when they come back.
+
+**Why this priority**: Last because nothing else depends on it. It is here at
+all because this feature makes the theme load-bearing — eighteen colours have to
+work on both grounds, and checking that currently means changing an operating
+system setting.
+
+**Independent Test**: Toggle the theme, confirm the whole site follows, reload
+and confirm it held. Nothing from the other four stories is needed.
+
+**Acceptance Scenarios**:
+
+1. **Given** the site is showing the light theme, **When** the player uses the
+   theme control, **Then** the site switches to dark and the control shows which
+   is active.
+2. **Given** the player has chosen a theme, **When** they reload, **Then** their
+   choice is still in effect.
+3. **Given** the player has never chosen, **When** they arrive, **Then** the site
+   follows the device setting as it does today.
+4. **Given** cells are coloured, **When** the theme changes, **Then** every
+   colour is still distinguishable from the grid and every digit still legible.
+
+---
+
 ### Edge Cases
 
 - **EC-001**: When a selection contains cells that came with the puzzle, placing
@@ -179,6 +210,9 @@ digit in them, given or entered, remains readable.
   marks, the cell MUST remain legible at 320px width.
 - **EC-010**: When the player selects every cell in the grid and places a mark,
   the grid MUST remain responsive to the next input.
+- **EC-011**: When a stored theme choice is unreadable or names a theme that no
+  longer exists, the site MUST fall back to the device setting rather than
+  failing to render.
 
 ## Requirements *(mandatory)*
 
@@ -300,6 +334,19 @@ digit in them, given or entered, remains readable.
   by FR-023 already — no special case applies. Unlocking and erasing a cell MUST
   reveal that cell's marks exactly as it does on an unsolved board.
 
+**Theme**
+
+- **FR-045**: A player MUST be able to choose the light or the dark theme
+  directly, without changing a device setting.
+- **FR-046**: The choice MUST persist across visits.
+- **FR-047**: With no choice made, the site MUST follow the device setting, as
+  it does today.
+- **FR-048**: The theme choice MUST NOT be stored with puzzle progress. It is a
+  preference, not progress: it must survive the storage format changing and must
+  not be evicted when a puzzle is.
+- **FR-049**: The theme control MUST be reachable by keyboard, by pointer, and
+  by touch, and MUST show which theme is active.
+
 ### Key Entities
 
 - **Annotation**: What a player records in a cell that is not a value. Has a
@@ -333,6 +380,9 @@ digit in them, given or entered, remains readable.
   scrolls the page.
 - **SC-008**: Conflict marking and solved detection behave exactly as they did
   before this feature, with annotations present.
+- **SC-009**: Every one of the eighteen colours is distinguishable from the grid
+  in both themes, checkable in under a minute by toggling rather than by
+  changing a device setting.
 
 ## Assumptions
 
