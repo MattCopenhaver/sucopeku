@@ -139,7 +139,10 @@ function start(): void {
     const step = moves[event.key];
     if (step !== undefined) {
       event.preventDefault();
-      const from = cell ?? game.anchor ?? 0;
+      // From where the keyboard is, not from the anchor: the anchor stays put
+      // while a range grows, so measuring from it would recompute the same
+      // range forever (003 research.md D2).
+      const from = game.cursor ?? cell ?? 0;
       const to = from + step;
       // Left and right must not wrap across a row edge.
       const sameRow = Math.floor(from / width) === Math.floor(to / width);

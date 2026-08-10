@@ -42,8 +42,14 @@ export class Game {
 
   /** The cells the next placement applies to (003 FR-014). */
   selection = new Set<number>();
-  /** Where a shift-extended range grows from, so it does not drift (003 D2). */
+  /** Where a shift-extended range grows *from*. Fixed while extending (003 D2). */
   anchor: number | null = null;
+  /**
+   * Where the keyboard currently is. Distinct from the anchor: a range needs a
+   * fixed end and a moving one, and using the anchor for both means the second
+   * shift+arrow recomputes the same range and the selection never grows.
+   */
+  cursor: number | null = null;
   mode: Mode = 'value';
   palette: PaletteId = 'light';
 
@@ -115,6 +121,7 @@ export class Game {
     if (!this.inRange(cell)) return;
     this.selection = new Set([cell]);
     this.anchor = cell;
+    this.cursor = cell;
   }
 
   /** Add one cell without discarding the rest — a modified click (003 FR-017). */
@@ -122,11 +129,13 @@ export class Game {
     if (!this.inRange(cell)) return;
     this.selection.add(cell);
     this.anchor = cell;
+    this.cursor = cell;
   }
 
   /** Extend from the anchor, leaving it put so the range does not drift (003 FR-018). */
   extendTo(cell: number): void {
     if (!this.inRange(cell)) return;
+    this.cursor = cell;
     const from = this.anchor ?? cell;
     const width = this.ruleset.geometry.width;
     const [r1, r2] = [Math.floor(from / width), Math.floor(cell / width)].sort((a, b) => a - b);

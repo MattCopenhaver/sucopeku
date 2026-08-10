@@ -68,17 +68,17 @@ the whole request. Everything after it makes that faster or richer.
 **Independent test**: select four cells by drag, by modified click, and by
 shift plus arrows, then place a value and a centre mark into all four.
 
-- [ ] T024 [US2] Implement drag selection in `site/src/ui/grid.ts` with `pointerdown`, `pointermove`, and `pointerup`, one path for mouse, touch, and pen (FR-016, research.md D3)
-- [ ] T025 [US2] Identify cells during a drag with `document.elementFromPoint` rather than `pointerenter`, because implicit pointer capture stops enter firing and would select exactly one cell on touch while appearing to work on a mouse (FR-016, research.md D3)
-- [ ] T026 [US2] Set `touch-action: none` on the grid alone in `site/src/style.css`, so a drag does not scroll the page and the rest of the page still scrolls (EC-002, SC-007)
-- [ ] T027 [US2] Continue a drag that leaves the grid and returns, rather than abandoning the selection (EC-003)
-- [ ] T028 [US2] Add a cell to the selection on control or command click without discarding the rest, and collapse to one cell on a plain click or tap (FR-015, FR-017)
-- [ ] T029 [US2] Extend the selection with shift plus an arrow key in `site/src/main.ts`, from the anchor, leaving a bare arrow key replacing the selection as it does today (FR-018, research.md D2)
-- [ ] T030 [P] [US2] Write `tests/e2e/selection.spec.ts`: build a four-cell selection by drag, by modified click, and by shift plus arrows, confirming each (FR-015 to FR-018, SC-003)
-- [ ] T031 [US2] Extend `tests/e2e/selection.spec.ts`: place a mark across four cells, press again to remove from all four, and confirm a selection where only some carry it gains it everywhere (FR-021, FR-022, SC-002)
-- [ ] T032 [US2] Extend `tests/e2e/selection.spec.ts` with a drag dispatched as `pointerType: 'touch'`, covering the selection half of SC-007 — the did-not-scroll half is manual, see T052 (research.md D8)
-- [ ] T033 [US2] Extend `tests/e2e/selection.spec.ts`: select a range spanning given and writable cells, place a value, confirm the givens are untouched and no error appears (EC-001)
-- [ ] T034 [US2] Extend `tests/e2e/selection.spec.ts`: select all 81 cells, place a mark, confirm the grid still responds to the next input (EC-010)
+- [X] T024 [US2] Implement drag selection in `site/src/ui/grid.ts` with `pointerdown`, `pointermove`, and `pointerup`, one path for mouse, touch, and pen (FR-016, research.md D3)
+- [X] T025 [US2] Identify cells during a drag with `document.elementFromPoint` rather than `pointerenter`, because implicit pointer capture stops enter firing and would select exactly one cell on touch while appearing to work on a mouse (FR-016, research.md D3)
+- [X] T026 [US2] Set `touch-action: none` on the grid alone in `site/src/style.css`, so a drag does not scroll the page and the rest of the page still scrolls (EC-002, SC-007)
+- [X] T027 [US2] Continue a drag that leaves the grid and returns, rather than abandoning the selection (EC-003)
+- [X] T028 [US2] Add a cell to the selection on control or command click without discarding the rest, and collapse to one cell on a plain click or tap (FR-015, FR-017)
+- [X] T029 [US2] Extend the selection with shift plus an arrow key in `site/src/main.ts`, from the anchor, leaving a bare arrow key replacing the selection as it does today (FR-018, research.md D2)
+- [X] T030 [P] [US2] Write `tests/e2e/selection.spec.ts`: build a four-cell selection by drag, by modified click, and by shift plus arrows, confirming each (FR-015 to FR-018, SC-003)
+- [X] T031 [US2] Extend `tests/e2e/selection.spec.ts`: place a mark across four cells, press again to remove from all four, and confirm a selection where only some carry it gains it everywhere (FR-021, FR-022, SC-002)
+- [X] T032 [US2] Extend `tests/e2e/selection.spec.ts` with a drag dispatched as `pointerType: 'touch'`, covering the selection half of SC-007 — the did-not-scroll half is manual, see T052 (research.md D8)
+- [X] T033 [US2] Extend `tests/e2e/selection.spec.ts`: select a range spanning given and writable cells, place a value, confirm the givens are untouched and no error appears (EC-001)
+- [X] T034 [US2] Extend `tests/e2e/selection.spec.ts`: select all 81 cells, place a mark, confirm the grid still responds to the next input (EC-010)
 
 **Checkpoint**: annotation is practical rather than tedious.
 
@@ -91,11 +91,11 @@ shift plus arrows, then place a value and a centre mark into all four.
 **Independent test**: select three cells, place a corner mark, confirm it
 appears at the edges of all three without disturbing centre marks.
 
-- [ ] T035 [US3] Render corner marks in `site/src/ui/grid.ts` along the top edge up to five and the bottom edge up to four, never the middle (FR-002, research.md D6)
-- [ ] T036 [US3] Style corner marks in `site/src/style.css` so they are distinguishable from centre marks and from values (FR-004)
-- [ ] T037 [P] [US3] Extend `tests/e2e/marks.spec.ts`: place a corner mark across three cells, confirm all three carry it (FR-002, FR-021)
-- [ ] T038 [US3] Extend `tests/e2e/marks.spec.ts`: a cell holding both centre and corner marks shows both, with neither obscuring the other (US3 scenario 2)
-- [ ] T039 [US3] Extend `tests/e2e/marks.spec.ts` for the erase walk: build a cell with colour, corner marks, centre marks, and a value, then confirm three presses clear the layers in order without changing mode (FR-025, FR-041, quickstart Scenario 5)
+- [X] T035 [US3] Render corner marks in `site/src/ui/grid.ts` along the top edge up to five and the bottom edge up to four, never the middle (FR-002, research.md D6)
+- [X] T036 [US3] Style corner marks in `site/src/style.css` so they are distinguishable from centre marks and from values (FR-004)
+- [X] T037 [P] [US3] Extend `tests/e2e/marks.spec.ts`: place a corner mark across three cells, confirm all three carry it (FR-002, FR-021)
+- [X] T038 [US3] Extend `tests/e2e/marks.spec.ts`: a cell holding both centre and corner marks shows both, with neither obscuring the other (US3 scenario 2)
+- [X] T039 [US3] Extend `tests/e2e/marks.spec.ts` for the erase walk: build a cell with colour, corner marks, centre marks, and a value, then confirm three presses clear the layers in order without changing mode (FR-025, FR-041, quickstart Scenario 5)
 
 ---
 
@@ -106,13 +106,13 @@ appears at the edges of all three without disturbing centre marks.
 **Independent test**: colour cells from both palettes and confirm every digit in
 them stays legible.
 
-- [ ] T040 [US4] Define the eighteen colours in `site/src/style.css` per contracts/palette.md, each reaching at least 4.5:1 against its own palette's digit treatment and distinguishable from both theme backgrounds (FR-031, FR-032, research.md D5)
-- [ ] T041 [US4] Show nine swatches in the pad's existing three-by-three arrangement while in colour mode, without changing the pad's shape (FR-034)
-- [ ] T042 [US4] Add the palette control in `site/src/ui/pad.ts`, visible without interaction and reachable by keyboard, pointer, and touch (FR-042)
-- [ ] T043 [US4] Render the cell background from its colour in `site/src/ui/grid.ts`, beneath marks and values (data-model.md rendering order)
-- [ ] T044 [P] [US4] Write `tests/e2e/colour.spec.ts`: apply a colour across a selection, re-apply to remove it, and reach the second palette through the control (FR-033, FR-034)
-- [ ] T045 [US4] Add a greyscale screenshot assertion to `tests/e2e/colour.spec.ts` proving a value, a centre mark, and a corner mark all stay distinguishable on a coloured cell (SC-006)
-- [ ] T046 [US4] Extend `tests/e2e/colour.spec.ts` to run under both `colorScheme: 'dark'` and `'light'`, confirming every colour stays distinguishable from the grid in each (SC-009, research.md D5)
+- [X] T040 [US4] Define the eighteen colours in `site/src/style.css` per contracts/palette.md, each reaching at least 4.5:1 against its own palette's digit treatment and distinguishable from both theme backgrounds (FR-031, FR-032, research.md D5)
+- [X] T041 [US4] Show nine swatches in the pad's existing three-by-three arrangement while in colour mode, without changing the pad's shape (FR-034)
+- [X] T042 [US4] Add the palette control in `site/src/ui/pad.ts`, visible without interaction and reachable by keyboard, pointer, and touch (FR-042)
+- [X] T043 [US4] Render the cell background from its colour in `site/src/ui/grid.ts`, beneath marks and values (data-model.md rendering order)
+- [X] T044 [P] [US4] Write `tests/e2e/colour.spec.ts`: apply a colour across a selection, re-apply to remove it, and reach the second palette through the control (FR-033, FR-034)
+- [X] T045 [US4] Add a greyscale screenshot assertion to `tests/e2e/colour.spec.ts` proving a value, a centre mark, and a corner mark all stay distinguishable on a coloured cell (SC-006)
+- [X] T046 [US4] Extend `tests/e2e/colour.spec.ts` to run under both `colorScheme: 'dark'` and `'light'`, confirming every colour stays distinguishable from the grid in each (SC-009, research.md D5)
 
 ---
 
@@ -123,11 +123,11 @@ them stays legible.
 **Independent test**: cycle the control through all three positions, reload, and
 confirm the choice held. Needs nothing from Stories 1 to 4.
 
-- [ ] T047 [US5] Write `site/src/ui/theme.ts`: read the stored choice from its own key — never the progress document, so it survives eviction and the format change — apply it as `data-theme` on the root element, and cycle light, dark, and following the device, the third removing the key rather than storing a value (FR-045, FR-047, FR-048, research.md D11)
-- [ ] T048 [US5] Redefine the theme custom properties under `:root[data-theme]` in `site/src/style.css` alongside the existing media query, so the no-choice case still works with no script (FR-047, research.md D11)
-- [ ] T049 [US5] Add the theme control to `site/src/ui/controls.ts`, showing which of the three positions is active and reachable three ways (FR-046, FR-049)
-- [ ] T050 [US5] Reflect a theme change from another tab through the storage event already used for progress, and fall back to the device setting when the stored value is unreadable (FR-050, EC-011)
-- [ ] T051 [P] [US5] Extend `tests/e2e/site.spec.ts`: cycle all three positions, reload and confirm the choice held, cycle back to following the device and confirm nothing is stored (FR-045 to FR-047, quickstart Scenario 10)
+- [X] T047 [US5] Write `site/src/ui/theme.ts`: read the stored choice from its own key — never the progress document, so it survives eviction and the format change — apply it as `data-theme` on the root element, and cycle light, dark, and following the device, the third removing the key rather than storing a value (FR-045, FR-047, FR-048, research.md D11)
+- [X] T048 [US5] Redefine the theme custom properties under `:root[data-theme]` in `site/src/style.css` alongside the existing media query, so the no-choice case still works with no script (FR-047, research.md D11)
+- [X] T049 [US5] Add the theme control to `site/src/ui/controls.ts`, showing which of the three positions is active and reachable three ways (FR-046, FR-049)
+- [X] T050 [US5] Reflect a theme change from another tab through the storage event already used for progress, and fall back to the device setting when the stored value is unreadable (FR-050, EC-011)
+- [X] T051 [P] [US5] Extend `tests/e2e/site.spec.ts`: cycle all three positions, reload and confirm the choice held, cycle back to following the device and confirm nothing is stored (FR-045 to FR-047, quickstart Scenario 10)
 
 ---
 

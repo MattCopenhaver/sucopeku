@@ -418,4 +418,15 @@ and confirm it held. Nothing from the other four stories is needed.
 
 ## Revisions
 
-_Nothing yet._
+**2026-08-09 — interaction state gained a cursor.** No requirement changed.
+FR-018 says shift plus an arrow extends the selection; implementing that with
+only an anchor makes the second press recompute the same range, so the
+selection never grows past two cells. A range needs a fixed end and a moving
+one. Recorded in research.md D2 and the data model.
+
+**2026-08-09 — `contracts/annotations.md` moved `render` to the UI side.** As
+first written, a kind supplied its own renderer, which would have required DOM
+code inside `game/annotations/` — the layer that must not have any. Behaviour
+and appearance are now separate registries keyed by the same identifier, which
+leaves FR-007 intact: a fourth kind is one file in each and no edit to the
+others.

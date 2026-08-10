@@ -157,3 +157,75 @@ test('a solved puzzle refuses annotations and does not lose them (FR-039, FR-040
   await key(page, 'erase').click();
   await expect(cell(page, target).locator('.centre')).toHaveText('2');
 });
+
+test('corner marks appear at the edges across a selection (US3)', async ({ page }) => {
+  await page.goto('./');
+  const cells = (await emptyCells(page)).slice(0, 3);
+
+  await cell(page, cells[0]!).click();
+  for (const c of cells.slice(1)) await cell(page, c).click({ modifiers: ['ControlOrMeta'] });
+
+  await mode(page, 'corner').click();
+  await key(page, '5').click();
+  for (const c of cells) await expect(cell(page, c).locator('.corner')).toContainText('5');
+});
+
+test('centre and corner marks coexist without obscuring each other (US3 scenario 2)', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const target = await firstEmpty(page);
+
+  await cell(page, target).click();
+  await mode(page, 'centre').click();
+  for (const d of ['1', '2', '3']) await key(page, d).click();
+  await mode(page, 'corner').click();
+  for (const d of ['7', '8']) await key(page, d).click();
+
+  const centre = cell(page, target).locator('.centre');
+  const corner = cell(page, target).locator('.corner').first();
+  await expect(centre).toHaveText('123');
+  await expect(corner).toContainText('7');
+
+  // Neither overlaps: corner marks sit at the edges, centre in the middle
+  // (research.md D6).
+  const [cBox, kBox] = [await centre.boundingBox(), await corner.boundingBox()];
+  expect(cBox && kBox).toBeTruthy();
+  const overlaps = cBox!.y < kBox!.y + kBox!.height && kBox!.y < cBox!.y + cBox!.height;
+  expect(overlaps, 'centre and corner marks overlap vertically').toBe(false);
+});
+
+test('erase walks value, then marks, then colour — without changing mode', async ({ page }) => {
+  await page.goto('./');
+  const target = await firstEmpty(page);
+
+  await cell(page, target).click();
+  await mode(page, 'colour').click();
+  await page.locator('[data-key="l4"]').click();
+  await mode(page, 'centre').click();
+  await key(page, '1').click();
+  await mode(page, 'corner').click();
+  await key(page, '9').click();
+  await mode(page, 'value').click();
+  await key(page, '4').click();
+
+  await expect(cell(page, target).locator('.value')).toHaveText('4');
+  await expect(cell(page, target)).toHaveClass(/coloured/);
+
+  // Three presses, no mode switching (FR-025, FR-041).
+  await key(page, 'erase').click();
+  await expect(cell(page, target).locator('.value')).toHaveCount(0);
+  await expect(cell(page, target).locator('.centre')).toHaveText('1');
+
+  await key(page, 'erase').click();
+  await expect(cell(page, target).locator('.centre')).toHaveCount(0);
+  await expect(cell(page, target).locator('.corner')).toHaveCount(0);
+  await expect(cell(page, target)).toHaveClass(/coloured/);
+
+  await key(page, 'erase').click();
+  await expect(cell(page, target)).not.toHaveClass(/coloured/);
+
+  // A fourth press on an empty cell does nothing and reports nothing (FR-026).
+  await key(page, 'erase').click();
+  await expect(page.getByTestId('grid')).toBeVisible();
+});

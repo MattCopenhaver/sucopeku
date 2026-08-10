@@ -26,3 +26,56 @@ test('the site fits a narrow phone screen without sideways scrolling (FR-029)', 
   );
   expect(overflows, 'page scrolls horizontally at 320px wide').toBe(false);
 });
+
+test('the theme control cycles all three positions and the choice holds (FR-045 to FR-047)', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const control = page.getByTestId('theme');
+  const attr = () => page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+
+  // Nothing chosen yet: the device setting applies and nothing is stored.
+  await expect(control).toHaveText('Theme: Auto');
+  expect(await attr()).toBeNull();
+
+  await control.click();
+  await expect(control).toHaveText('Theme: Light');
+  expect(await attr()).toBe('light');
+
+  await control.click();
+  await expect(control).toHaveText('Theme: Dark');
+  expect(await attr()).toBe('dark');
+
+  await page.reload();
+  expect(await attr()).toBe('dark');
+  await expect(page.getByTestId('theme')).toHaveText('Theme: Dark');
+
+  // Back to following the device, with nothing left stored (FR-045).
+  await page.getByTestId('theme').click();
+  await expect(page.getByTestId('theme')).toHaveText('Theme: Auto');
+  expect(await attr()).toBeNull();
+  expect(await page.evaluate(() => localStorage.getItem('sucopeku.theme'))).toBeNull();
+});
+
+test('a theme chosen in one tab appears in the other (FR-050)', async ({ page, context }) => {
+  await page.goto('./');
+  const other = await context.newPage();
+  await other.goto('./');
+
+  await other.getByTestId('theme').click();
+  await other.getByTestId('theme').click();
+
+  // No reload in the first tab.
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme')))
+    .toBe('dark');
+  await other.close();
+});
+
+test('an unreadable stored theme falls back to the device (EC-011)', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('sucopeku.theme', 'chartreuse'));
+  await page.goto('./');
+
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBeNull();
+  await expect(page.getByTestId('grid')).toBeVisible();
+});

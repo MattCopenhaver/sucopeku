@@ -68,12 +68,18 @@ Feature 002's research described this as "one field". It becomes four.
 |---|---|---|
 | `selection` | `Set<cell>` | No (FR-020) |
 | `anchor` | `cell \| null` | No |
+| `cursor` | `cell \| null` | No |
 | `mode` | `value \| centre \| corner \| colour` | No (FR-013) |
 | `palette` | `light-digit \| dark-digit` | No (FR-043) |
 
 `anchor` exists so shift plus arrows extends from a fixed point rather than
 drifting (research.md D2). It is set by any selection change that is not an
 extension.
+
+`cursor` is where the keyboard currently is, and it moves while the anchor does
+not. Both are needed: a range has a fixed end and a moving one, and using the
+anchor for both makes the second shift+arrow recompute the same range so the
+selection never grows. Found by test rather than by design — see Revisions.
 
 None of it persists. On load: selection empty or the first writable cell, no
 anchor, mode `value`, palette `light-digit`.

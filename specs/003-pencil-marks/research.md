@@ -30,9 +30,16 @@ because feature 002 already demonstrated the registry paying off.
 
 ## D2. Selection is a set plus an anchor
 
-**Decision**: Interaction state becomes `{ selection: Set<cell>, anchor: cell |
-null, mode, palette }`. The anchor is the cell a range extends from — the last
-cell chosen without shift.
+**Decision**: Interaction state becomes `{ selection: Set<cell>, anchor, cursor,
+mode, palette }`. The anchor is the cell a range extends *from* — the last cell
+chosen without shift. The cursor is where the keyboard currently *is*.
+
+**Amended during implementation**: this originally named the anchor alone. Two
+tests then failed in the same way — a second shift+arrow left the selection the
+same size. A range needs a fixed end and a moving one, and with only the anchor
+every extension recomputes from the same origin to the same place. Recorded
+because the omission is not obvious from reading the requirement: FR-018 says
+"extend", and extending sounds like one piece of state until you try it.
 
 **Rationale**: FR-018 requires shift plus arrows to extend rather than move,
 which is meaningless without knowing what it extends *from*. Holding the anchor
