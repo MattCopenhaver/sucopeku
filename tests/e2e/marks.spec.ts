@@ -279,3 +279,21 @@ test('corner marks read ascending whatever order they were pressed in', async ({
   const sorted = [...boxes].sort((a, b) => a[1]! - b[1]! || a[0]! - b[0]!);
   expect(boxes, 'corner marks are not laid out in reading order').toEqual(sorted);
 });
+
+test('a value hides corner marks as well as centre marks (FR-023, FR-024)', async ({ page }) => {
+  await page.goto('./');
+  const target = await firstEmpty(page);
+
+  await cell(page, target).click();
+  await mode(page, 'corner').click();
+  for (const d of ['3', '6']) await key(page, d).click();
+  await expect(cell(page, target).locator('.corner')).toHaveCount(2);
+
+  await mode(page, 'value').click();
+  await key(page, '8').click();
+  await expect(cell(page, target).locator('.value')).toHaveText('8');
+  await expect(cell(page, target).locator('.corner')).toHaveCount(0);
+
+  await key(page, 'erase').click();
+  await expect(cell(page, target).locator('.corner')).toHaveCount(2);
+});

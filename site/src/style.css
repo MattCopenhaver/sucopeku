@@ -8,12 +8,18 @@
   color-scheme: light dark;
 
   /* One width for the grid and the pad, so they always agree.
-     - 92vw keeps a phone from overflowing, which is what 002 FR-029 requires
-     - 62vh keeps the board on screen on a short, wide window
+     - 100% is the container's content box, so the board can never be wider
+       than the space it sits in — which is what keeps it centred
+     - 62vh keeps the whole board on screen in a short, wide window
      - 46rem stops it becoming comical on a very large monitor
      The height term is what makes a big screen useful: a fixed 30rem left most
-     of a high-resolution display empty and invited zooming. */
-  --board: min(92vw, 62vh, 46rem);
+     of a high-resolution display empty and invited zooming.
+
+     Measured against the container rather than the viewport on purpose. With
+     92vw the board was wider than its padded container on a phone, so the
+     container stretched past the window, `overflow-x: hidden` swallowed the
+     evidence, and the board sat 9px off centre. */
+  --board: min(100%, 62vh, 46rem);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -66,8 +72,14 @@ body {
 }
 
 main {
-  max-width: 34rem;
+  /* Derived from the board rather than fixed. A literal 34rem was narrower than
+     the board once it could reach 46rem, so the grid overflowed its own
+     container and sat off to one side — with `overflow-x: hidden` on the body
+     quietly hiding the evidence rather than producing a scrollbar. Tying the
+     two together means the heading is centred over the board at every size
+     (003 FR-055). */
   width: 100%;
+  max-width: 49rem;
   padding: 1.5rem;
   text-align: center;
 }

@@ -92,3 +92,36 @@ test('the board scales with the window rather than sitting fixed (FR-055)', asyn
   // And it never outgrows the window (002 FR-029 still holds).
   expect(large).toBeLessThanOrEqual(1600 * 0.92);
 });
+
+test('the board and the heading are centred in the window', async ({ page }) => {
+  for (const size of [
+    { width: 1600, height: 1200 },
+    { width: 1024, height: 768 },
+    { width: 375, height: 720 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto('./');
+
+    const grid = (await page.getByTestId('grid').boundingBox())!;
+    const heading = (await page.getByRole('heading', { name: 'Sucopeku' }).boundingBox())!;
+
+    // Against the client width, not the viewport: a vertical scrollbar takes
+    // real estate the layout centres inside, so comparing to the window would
+    // report the board as off-centre by half a scrollbar when it is not.
+    const usable = await page.evaluate(() => document.documentElement.clientWidth);
+    const gridCentre = grid.x + grid.width / 2;
+    const headingCentre = heading.x + heading.width / 2;
+
+    expect(Math.abs(gridCentre - usable / 2), `board off centre at ${size.width}px`).toBeLessThan(
+      2,
+    );
+    expect(
+      Math.abs(headingCentre - gridCentre),
+      `heading not over the board at ${size.width}px`,
+    ).toBeLessThan(2);
+
+    // And it never overflows the space it is centred in.
+    expect(grid.x).toBeGreaterThanOrEqual(0);
+    expect(grid.x + grid.width).toBeLessThanOrEqual(usable);
+  }
+});

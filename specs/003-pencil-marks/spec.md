@@ -508,3 +508,17 @@ were already sorted, but positions were assigned from a fixed slot sequence, so
 the fifth mark landed between the first and second and the cell read "1 5 2".
 Which positions are used now depends on how many marks there are, each set
 listed in reading order. Corners still fill before edges.
+
+**2026-08-09 — corner marks were not hidden by a value.** FR-023 says entering a
+value hides that cell's pencil marks; only centre marks were drawn conditionally,
+so a value was painted on top of corner marks rather than replacing them. Fixed,
+and now covered by a test. The requirement was right and the reading of it was
+partial — "pencil marks" is both kinds.
+
+**2026-08-09 — the board was nine pixels off centre on a phone.** The board was
+sized against the viewport (92vw) while sitting inside a padded container, so it
+was wider than the space it occupied. The container stretched past the window,
+`overflow-x: hidden` swallowed the overflow rather than showing a scrollbar, and
+the result looked like a centring bug with nothing visibly wrong. The board is
+now measured against its container, which makes fitting and centring the same
+fact rather than two that have to agree.

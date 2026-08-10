@@ -37,10 +37,12 @@ export function renderGrid(root: HTMLElement, game: Game): void {
     const given = game.isGiven(cell);
 
     renderers[COLOUR]?.(button, game.annotation(COLOUR, cell));
-    renderers[CORNER]?.(button, game.annotation(CORNER, cell));
 
     if (value === null || value === undefined) {
-      // Marks are hidden by a value, never deleted (003 FR-023, FR-024).
+      // Both kinds of mark are hidden by a value, never deleted (003 FR-023,
+      // FR-024). Corner marks were drawn unconditionally at first, so a value
+      // sat on top of them instead of replacing them.
+      renderers[CORNER]?.(button, game.annotation(CORNER, cell));
       renderers[CENTRE]?.(button, game.annotation(CENTRE, cell));
     } else {
       const digit = document.createElement('span');
