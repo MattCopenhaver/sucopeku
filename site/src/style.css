@@ -6,6 +6,20 @@
   --paper: #fdfdfb;
   --muted: #5a5a5a;
   color-scheme: light dark;
+
+  /* One width for the grid and the pad, so they always agree.
+     - 100% is the container's content box, so the board can never be wider
+       than the space it sits in — which is what keeps it centred
+     - 62vh keeps the whole board on screen in a short, wide window
+     - 46rem stops it becoming comical on a very large monitor
+     The height term is what makes a big screen useful: a fixed 30rem left most
+     of a high-resolution display empty and invited zooming.
+
+     Measured against the container rather than the viewport on purpose. With
+     92vw the board was wider than its padded container on a phone, so the
+     container stretched past the window, `overflow-x: hidden` swallowed the
+     evidence, and the board sat 9px off centre. */
+  --board: min(100%, 62vh, 46rem);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,6 +28,21 @@
     --paper: #16171a;
     --muted: #a3a3a3;
   }
+}
+
+/* An explicit choice wins over the device in both directions. With no choice
+   the attribute is absent and the media query above applies with no script
+   involved (003 FR-045, FR-047, research.md D11). */
+:root[data-theme='light'] {
+  --ink: #1a1a1a;
+  --paper: #fdfdfb;
+  --muted: #5a5a5a;
+}
+
+:root[data-theme='dark'] {
+  --ink: #ececec;
+  --paper: #16171a;
+  --muted: #a3a3a3;
 }
 
 * {
@@ -43,8 +72,14 @@ body {
 }
 
 main {
-  max-width: 34rem;
+  /* Derived from the board rather than fixed. A literal 34rem was narrower than
+     the board once it could reach 46rem, so the grid overflowed its own
+     container and sat off to one side — with `overflow-x: hidden` on the body
+     quietly hiding the evidence rather than producing a scrollbar. Tying the
+     two together means the heading is centred over the board at every size
+     (003 FR-055). */
   width: 100%;
+  max-width: 49rem;
   padding: 1.5rem;
   text-align: center;
 }
@@ -79,7 +114,7 @@ p {
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--cols, 9), 1fr);
-  width: min(92vw, 30rem);
+  width: var(--board);
   aspect-ratio: 1;
   gap: 1px;
   background: var(--muted);
@@ -131,13 +166,6 @@ p {
   font-weight: 700;
 }
 
-.pad {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.4rem;
-  width: min(92vw, 30rem);
-}
-
 .key {
   padding: 0.6rem 0;
   font: inherit;
@@ -185,4 +213,305 @@ p {
 
 .status.solved::before {
   content: '✓ ';
+}
+
+/* --- Feature 003: annotations, the 3x3 pad, and modes --- */
+
+/* A drag across the grid selects rather than scrolling the page. Scoped to the
+   grid alone: on the whole page it would stop a short screen scrolling to the
+   pad (003 EC-002, SC-007). */
+.grid {
+  touch-action: none;
+}
+
+/* The cell becomes a stack: colour behind, corner marks at the perimeter, and
+   either the value or the centre marks in the middle (003 data-model.md).
+
+   Everything inside is sized in `cqw` — a share of the cell's own width. `em`
+   was wrong here: it measures against the cell's font-size, which has no fixed
+   relationship to the cell's height, so enlarging corner marks quietly pushed
+   them into the middle and they began overlapping the centre marks. Against the
+   cell itself, "a quarter of a cell" means a quarter of a cell. */
+.cell {
+  position: relative;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.cell.coloured {
+  background: var(--cell-colour);
+}
+
+/* Digits carry a halo of the page colour, so they read against any background
+   and any combination of them. This is what makes a cell split between several
+   colours legible at all, and what lets the palettes be moderate mid-tones
+   rather than extremes chosen to suit one digit colour (003 FR-032, FR-061).
+
+   Four offsets rather than a blur: a blur washes out at the size a centre mark
+   renders, where the halo matters most. */
+.cell.coloured .value,
+.cell.coloured .centre,
+.cell.coloured .corner {
+  color: var(--ink);
+  text-shadow:
+    0 0 0.08em var(--paper),
+    0.04em 0 0.04em var(--paper),
+    -0.04em 0 0.04em var(--paper),
+    0 0.04em 0.04em var(--paper),
+    0 -0.04em 0.04em var(--paper);
+}
+
+/* A value always reads larger than any mark, so an answer is never mistaken
+   for a note (003 FR-052). */
+.cell .value {
+  font-size: 62cqw;
+  line-height: 1;
+}
+
+/* Marks are comfortable when few and shrink as they multiply (003 FR-052,
+   research.md D12). Sizing everything for the nine-mark case would make the
+   two-or-three case — which is what a player looks at most — unreadable. */
+.cell .centre {
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  max-width: 76%;
+  font-size: 32cqw;
+  display: grid;
+  justify-items: center;
+}
+
+.cell .centre[data-count='4'],
+.cell .centre[data-count='5'] {
+  font-size: 27cqw;
+}
+
+/* Six or more wrap to two balanced rows instead of shrinking further. The
+   middle of the cell has vertical space to give; legibility does not
+   (003 FR-058). */
+.cell .centre[data-count='6'],
+.cell .centre[data-count='7'],
+.cell .centre[data-count='8'],
+.cell .centre[data-count='9'] {
+  font-size: 23cqw;
+  line-height: 1.05;
+}
+
+.cell .centre-row {
+  display: block;
+}
+
+/* Eight perimeter positions, corners first. The middle stays clear, which is
+   what keeps corner and centre marks from colliding (research.md D6). */
+.cell .corner {
+  position: absolute;
+  font-size: 23.5cqw;
+  line-height: 1;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.cell .corner[data-count='6'],
+.cell .corner[data-count='7'],
+.cell .corner[data-count='8'],
+.cell .corner[data-count='9'] {
+  font-size: 20cqw;
+}
+
+/* The ninth mark's only effect: four digits evenly spaced along the bottom in
+   place of the three that sit there at eight (research.md D6). */
+.cell .corner-row {
+  left: 7cqw;
+  right: 7cqw;
+  display: flex;
+  justify-content: space-between;
+}
+
+.cell .corner-row-bottom {
+  bottom: 5cqw;
+}
+
+.cell .corner-tl {
+  top: 5cqw;
+  left: 7cqw;
+}
+
+.cell .corner-tr {
+  top: 5cqw;
+  right: 7cqw;
+}
+
+.cell .corner-bl {
+  bottom: 5cqw;
+  left: 7cqw;
+}
+
+.cell .corner-br {
+  bottom: 5cqw;
+  right: 7cqw;
+}
+
+.cell .corner-tc {
+  top: 5cqw;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cell .corner-bc {
+  bottom: 5cqw;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cell .corner-ml {
+  top: 50%;
+  left: 7cqw;
+  transform: translateY(-50%);
+}
+
+.cell .corner-mr {
+  top: 50%;
+  right: 7cqw;
+  transform: translateY(-50%);
+}
+
+/* The pad: nine keys, a fixed side column, and a palette strip. Nothing here
+   changes size when the mode changes — only what it contains (003 FR-053). */
+.pad {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  grid-template-areas: 'keys side';
+  gap: 0.5rem;
+  width: var(--board);
+
+  /* Everything inside is sized in `cqw` — a percentage of the pad's own width —
+     so digits, the colour wheel, and the mode previews grow with the board and
+     stay in proportion to the buttons holding them.
+
+     Deliberately not `calc(var(--board) / n)`: `--board` contains a `100%`,
+     which means the container's width in a `width` declaration and the parent's
+     font size in a `font-size` one. The same token, read two ways; it computed
+     to under a pixel and the pad went blank. */
+  container-type: inline-size;
+}
+
+.keys {
+  grid-area: keys;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.key {
+  aspect-ratio: 3 / 2;
+  padding: 0;
+  font-size: 7.5cqw;
+  line-height: 1;
+}
+
+.key.swatch {
+  background: var(--swatch);
+  color: transparent;
+}
+
+.side {
+  grid-area: side;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 0.4rem;
+}
+
+.modes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+}
+
+.mode {
+  display: grid;
+  place-items: center;
+  padding: 2%;
+  font: inherit;
+  font-size: 4cqw;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--muted);
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+
+/* The active mode is visible without interacting with anything (003 FR-009). */
+.mode.active {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 14%, var(--paper));
+}
+
+.mode.erase {
+  font-size: 4cqw;
+  padding: 0.5em 0.3em;
+}
+
+/* A miniature cell showing where this mode's digits land (003 FR-054). It fills
+   the control rather than sitting in it, so the four modes read at roughly the
+   size of a cell in the grid. */
+.preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 8cqw;
+  border-radius: 0.2rem;
+  color: var(--ink);
+}
+
+.preview-value {
+  font-size: 9cqw;
+  line-height: 1;
+}
+
+.preview-centre {
+  font-size: 4.4cqw;
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+
+.preview-corner .pip {
+  position: absolute;
+  font-size: 3.6cqw;
+  font-style: normal;
+  line-height: 1;
+}
+
+.preview-corner .pip-tl {
+  top: 0.1em;
+  left: 0.2em;
+}
+
+.preview-corner .pip-tr {
+  top: 0.1em;
+  right: 0.2em;
+}
+
+.preview-corner .pip-bl {
+  bottom: 0.1em;
+  left: 0.2em;
+}
+
+.preview-corner .pip-br {
+  bottom: 0.1em;
+  right: 0.2em;
+}
+
+/* The nine colours in use, radiating from the centre. This control is also the
+   palette indicator, so what it shows is the answer to "which nine?"
+   (003 FR-056). */
+.preview-colour {
+  background: var(--wheel);
+  border-radius: 50%;
+  width: min(100%, 12cqw);
+  height: min(100%, 12cqw);
+  min-height: 9cqw;
+  justify-self: center;
+  align-self: center;
 }

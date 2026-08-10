@@ -1,4 +1,5 @@
 import type { Game } from '../game/state.js';
+import { currentChoice, cycleTheme, describeChoice } from './theme.js';
 
 /** The solved banner, the unlock control, and the new-puzzle control. */
 export function renderControls(
@@ -36,4 +37,21 @@ export function renderControls(
   next.textContent = 'New puzzle';
   next.addEventListener('click', handlers.onNewPuzzle);
   root.append(next);
+
+  // Three positions, cycling. Without the third the player could never get back
+  // to following their device, which would make 003 FR-047 true for about ten
+  // seconds (003 FR-045, FR-049).
+  const theme = document.createElement('button');
+  theme.type = 'button';
+  theme.className = 'control';
+  theme.dataset.testid = 'theme';
+  const label = (): string => `Theme: ${describeChoice(currentChoice())}`;
+  theme.textContent = label();
+  theme.setAttribute('aria-label', label());
+  theme.addEventListener('click', () => {
+    cycleTheme();
+    theme.textContent = label();
+    theme.setAttribute('aria-label', label());
+  });
+  root.append(theme);
 }

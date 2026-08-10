@@ -14,7 +14,7 @@ async function firstEmpty(page: Page): Promise<number> {
     .locator('.cell')
     .evaluateAll((nodes) =>
       nodes
-        .map((node, index) => (node.textContent?.trim() === '' ? index : -1))
+        .map((node, index) => (node.querySelector('.value') ? -1 : index))
         .filter((index) => index >= 0),
     );
   const first = cells[0];

@@ -1,6 +1,12 @@
 /**
  * Stored progress: one versioned document, all puzzles (contracts/storage.md C2).
  *
+ * Version 2 adds annotations. A version 1 document is discarded rather than
+ * upgraded (003 FR-037, EC-005) — constitution 3.0.0 permits that before
+ * Sucopeku 1.0 provided the failure is graceful, and the discard path below
+ * already existed for unrecognised versions, so this is a changed constant
+ * rather than a new behaviour.
+ *
  * Two behaviours are worth knowing about before reading:
  *
  *   Saving merges into the document as it currently stands rather than writing
@@ -14,11 +20,20 @@
  */
 
 const KEY = 'sucopeku.progress';
-const VERSION = 1;
+const VERSION = 2;
 const MAX_PUZZLES = 10;
+
+/** Payloads keyed by cell index, keyed by annotation kind (003 data-model.md). */
+export type StoredAnnotations = Record<string, Record<string, unknown>>;
 
 export interface PuzzleProgress {
   entries: Record<string, number>;
+  /**
+   * Keyed by kind so a kind this release does not have can be ignored without
+   * disturbing the ones it does — the same tolerance the ruleset loader applies
+   * to an unknown primitive (003 FR-007).
+   */
+  annotations: StoredAnnotations;
   solved: boolean;
   unlocked: boolean;
   playedAt: number;
@@ -101,5 +116,47 @@ export function solvedIds(): ReadonlySet<string> {
 export function onExternalChange(listener: () => void): void {
   window.addEventListener('storage', (event) => {
     if (event.key === KEY || event.key === null) listener();
+  });
+}
+
+/**
+ * The theme preference, deliberately not in the document above (003 FR-048).
+ *
+ * Progress is versioned, is discarded when the version moves — which this very
+ * release does — and evicts puzzles beyond ten. A preference must survive all
+ * three, so it lives under its own key.
+ *
+ * There are three states and only two are stored: *follow the device* is the
+ * absence of the key, not a stored "auto". That way a player who never chose
+ * and a player who changed their mind back reach identical storage, rather than
+ * two states that have to be kept behaving alike.
+ */
+const THEME_KEY = 'sucopeku.theme';
+
+export type ThemeChoice = 'light' | 'dark' | null;
+
+export function loadTheme(): ThemeChoice {
+  try {
+    const raw = localStorage.getItem(THEME_KEY);
+    // Anything unrecognised falls back to following the device (003 EC-011).
+    return raw === 'light' || raw === 'dark' ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveTheme(choice: ThemeChoice): void {
+  try {
+    if (choice === null) localStorage.removeItem(THEME_KEY);
+    else localStorage.setItem(THEME_KEY, choice);
+  } catch {
+    // Storage refused. The theme still applies for this session.
+  }
+}
+
+/** Fires when another tab changes the theme (003 FR-050). */
+export function onThemeChange(listener: () => void): void {
+  window.addEventListener('storage', (event) => {
+    if (event.key === THEME_KEY || event.key === null) listener();
   });
 }

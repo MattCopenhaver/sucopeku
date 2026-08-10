@@ -15,7 +15,7 @@ const box = (cell: number) => Math.floor(row(cell) / 3) * 3 + Math.floor(col(cel
 async function boardValues(page: Page): Promise<(number | null)[]> {
   return page.locator('.cell').evaluateAll((nodes) =>
     nodes.map((node) => {
-      const text = node.textContent?.trim() ?? '';
+      const text = node.querySelector('.value')?.textContent?.trim() ?? '';
       return text === '' ? null : Number(text);
     }),
   );
