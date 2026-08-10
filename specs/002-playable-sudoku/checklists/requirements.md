@@ -60,8 +60,9 @@ Recorded so a reviewer can see these were derived rather than invented:
 - **Principle IX** → FR-017, FR-018, FR-021 (input parity, phone width, conflicts
   not signalled by colour alone)
 
-*Corrected 2026-08-09. These cited FR-026, FR-022 to FR-025, and FR-011, FR-012,
-FR-015 — the numbers those obligations held before clarification inserted the
+*Corrected 2026-08-09. These cited FR-026, FR-022 to FR-025, and the eleventh,
+twelfth and fifteenth requirements — the numbers those obligations held before
+clarification inserted the
 interaction requirements and shifted everything after them. Every one of those
 references still resolved, which is why the citation check never objected: it
 proves a reference exists, not that it still points at what the text claims.*

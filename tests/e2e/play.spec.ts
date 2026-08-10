@@ -49,7 +49,8 @@ test('the pad does nothing until a cell is chosen', async ({ page }) => {
   await page.goto('./');
 
   // There is no mode to enter, so a pad key with no selection is inert rather
-  // than arming something invisible (FR-011, withdrawn).
+  // than arming something invisible. The requirement asking for a digit
+  // indicator was deleted when entry became cell-first.
   const before = await page.locator('.cell').allTextContents();
   await page.evaluate(() => {
     document

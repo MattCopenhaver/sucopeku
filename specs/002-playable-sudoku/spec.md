@@ -217,10 +217,6 @@ cases are traced and covered by tasks exactly as functional requirements are.
 - **FR-010**: Entry MUST be cell-first: the player chooses a cell, and then
   chooses a digit to place in it. The chosen cell MUST remain selected after
   placement, so its value can be corrected without selecting it again.
-- **FR-011**: *(withdrawn 2026-08-09 — see Revisions.)* Formerly: the site MUST
-  indicate which digit is currently selected. Cell-first entry has no persistent
-  digit selection to indicate; the pad performs an action rather than entering a
-  mode.
 - **FR-012**: Typing a digit MUST place it in the selected cell. This is a
   shortcut over the same model, not a second one: every action it performs is
   also reachable from the number pad, and both act on the selected cell.
@@ -491,7 +487,11 @@ FR-029 was amended; `tests/e2e/placeholder.spec.ts` became
 on the record, and the citation check still passes.
 
 **2026-08-09 — entry reversed from digit-first to cell-first.** FR-010, FR-012,
-FR-014, and FR-015 amended; FR-011 withdrawn in place.
+FR-014, and FR-015 amended. The requirement that the site indicate the currently
+selected digit was **deleted outright** — the eleventh, whose number is retired
+and will never be reused. Constitution 3.3.0 permits deletion without a marker
+before a spec is `Complete`, on the grounds that the spec and everything citing
+it move together and no reader can be stranded by it.
 
 Digit-first was chosen before there was anything to use. In use it reads wrong:
 a pointer player picks a digit and enters a *mode*, while a keyboard player
@@ -499,7 +499,8 @@ selects a cell and types into it. Two models, and the pad was the odd one out.
 
 Cell-first removes a concept rather than adding one. There is no selected digit,
 so there is no mode, no indicator for one, and no state to keep in sync — which
-is why FR-011 has nothing left to require. Every input now does one of two
+is why the digit-indicator requirement had nothing left to require. Every input
+now does one of two
 things: move the selection, or place into it. Pointer, touch, and keyboard
 become the same model in fact rather than only in wording, which is what FR-012
 always claimed and what FR-017 has to be checkable against.

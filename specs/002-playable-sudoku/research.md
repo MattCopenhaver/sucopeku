@@ -194,7 +194,8 @@ state `{ selectedDigit, selectedCell }` and the pad selecting a mode. It was
 decided before there was anything to use, and using it showed the flaw: the
 keyboard was already cell-first, so the two input paths were different models
 wearing the same words. Reversing it deleted a field, a mode, and an indicator
-(FR-011, withdrawn). Recorded rather than quietly rewritten, because "the design
+(the digit indicator, deleted). Recorded rather than quietly rewritten, because
+"the design
 that survived contact" is the part worth keeping.
 
 ---

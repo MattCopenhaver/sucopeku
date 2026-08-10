@@ -70,7 +70,7 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 - [X] T012 [US1] Hold interaction state in `site/src/game/state.ts` as a selected cell, with every input reducing to *move the selection* and *place into it* (research.md D7, revised 2026-08-09 from digit-first)
 - [X] T013 [US1] Render the 9×9 grid from the board in `site/src/ui/grid.ts`, distinguishing given cells from the player's entries
 - [X] T014 [P] [US1] Render the number pad in `site/src/ui/pad.ts` with digits 1–9 and an erase key, always visible while a puzzle is shown (FR-009, FR-014)
-- [X] T015 [US1] Indicate the selected cell in `site/src/ui/grid.ts` (FR-016). There is no selected digit to indicate under cell-first entry — FR-011 is withdrawn
+- [X] T015 [US1] Indicate the selected cell in `site/src/ui/grid.ts` (FR-016). There is no selected digit to indicate under cell-first entry — the requirement that asked for it was deleted
 - [X] T016 [US1] Place a chosen digit into the selected cell in `site/src/game/state.ts`, leaving the cell selected so its value can be corrected without reselecting it (FR-008, FR-010)
 - [X] T017 [US1] Implement erase in `site/src/game/state.ts`: choosing erase clears the selected cell's player value; doing so on an empty cell does nothing and reports no error (FR-013, FR-014, FR-015)
 - [X] T018 [US1] Add keyboard handling in `site/src/main.ts` — arrows move the selected cell, typing a digit places it there, Backspace and Delete clear it, per the table in research.md D7 (FR-012, FR-017)

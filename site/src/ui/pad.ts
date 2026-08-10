@@ -6,7 +6,8 @@ import type { Entry, Game } from '../game/state.js';
  * shortcut rather than a separate mechanism.
  *
  * A key performs an action; it does not enter a mode. There is nothing to show
- * as "currently selected" here, which is FR-011 having nothing left to require.
+ * as "currently selected" here, which is why the requirement asking for a digit
+ * indicator was deleted rather than reworded.
  */
 export function renderPad(root: HTMLElement, game: Game, onChange: () => void): void {
   root.replaceChildren();
