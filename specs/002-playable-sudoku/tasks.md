@@ -151,7 +151,7 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 - [X] T053 Make the service worker's navigation fallback ignore the query string in `site/public/sw.js`, or offline works at `/` and fails at `/?puzzle=p07` (research.md D4, contracts/storage.md C1)
 - [ ] T054 Validate quickstart Scenario 6 by hand on a real iOS device — load a puzzle, go offline, reload at a puzzle address. Playwright cannot drive WebKit service workers, so this is unreachable by the suite
 - [ ] T055 Validate quickstart Scenario 7 by hand: disable storage for the site and confirm the puzzle remains playable. `tests/e2e/progress.spec.ts` now covers this with `localStorage` stubbed to throw, so the manual pass is confirming that a real browser's own setting behaves the same way
-- [ ] T056 Update `specs/002-playable-sudoku/plan.md` and this file if anything built diverged from what was planned
+- [X] T056 Update `specs/002-playable-sudoku/plan.md` and this file if anything built diverged from what was planned
 - [ ] T057 Write the human-authored `## SDD Notes` section in this feature's pull request body, including whether a defect reached `main` that a unit test would have caught — the result Principle VIII asks be reported
 
 ---

@@ -14,7 +14,7 @@ evaluator that has never heard of rows, columns, boxes, or the number nine. That
 is the whole reason variants will later be free, and it is the entire cost of
 this feature being harder than "draw a grid."
 
-Everything else is small: a board array, a digit-first input state machine, one
+Everything else is small: a board array, a cell-first input state machine, one
 versioned document in local storage, and plain DOM rendering with no framework.
 
 ## Technical Context
@@ -57,7 +57,7 @@ FR-006). Input parity across keyboard, pointer, and touch (FR-017). Usable at
 | VI. Progress Persists Locally | **Pass** | Automatic, per puzzle, capped at ten with least-recently-played eviction (D5) |
 | VII. Generation Stays Responsive | **Dormant** | Nothing generates. The principle's subject does not exist in this feature |
 | VIII. Every Test Is Something a Player Could Do | **Pass, and under real strain** | The constraint engine is exactly the code unit tests exist for, and will be verified only by placing digits in a grid. This is the experiment's first genuine test — see D9 |
-| IX. Playable by Keyboard, Mouse, and Touch | **Pass** | Every input reduces to *select a digit* and *apply to a cell*, reachable three ways (D7). Conflicts marked by more than colour (D8) |
+| IX. Playable by Keyboard, Mouse, and Touch | **Pass** | Every input reduces to *move the selection* and *place into it*, reachable three ways (D7). Conflicts marked by more than colour (D8) |
 | Scope and Technology Bounds | **Pass** | English only; no dependency added; nothing precludes curated libraries, authored puzzles, or player-defined rulesets — the ruleset format is already the data such a feature would write |
 
 ### No violations requiring justification
@@ -75,7 +75,7 @@ when the constitution was ratified, and this is the feature that pays for it.
 specs/002-playable-sudoku/
 ├── plan.md              # This file
 ├── spec.md              # Feature specification
-├── research.md          # Phase 0 — D1 through D9
+├── research.md          # Phase 0 — D1 through D11
 ├── data-model.md        # Phase 1
 ├── quickstart.md        # Phase 1
 ├── contracts/           # Phase 1
@@ -95,7 +95,8 @@ site/
 ├── public/
 │   └── sw.js                # One change: fallback ignores the query string
 └── src/
-    ├── main.ts              # Wiring: read address, load, render, listen
+    ├── main.ts              # Wiring: read address, load, render, listen,
+    │                         # and keyboard handling
     ├── style.css
     ├── engine/
     │   ├── primitives.ts    # The registry. all-different is the only entry
@@ -106,7 +107,7 @@ site/
     ├── puzzles/
     │   └── curated.json     # Data. 20 puzzles, uniqueness verified before ship
     ├── game/
-    │   ├── state.ts         # Selected digit, selected cell, board, solved
+    │   ├── state.ts         # Selected cell, board, solved, place()
     │   └── progress.ts      # Load, save, evict, version check
     └── ui/
         ├── grid.ts          # Render cells, mark conflicts, handle selection
@@ -118,10 +119,13 @@ scripts/
                              # Nothing at runtime imports it
 
 tests/e2e/
-├── play.spec.ts             # US1 — enter, clear, solve
+├── play.spec.ts             # US1 — enter, clear, solve, three input methods
 ├── conflicts.spec.ts        # US2 — marking and clearing
-├── progress.spec.ts         # US3 — reload, return, per-puzzle
-└── puzzles.spec.ts          # US4 — new puzzle, back button
+├── progress.spec.ts         # US3 — reload, return, per-puzzle, cross-tab
+├── puzzles.spec.ts          # US4 — new puzzle, back button
+├── site.spec.ts             # Replaces feature 001's placeholder.spec.ts
+└── solve.ts                 # Test-only oracle. Solves the board on screen so a
+                             # test can play a puzzle to the end. Never shipped
 ```
 
 **Structure Decision**: `engine/` is separated from `game/` and `ui/` because the
@@ -138,8 +142,9 @@ interface would produce.
 
 Recorded so they are choices rather than oversights:
 
-- **Pencil marks.** Out of scope, but the digit-first model was chosen partly to
-  accommodate them. Nothing here should make them harder.
+- **Pencil marks.** Out of scope. The cell-first model accommodates them at
+  least as well as digit-first would have: a pencil mode becomes a modifier on
+  `place`, not a second selection to track.
 - **A second ruleset.** None exists, so the engine's genericity is unproven by
   use. The first variant is the real test of D1, and may expose a primitive the
   registry needs.
@@ -151,3 +156,43 @@ Recorded so they are choices rather than oversights:
 ## Complexity Tracking
 
 > No constitution violations requiring justification.
+
+## What diverged from this plan
+
+Recorded under T056, so the plan describes what was built rather than what was
+expected. Each is dated 2026-08-09 and explained where the decision lives.
+
+**Entry became cell-first.** Planned as digit-first; reversed after playing it.
+The keyboard was already cell-first, so the pad was the odd one out. This deleted
+a field, a mode, and an indicator rather than adding anything — research D7, and
+the spec's Revisions.
+
+**Keyboard handling landed in `main.ts`, not `ui/grid.ts`.** Arrow keys need the
+geometry and the redraw, both of which live in the wiring. Putting it in `grid.ts`
+would have meant passing them back in.
+
+**`tests/e2e/solve.ts` was added and is not in the original structure.** A test
+needs to play a puzzle to the end to prove it locks, and the site ships no
+solution by design (FR-007). The oracle lives in the suite, never in `site/`.
+
+**Cross-tab tests use two tabs in one browser context, not two contexts.**
+Separate contexts do not share `localStorage`, so they cannot exercise this at
+all. Two tabs is also what a player actually has.
+
+**Three defects appeared only on WebKit**, and shaped the code: Backspace
+navigating the browser back, buttons absent from Safari's default tab order, and
+focus diverging from selection. The first two are why `main.ts` prevents the
+default on Backspace and why a cell is selected on load. This is the Principle
+VIII result worth reporting — none would have been caught by a unit test of the
+handlers involved.
+
+**Feature 001's FR-028 was superseded.** It required the deployed site to serve a
+page with no gameplay. Withdrawn in place there, with FR-029 amended, and
+`placeholder.spec.ts` became `site.spec.ts`.
+
+**One requirement was deleted outright**, rather than being tombstoned: the
+eleventh, which asked the site to indicate the selected digit. Constitution 3.3.0
+permits deletion before a spec is `Complete`. Its number is retired.
+
+**Research gained D10 and D11** after planning — cross-tab synchronisation, and
+where constraints live when a ruleset's cages vary per puzzle.
