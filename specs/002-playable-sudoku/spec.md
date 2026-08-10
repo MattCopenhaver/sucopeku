@@ -509,3 +509,16 @@ The cost is that filling several cells with the same digit now takes two actions
 per cell instead of one. That is the trade, and it is the right way round:
 correcting a single cell is the common act; repeating one digit across a region
 is not.
+
+**2026-08-09 — the WebKit fixes confirmed in real Safari.** Playwright's WebKit
+is not Safari, so the three defects it found were re-checked by hand in Safari
+on macOS: Backspace erases rather than navigating back, a cell is selected on
+load, and the whole grid is reachable by arrow keys and typing with no pointer.
+
+Offline was confirmed at a `?puzzle=` address rather than only at `/`, and the
+puzzle stayed playable with all cookies blocked.
+
+Outstanding, and named rather than quietly closed: none of this ran on a real
+iOS device. macOS Safari confirms the mechanism — WebKit's service worker
+serving a query-string address offline — but iOS evicts storage on its own
+schedule and applies stricter limits. That difference is unverified.
