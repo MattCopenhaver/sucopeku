@@ -396,6 +396,10 @@ and confirm it held. Nothing from the other four stories is needed.
   does not reshuffle those already there.
 - **FR-061**: Digits MUST carry a treatment that keeps them legible against an
   arbitrary background, rather than relying on the background being known.
+- **FR-062**: Placing a value a cell already holds MUST remove it, on the same
+  rule marks follow: across a selection, remove only when every writable
+  selected cell already holds that value, and otherwise place it in all of them.
+  A *different* value still replaces the one there.
 
 ### Key Entities
 
@@ -613,3 +617,12 @@ Also covered now: annotations under refused storage, and a *full* quota as
 distinct from a denied one. Annotations make a puzzle's record several times
 larger, so exhaustion is far more reachable than it was, and it is a different
 failure reaching the same catch.
+
+**2026-08-10 — FR-062 added: a value toggles like everything else.** Pressing
+the digit already in a cell did nothing — it replaced the value with itself.
+
+Feature 002's rules were satisfied: EC-002 there requires a *different* digit to
+replace what is present, and it does. What made this wrong is FR-022, added by
+this feature: every mark toggles off when pressed again, and values were then
+the one thing on the pad that did not. The inconsistency arrived with pencil
+marks rather than being inherited, so the correction belongs here.

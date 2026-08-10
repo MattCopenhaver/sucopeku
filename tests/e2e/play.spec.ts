@@ -189,3 +189,53 @@ test.describe('touch', () => {
     await expect(page.getByTestId('status')).toHaveText('Solved');
   });
 });
+
+test('pressing the value already in a cell removes it (FR-062)', async ({ page }) => {
+  await page.goto('./');
+  const target = await firstEmptyCell(page);
+
+  await cell(page, target).click();
+  await key(page, '3').click();
+  await expect(cell(page, target).locator('.value')).toHaveText('3');
+
+  // The same digit again clears it, exactly as a mark would.
+  await key(page, '3').click();
+  await expect(cell(page, target).locator('.value')).toHaveCount(0);
+
+  // A different digit still replaces rather than toggling (002 EC-002).
+  await key(page, '3').click();
+  await key(page, '8').click();
+  await expect(cell(page, target).locator('.value')).toHaveText('8');
+
+  // And by keyboard, on the same rule.
+  await page.keyboard.press('8');
+  await expect(cell(page, target).locator('.value')).toHaveCount(0);
+});
+
+test('across a selection, a value toggles only when every cell holds it (FR-062)', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const empty = await page
+    .locator('.cell')
+    .evaluateAll((nodes) =>
+      nodes.map((n, i) => (n.querySelector('.value') ? -1 : i)).filter((i) => i >= 0),
+    );
+  const [a, b] = [empty[0]!, empty[1]!];
+
+  await cell(page, a).click();
+  await key(page, '2').click();
+
+  await cell(page, a).click();
+  await cell(page, b).click({ modifiers: ['ControlOrMeta'] });
+  await key(page, '2').click();
+
+  // Mixed: adding wins, so both now hold it.
+  await expect(cell(page, a).locator('.value')).toHaveText('2');
+  await expect(cell(page, b).locator('.value')).toHaveText('2');
+
+  // Now every cell holds it, so the same press clears both.
+  await key(page, '2').click();
+  await expect(cell(page, a).locator('.value')).toHaveCount(0);
+  await expect(cell(page, b).locator('.value')).toHaveCount(0);
+});

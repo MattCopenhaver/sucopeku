@@ -184,10 +184,24 @@ export class Game {
     this.placeAnnotation(COLOUR, entryId);
   }
 
+  /**
+   * Values follow the same rule as marks: pressing what is already there
+   * removes it, and across a selection that is decided once (003 FR-062,
+   * FR-022). A different value still replaces what is present.
+   *
+   * Before this, pressing the digit already in a cell replaced the value with
+   * itself and looked like nothing had happened — leaving values as the one
+   * thing on the pad that did not toggle.
+   */
   private placeValue(value: number): void {
     const targets = this.writableSelection();
     if (targets.length === 0) return; // silent, not an error (003 FR-026)
-    for (const cell of targets) this.entries[String(cell)] = value;
+
+    const allHaveIt = targets.every((cell) => this.entries[String(cell)] === value);
+    for (const cell of targets) {
+      if (allHaveIt) delete this.entries[String(cell)];
+      else this.entries[String(cell)] = value;
+    }
     this.after();
   }
 
