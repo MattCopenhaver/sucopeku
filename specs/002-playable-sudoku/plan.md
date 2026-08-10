@@ -39,7 +39,7 @@ every entry — trivially fast, and not worth a target
 
 **Constraints**: Ruleset expressed as data, evaluator ruleset-agnostic (FR-005,
 FR-006). Input parity across keyboard, pointer, and touch (FR-017). Usable at
-320px (FR-018). Progress versioned and capped at 10 (FR-026 to FR-029)
+320px (FR-018). Progress versioned and capped at 10 (FR-031 to FR-035)
 
 **Scale/Scope**: 20 puzzles, 81 cells, one ruleset, one player, one device
 

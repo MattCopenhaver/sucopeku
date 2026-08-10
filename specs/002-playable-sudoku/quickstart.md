@@ -56,27 +56,27 @@ Principle IX failure, not a rough edge.
 2. Repeat for a **column**, and for a **three-by-three box**.
 3. Clear one of them. **Expect** both markings clear (FR-020).
 4. **Take a greyscale screenshot with a conflict on the board.** **Expect** the
-   conflict is still identifiable (SC-008) — this is the check that catches
+   conflict is still identifiable (SC-009) — this is the check that catches
    colour-only marking, and it will not fail in normal use.
 
 ## Scenario 4 — Progress (US3)
 
-1. Fill several cells. Reload. **Expect** your entries are still there (FR-026).
+1. Fill several cells. Reload. **Expect** your entries are still there (FR-031).
 2. Close the browser entirely and return. **Expect** the same.
 3. Note the address. Use the new-puzzle control, fill a cell, then open the first
    puzzle's address. **Expect** the first puzzle's own entries, untouched
-   (FR-028, SC-006).
+   (FR-033, FR-039, SC-006).
 4. Solve a puzzle, leave, return. **Expect** it still shows as solved and locked.
 
 ## Scenario 5 — Addresses (US4)
 
 1. Open `/` with no puzzle named. **Expect** a puzzle appears and the address
-   becomes `/?puzzle=<id>` (FR-021).
+   becomes `/?puzzle=<id>` (FR-026, FR-028).
 2. Reload. **Expect** the **same** puzzle, not a new random one — this is what
-   FR-021's address replacement buys.
+   FR-028's address replacement buys.
 3. Use the new-puzzle control. **Expect** a different puzzle at its own address.
 4. Press the browser back button. **Expect** the previous puzzle with its
-   progress (FR-034).
+   progress (FR-039).
 5. Open `/?puzzle=nonsense`. **Expect** a working puzzle, not an error (EC-010).
 
 ## Scenario 6 — Offline (Principle IV)
@@ -113,3 +113,12 @@ evaluator is pure, branchy logic verified only by placing digits in a grid. Whet
 that was sufficient — or whether a defect reached `main` that a unit test would
 have caught — is the result the constitution asks be reported rather than quietly
 fixed by adding one.
+
+---
+
+*Citations corrected 2026-08-09. Five pointed at the numbers these obligations
+held before clarification inserted the interaction requirements and shifted
+everything after them — a greyscale check citing the 320px criterion, a reload
+check citing the addressing requirement, and address replacement cited as the
+rule about conflict colour. Every one resolved, so the citation check never
+objected. See the constitution's amendment 3.3.0.*

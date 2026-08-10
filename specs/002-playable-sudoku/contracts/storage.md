@@ -15,13 +15,14 @@ Sucopeku 1.0 provided the failure is graceful (constitution 3.0.0).
 **Guarantees**:
 
 - Opening a puzzle's address loads that puzzle and restores any progress on it
-  (FR-020).
+  (FR-027).
 - Arriving without a puzzle selects one at random and **replaces the address**
   with that puzzle's, so a reload keeps the player where they were rather than
-  reshuffling (FR-021).
+  reshuffling (FR-028).
 - An unknown or malformed id gives the player a working puzzle rather than an
-  error (FR-022, EC-010).
-- The address carries **only an identifier**, never an encoded board (FR-023).
+  error (FR-029, EC-010).
+- The address carries **only an identifier**, never an encoded board (FR-030),
+  and that identifier is stable across releases (FR-026).
 
 **Offline interaction**: every address serves the same document, so an offline
 visitor can be served the cached page. This requires the service worker's
@@ -49,12 +50,12 @@ One `localStorage` key, `sucopeku.progress`:
 
 **Guarantees**:
 
-- **Saved without the player asking** (FR-027). There is no save control to
+- **Saved without the player asking** (FR-032). There is no save control to
   forget.
 - **`entries` holds the player's values only**, never givens. A puzzle's fixed
   cells come from the puzzle data, so a change there cannot be silently
   overwritten by old progress.
-- **At most ten puzzles**, evicting the oldest `playedAt` (FR-029). Eviction is
+- **At most ten puzzles**, evicting the oldest `playedAt` (FR-034). Eviction is
   specified behaviour, not failure.
 - **An unrecognised `v` discards the whole document** and the player starts fresh
   (EC-004). Before 1.0 this is the correct behaviour rather than a shortcut —

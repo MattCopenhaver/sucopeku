@@ -119,7 +119,7 @@ no progress ──first entry──► in progress ──board complete, no conf
 ```
 
 - **in progress**: entries accumulate; every change is saved without the player
-  asking (FR-027)
+  asking (FR-032)
 - **solved**: the grid locks; nothing can be entered or erased (FR-023)
 - **unlocked**: editing resumes. Clearing a value returns it to *in progress*
   rather than leaving a stale solved flag (EC-007)
@@ -127,7 +127,7 @@ no progress ──first entry──► in progress ──board complete, no conf
 ### Eviction
 
 At most ten puzzles are retained. When an eleventh is played, the one with the
-oldest `playedAt` is dropped (FR-029). Eviction is deliberate and specified, not
+oldest `playedAt` is dropped (FR-034). Eviction is deliberate and specified, not
 a failure — distinct from the format being discarded, below.
 
 ### Version handling
