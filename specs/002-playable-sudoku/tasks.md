@@ -152,7 +152,7 @@ and `site/src/puzzles/` hold data. Tests live in `tests/e2e/`.
 - [X] T054 Validate quickstart Scenario 6 by hand — load a puzzle, go offline, reload at a puzzle address. Playwright cannot drive WebKit service workers, so this is unreachable by the suite. Validated 2026-08-09 in Safari on macOS: the puzzle loaded offline at its `?puzzle=` address with entries intact
 - [X] T055 Validate quickstart Scenario 7 by hand: disable storage for the site and confirm the puzzle remains playable. `tests/e2e/progress.spec.ts` covers this with `localStorage` stubbed to throw; the manual pass confirmed a real browser's own setting behaves the same way. Validated 2026-08-09 in Safari on macOS with all cookies blocked
 - [X] T056 Update `specs/002-playable-sudoku/plan.md` and this file if anything built diverged from what was planned
-- [ ] T057 Write the human-authored `## SDD Notes` section in this feature's pull request body, including whether a defect reached `main` that a unit test would have caught — the result Principle VIII asks be reported
+- [X] T057 Write the human-authored `## SDD Notes` section in this feature's pull request body, including whether a defect reached `main` that a unit test would have caught — the result Principle VIII asks be reported
 
 ---
 
